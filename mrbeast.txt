@@ -103,11 +103,88 @@ Dropdown = AddDropdown(Tab2o, {
      end
    })
 
+-----farm lvl
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local isFarming = false
+
+local function getSameLevelEnemies()
+    local enemies = {}
+    local myLevel = player.Data.Level.Value -- Giả sử level lưu trong Data.Level
+
+    for _, v in pairs(game.Workspace.Enemies:GetChildren()) do
+        if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Level") then
+            if v.Level.Value == myLevel then
+                table.insert(enemies, v)
+            end
+        end
+    end
+    return enemies
+end
+
+local function bringEnemiesTogether(enemies)
+    if #enemies == 0 then return end
+
+    local centerPos = enemies[1].HumanoidRootPart.Position
+    for _, enemy in pairs(enemies) do
+        if enemy:FindFirstChild("HumanoidRootPart") then
+            enemy.HumanoidRootPart.CFrame = CFrame.new(centerPos)
+        end
+    end
+end
+
+local function attackEnemies()
+    local tool = character:FindFirstChildOfClass("Tool")
+    if tool then
+        tool:Activate()
+    end
+end
+
+local function farmLevel()
+    isFarming = not isFarming
+    
+    while isFarming do
+        local enemies = getSameLevelEnemies()
+
+        if #enemies > 0 then
+            bringEnemiesTogether(enemies)
+            character.HumanoidRootPart.CFrame = enemies[1].HumanoidRootPart.CFrame + Vector3.new(0, 10, 0) -- Bay trên quái
+            attackEnemies()
+        end
+        wait(0.5)
+    end
+end
+
+-- Đảm bảo Tab2o tồn tại
+if not Tab2o then
+    Tab2o = AddTab("Auto Farm")
+end
+
+-- Tạo nút bật/tắt Auto Farm Level
+AddButton(Tab2o, {
+    Name = "Auto Farm Level",
+    Callback = function()
+        farmLevel()
+    end
+})
+
+
+
+
+
+
+
+
+
+
 
 -----Chest farm
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local skipCurrentChest = false
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local autoCollectChests = false
 
 local function getClosestChest()
     local closestChest = nil
@@ -115,7 +192,7 @@ local function getClosestChest()
 
     for _, v in pairs(game.Workspace:GetChildren()) do
         if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and string.find(v.Name:lower(), "chest") then
-            local distance = (character.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
+            local distance = (humanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
             if distance < shortestDistance then
                 shortestDistance = distance
                 closestChest = v
@@ -126,30 +203,40 @@ local function getClosestChest()
     return closestChest
 end
 
-local function teleportToChest(chest)
-    if chest and chest:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = chest.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0) -- Đứng trên rương để nhặt
-        wait(0.5) -- Chờ nhặt rương
+local function moveToPosition(targetPosition, speed)
+    while (humanoidRootPart.Position - targetPosition).Magnitude > 5 and autoCollectChests do
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame:Lerp(CFrame.new(targetPosition), speed)
+        wait(0.1)
     end
 end
 
-local function collectAllChests()
-    while wait(0.5) do
-        if skipCurrentChest then
-            skipCurrentChest = false
-        else
-            local chest = getClosestChest()
-            if chest then
-                teleportToChest(chest)
-            else
-                break -- Không còn rương nào nữa
-            end
+local function collectChest(chest)
+    if chest and chest:FindFirstChild("HumanoidRootPart") then
+        local targetPos = chest.HumanoidRootPart.Position + Vector3.new(0, 5, 0) -- Bay đến trên rương
+        moveToPosition(targetPos, 0.1)
+
+        wait(0.3) -- Chờ để tránh lỗi
+
+        -- Nhặt rương nếu có ProximityPrompt
+        local prompt = chest:FindFirstChildOfClass("ProximityPrompt")
+        if prompt then
+            fireproximityprompt(prompt)
         end
     end
 end
 
-local function skipToNextChest()
-    skipCurrentChest = true
+local function collectAllChests()
+    autoCollectChests = not autoCollectChests
+
+    while autoCollectChests do
+        local chest = getClosestChest()
+        if chest then
+            collectChest(chest)
+            wait(1) -- Đợi trước khi tìm tiếp rương khác
+        else
+            autoCollectChests = false
+        end
+    end
 end
 
 -- **Thêm nút bật/tắt tự động nhặt rương**
@@ -157,14 +244,6 @@ AddButton(Tab2o, {
     Name = "Auto Collect Chests",
     Callback = function()
         collectAllChests()
-    end
-})
-
--- **Thêm nút bỏ qua rương hiện tại và đến rương khác**
-AddButton(Tab2o, {
-    Name = "Next Chest",
-    Callback = function()
-        skipToNextChest()
     end
 })
 
@@ -625,72 +704,102 @@ AddButton(Tab10o, {
   })
 
 -----Aim skill
-local aimbotEnabled = false -- Trạng thái bật/tắt aimbot
-local lockedTarget = nil -- Lưu mục tiêu bị khóa
 
--- Hàm tìm người chơi gần nhất
-local function getClosestPlayer()
-    local localPlayer = game.Players.LocalPlayer
-    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return nil end
 
-    local closestPlayer = nil
-    local closestDistance = math.huge
 
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local distance = (localPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-            if distance < closestDistance then
-                closestDistance = distance
-                closestPlayer = player
+-----team ht và hq
+
+AddButton(Tab11o, {
+    Name = "Chuyển sang Hải Tặc",
+    Callback = function()
+        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
+    end
+})
+
+AddButton(Tab11o, {
+    Name = "Chuyển sang Hải Quân",
+    Callback = function()
+        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
+    end
+})
+
+
+----- đổi máy chủ
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceId = game.PlaceId
+
+local function switchServer()
+    local success, servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+
+    if success and servers and servers.data then
+        for _, server in pairs(servers.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+                return
             end
         end
     end
-    return closestPlayer
 end
 
--- Hàm bật/tắt Aimbot
-local function toggleAimbot()
-    aimbotEnabled = not aimbotEnabled
-    if aimbotEnabled then
-        spawn(function()
-            while aimbotEnabled do
-                lockedTarget = getClosestPlayer()
-                wait(0.1) -- Cập nhật mỗi 0.1 giây
-            end
-        end)
-    else
-        lockedTarget = nil
-    end
+-- Đảm bảo Tab11 tồn tại
+if not Tab11 then
+    Tab11 = AddTab("Server")
 end
 
--- Hàm điều chỉnh hướng tấn công
-local function adjustAim()
-    local localPlayer = game.Players.LocalPlayer
-    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
-
-    if lockedTarget and lockedTarget.Character and lockedTarget.Character:FindFirstChild("HumanoidRootPart") then
-        localPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(localPlayer.Character.HumanoidRootPart.Position, lockedTarget.Character.HumanoidRootPart.Position)
-    end
-end
-
--- Kết nối sự kiện sử dụng kỹ năng
-local mouse = game.Players.LocalPlayer:GetMouse()
-mouse.Button1Down:Connect(function()
-    if aimbotEnabled then
-        adjustAim()
-    end
-end)
-
--- Thêm nút bật/tắt Aimbot
-if not Tab11o then
-    Tab11o = AddTab("ESP")
-end
-
-AddButton(Tab11o, {
-    Name = "Aimbot Player",
+-- Tạo nút đổi server
+AddButton(Tab11, {
+    Name = "Đổi Server",
     Callback = function()
-        toggleAimbot()
+        switchServer()
     end
+})
+
+----- đi trên nước
+
+local player = game.Players.LocalPlayer  
+local character = player.Character or player.CharacterAdded:Wait()  
+local waterWalkEnabled = false  
+
+local function enableWaterWalk()  
+    waterWalkEnabled = not waterWalkEnabled  
+
+    while waterWalkEnabled do  
+        if character and character:FindFirstChild("HumanoidRootPart") then  
+            local root = character.HumanoidRootPart  
+            if root.Position.Y < 2 then -- Nếu dưới mặt nước thì nâng lên  
+                root.Velocity = Vector3.new(0, 5, 0)  
+            end  
+        end  
+        wait(0.1)  
+    end  
+end  
+
+-- Đảm bảo Tab11 tồn tại  
+if not Tab11 then  
+    Tab11 = AddTab("Misc")  
+end  
+
+-- Tạo nút bật/tắt đi trên nước  
+AddButton(Tab11, {  
+    Name = "Water Walk",  
+    Callback = function()  
+        enableWaterWalk()  
+    end  
+})�ảm bảo Tab11 tồn tại  
+if not Tab11 then  
+    Tab11 = AddTab("Aimbot")  
+end  
+
+-- Thêm nút bật/tắt Aimlock  
+AddButton(Tab11, {  
+    Name = "Aimlock Player",  
+    Callback = function()  
+        toggleAimlock()  
+    end  
 })
 
 -----team ht và hq
@@ -707,4 +816,72 @@ AddButton(Tab11o, {
     Callback = function()
         game.ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
     end
+})
+
+
+----- đổi máy chủ
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceId = game.PlaceId
+
+local function switchServer()
+    local success, servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+
+    if success and servers and servers.data then
+        for _, server in pairs(servers.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+                return
+            end
+        end
+    end
+end
+
+-- Đảm bảo Tab11 tồn tại
+if not Tab11 then
+    Tab11 = AddTab("Server")
+end
+
+-- Tạo nút đổi server
+AddButton(Tab11, {
+    Name = "Đổi Server",
+    Callback = function()
+        switchServer()
+    end
+})
+
+----- đi trên nước
+
+local player = game.Players.LocalPlayer  
+local character = player.Character or player.CharacterAdded:Wait()  
+local waterWalkEnabled = false  
+
+local function enableWaterWalk()  
+    waterWalkEnabled = not waterWalkEnabled  
+
+    while waterWalkEnabled do  
+        if character and character:FindFirstChild("HumanoidRootPart") then  
+            local root = character.HumanoidRootPart  
+            if root.Position.Y < 2 then -- Nếu dưới mặt nước thì nâng lên  
+                root.Velocity = Vector3.new(0, 5, 0)  
+            end  
+        end  
+        wait(0.1)  
+    end  
+end  
+
+-- Đảm bảo Tab11 tồn tại  
+if not Tab11 then  
+    Tab11 = AddTab("Misc")  
+end  
+
+-- Tạo nút bật/tắt đi trên nước  
+AddButton(Tab11, {  
+    Name = "Water Walk",  
+    Callback = function()  
+        enableWaterWalk()  
+    end  
 })
