@@ -707,6 +707,4 @@ AddButton(Tab11o, {
     Callback = function()
         game.ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
     end
-})age.Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
-    end
 })
