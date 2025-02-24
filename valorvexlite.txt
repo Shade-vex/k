@@ -514,42 +514,12 @@ AddButton(Tab11o, {
 })
 
 
--------speed
 
-local speed = 16 -- Tốc độ mặc định
-local sliderValue = 16 -- Giá trị ban đầu của thanh trượt
-local player = game.Players.LocalPlayer
-
--- Tạo tab mới
-local Tab11 = AddTab("Tab 11")
-
--- Tạo thanh trượt (slider)
-local slider = AddSlider(Tab11, {
-    Name = "Tốc độ",
-    Min = 1,
-    Max = 300,
-    Default = 16,
-    Callback = function(value)
-        sliderValue = value
-    end
-})
-
--- Tạo nút "Tăng tốc độ"
-local button = AddButton(Tab11, {
-    Name = "Tăng tốc độ",
-    Callback = function()
-        -- Kiểm tra và thay đổi tốc độ của nhân vật
-        local character = player.Character
-        if character and character:FindFirstChild("Humanoid") then
-            local humanoid = character.Humanoid
-            humanoid.WalkSpeed = sliderValue -- Đặt tốc độ theo giá trị thanh trượt
-        end
-    end
-})
 
 
 
 -----v2
+
 local speedEnabled = false -- Biến kiểm tra trạng thái bật/tắt tốc độ
 local defaultSpeed = 16 -- Tốc độ mặc định
 local boostedSpeed = 300 -- Tốc độ khi bật
@@ -618,4 +588,4 @@ AddButton(Tab11o, {
     Callback = function()
         activateKillAura()
     end
-})     
+})      
