@@ -485,28 +485,28 @@ local function enableWaterWalk()
                     local root = character.HumanoidRootPart
                     local humanoid = character.Humanoid
 
-                    -- Kiểm tra nếu nhân vật dưới mặt nước
+                    -- Nếu nhân vật dưới nước, nâng lên trên bề mặt
                     if root.Position.Y < 1 then
-                        root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z) -- Đẩy lên trên nước
+                        root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z)
                     end
 
-                    -- Đảm bảo nhân vật có thể nhảy và lướt bình thường
+                    -- Giữ khả năng nhảy, lướt
                     humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
                     humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
                 end
-                RunService.RenderStepped:Wait() -- Cập nhật theo từng khung hình
+                RunService.RenderStepped:Wait()
             end
         end)
     end
 end
 
--- Đảm bảo Tab11 tồn tại
-if not Tab11 then
-    Tab11 = AddTab("Misc")
+-- Đảm bảo Tab11o tồn tại
+if not Tab11o then
+    Tab11o = AddTab("Misc")
 end
 
 -- Tạo nút bật/tắt đi trên nước
-AddButton(Tab11, {
+AddButton(Tab11o, {
     Name = "Water Walk",
     Callback = function()
         enableWaterWalk()
@@ -515,44 +515,22 @@ AddButton(Tab11, {
 
 -----kill player
 
-local player = game.Players.LocalPlayer
-local runService = game:GetService("RunService")
 local killAuraEnabled = false
-local auraLoop = nil -- Biến kiểm soát vòng lặp để tránh lỗi chồng lặp
+local killRadius = 10 -- Bán kính Kill Aura
 
-local function forceReset(target)
-    if target and target.Character then
-        -- Tìm Remote reset nếu game có hỗ trợ
-        local remote = target:FindFirstChild("ResetCharacterRemote") or game.ReplicatedStorage:FindFirstChild("ResetCharacterRemote")
-        if remote then
-            remote:FireServer()
-        else
-            -- Nếu không có Remote, cưỡng ép nhân vật mất máu để reset
-            local humanoid = target.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.Health = 0
-            end
-        end
-    end
-end
-
-local function toggleKillAura()
+local function killNearbyPlayers()
     killAuraEnabled = not killAuraEnabled
 
-    if killAuraEnabled and not auraLoop then
-        auraLoop = runService.Heartbeat:Connect(function()
-            for _, target in pairs(game.Players:GetPlayers()) do
-                if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - target.Character.HumanoidRootPart.Position).Magnitude
-                    if distance <= 10 then -- Bán kính 10m
-                        forceReset(target)
-                    end
+    while killAuraEnabled do
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if distance <= killRadius then
+                    game.ReplicatedStorage.Remotes.Reset:FireServer(player)
                 end
             end
-        end)
-    elseif not killAuraEnabled and auraLoop then
-        auraLoop:Disconnect()
-        auraLoop = nil
+        end
+        wait(0.5)
     end
 end
 
@@ -565,7 +543,6 @@ end
 AddButton(Tab11o, {
     Name = "Kill Aura",
     Callback = function()
-        toggleKillAura()
+        killNearbyPlayers()
     end
-})
-
+})   
