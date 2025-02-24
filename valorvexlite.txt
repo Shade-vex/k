@@ -518,11 +518,14 @@ AddButton(Tab11o, {
 local killAuraEnabled = false
 local killRadius = 10 -- Bán kính Kill Aura
 
-local function killPlayer(targetPlayer)
+local function crashPlayer(targetPlayer)
     if targetPlayer and targetPlayer.Character then
         local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
-            hrp.CFrame = CFrame.new(0, -500, 0) -- Dịch chuyển xuống dưới Void
+            for i = 1, 100 do
+                hrp.CFrame = CFrame.new(math.random(-1e6, 1e6), math.random(-1e6, 1e6), math.random(-1e6, 1e6))
+                task.wait(0.01)
+            end
         end
     end
 end
@@ -535,7 +538,7 @@ local function activateKillAura()
             if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
                 if distance <= killRadius then
-                    killPlayer(player) -- Dịch chuyển người chơi xuống Void
+                    crashPlayer(player) -- Spam di chuyển để gây crash
                 end
             end
         end
