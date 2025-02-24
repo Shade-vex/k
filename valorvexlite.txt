@@ -128,7 +128,6 @@ end
 function TableNearToFarChests()
     local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
     local chests = {}
-    local checkedchests = {}
 
     -- Lọc các rương trong workspace
     for i, v in pairs(workspace:GetDescendants()) do
@@ -157,26 +156,38 @@ AddButton(Tab2o, {
     end
 })
 
-while wait(5) do -- Thêm thời gian chờ 5 giây để không gây xung đột với các phần khác
-    if _G.Play then
-        local chests = TableNearToFarChests() -- Lấy tất cả các rương
-        for i, v in pairs(chests) do
-            -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
-            if _G.CurrentChest and v == _G.CurrentChest then
-                continue
+-- Hàm chính để farm tất cả rương
+local function farmAllChests()
+    -- Đợi 5 giây trước khi bắt đầu farm
+    wait(5)  -- Đợi 5 giây để các mã khác có thời gian tải
+
+    -- Tiến hành farm rương
+    while wait(1) do
+        if _G.Play then
+            local chests = TableNearToFarChests() -- Lấy tất cả các rương
+            for i, v in pairs(chests) do
+                -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
+                if _G.CurrentChest and v == _G.CurrentChest then
+                    continue
+                end
+                Tween(v) -- Di chuyển đến rương
+                _G.CurrentChest = v -- Lưu rương hiện tại
+                if _G.Play == false then
+                    break
+                end
             end
-            Tween(v) -- Di chuyển đến rương
-            _G.CurrentChest = v -- Lưu rương hiện tại
-            if _G.Play == false then
-                break
+        else
+            if _G.Tween then
+                _G.Tween:Cancel()
             end
-        end
-    else
-        if _G.Tween then
-            _G.Tween:Cancel()
         end
     end
 end
+
+-- Bắt đầu farm rương sau khi đã đợi 5 giây
+spawn(function()
+    farmAllChests()
+end)
 
 
 
