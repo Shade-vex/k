@@ -72,18 +72,25 @@ AddButton(Tab1o, {
 local Player = game.Players.LocalPlayer
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
-_G.Tween = nil
-_G.Play = false
-_G.CloseAllScript = false
+-- Tạo các biến cục bộ để tránh xung đột
+local chestTween = nil
+local isFarmPlaying = false
+local closeAllScript = false
+local currentChest = nil -- Biến lưu trữ rương hiện tại
 
 -- Tạo nút farm chest
 local function farmChestToggle()
-    _G.Play = not _G.Play
+    isFarmPlaying = not isFarmPlaying
+end
+
+-- Tạo nút next chest
+local function nextChest()
+    currentChest = nil -- Đặt lại rương hiện tại để bỏ qua rương đang nhặt
 end
 
 -- Hàm để di chuyển đến rương gần nhất
 game:GetService('RunService').Stepped:connect(function()
-    if _G.Play then
+    if isFarmPlaying then
         local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
         local Humanoid = Player.Character:WaitForChild("Humanoid")
         HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
@@ -97,19 +104,19 @@ game:GetService('RunService').Stepped:connect(function()
 end)
 
 function Tween(Part)
-    if _G.Tween then
-        _G.Tween:Cancel()
+    if chestTween then
+        chestTween:Cancel()
     end
     local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
-    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new((Part.Position - HumanoidRootPart.Position).magnitude / 300, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
-    _G.Tween:Play()
+    chestTween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new((Part.Position - HumanoidRootPart.Position).magnitude / 300, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
+    chestTween:Play()
     local flying = true
-    while game:GetService("RunService").Stepped:Wait() and flying and _G.Play do
-        if _G.Play == false then
-            _G.Tween:Cancel()
+    while game:GetService("RunService").Stepped:Wait() and flying and isFarmPlaying do
+        if isFarmPlaying == false then
+            chestTween:Cancel()
         end
         if (Part.Position - HumanoidRootPart.Position).magnitude < 250 then
-            _G.Tween:Cancel()
+            chestTween:Cancel()
             for i = 1, 5 do
                 HumanoidRootPart.CFrame = Part.CFrame
                 wait()
@@ -177,18 +184,31 @@ AddButton(Tab2o, {
     end
 })
 
+-- Thêm nút next chest để bỏ qua rương hiện tại
+AddButton(Tab2o, {
+    Name = "Next Chest",
+    Callback = function()
+        nextChest()
+    end
+})
+
 while wait(1) do
-    if _G.Play then
+    if isFarmPlaying then
         local chests, checkedchests = TableNearToFarChests()
         for i, v in pairs(checkedchests) do
+            -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
+            if currentChest and v == currentChest then
+                continue
+            end
             Tween(v)
-            if _G.Play == false then
+            currentChest = v -- Lưu rương hiện tại
+            if isFarmPlaying == false then
                 break
             end
         end
     else
-        if _G.Tween then
-            _G.Tween:Cancel()
+        if chestTween then
+            chestTween:Cancel()
         end
     end
 end
