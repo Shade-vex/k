@@ -1,0 +1,30 @@
+local killAuraEnabled = false
+
+local function killNearbyPlayers()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    while killAuraEnabled do
+        for _, target in pairs(game.Players:GetPlayers()) do
+            if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                local targetRoot = target.Character.HumanoidRootPart
+                local playerRoot = character:FindFirstChild("HumanoidRootPart")
+
+                if playerRoot and (playerRoot.Position - targetRoot.Position).Magnitude <= 10 then
+                    local humanoid = target.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid.Health = 0 -- Cưỡng ép reset
+                    end
+                end
+            end
+        end
+        wait(0.5) -- Cập nhật mỗi 0.5 giây
+    end
+end
+
+local function toggleKillAura()
+    killAuraEnabled = not killAuraEnabled
+    if killAuraEnabled then
+        spawn(killNearbyPlayers)
+    end
+end
