@@ -520,3 +520,55 @@ AddButton(Tab11o, {
         enableWaterWalk()
     end
 })
+
+
+
+
+
+----v2
+
+
+
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local waterWalkEnabled = false
+local RunService = game:GetService("RunService")
+
+local function enableWaterWalk()
+    waterWalkEnabled = not waterWalkEnabled
+
+    if waterWalkEnabled then
+        spawn(function()
+            while waterWalkEnabled do
+                if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
+                    local root = character.HumanoidRootPart
+                    local humanoid = character.Humanoid
+
+                    -- Nếu nhân vật dưới nước, nâng lên trên bề mặt
+                    if root.Position.Y < 1 then
+                        root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z)
+                    end
+
+                    -- Giữ khả năng nhảy, lướt
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+                end
+                RunService.RenderStepped:Wait()
+            end
+        end)
+    end
+end
+
+-- Đảm bảo Tab11o tồn tại
+if not Tab11o then
+    Tab11o = AddTab("Misc")
+end
+
+-- Tạo nút bật/tắt đi trên nước
+AddButton(Tab11o, {
+    Name = "Đi trên nước v2",
+    Callback = function()
+        enableWaterWalk()
+    end
+})    
