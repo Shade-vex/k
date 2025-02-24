@@ -191,26 +191,32 @@ AddButton(Tab2o, {
     end
 })
 
-while wait(1) do
-    if _G.Play then
-        local chests, checkedchests = TableNearToFarChests()
-        for i, v in pairs(checkedchests) do
-            -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
-            if _G.CurrentChest and v == _G.CurrentChest then
-                continue
+-- Hàm chạy vòng lặp farm chest với thời gian chờ 5s
+local function farmChestLoop()
+    while wait(5) do
+        if _G.Play then
+            local chests, checkedchests = TableNearToFarChests()
+            for i, v in pairs(checkedchests) do
+                -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
+                if _G.CurrentChest and v == _G.CurrentChest then
+                    continue
+                end
+                Tween(v)
+                _G.CurrentChest = v -- Lưu rương hiện tại
+                if _G.Play == false then
+                    break
+                end
             end
-            Tween(v)
-            _G.CurrentChest = v -- Lưu rương hiện tại
-            if _G.Play == false then
-                break
+        else
+            if _G.Tween then
+                _G.Tween:Cancel()
             end
-        end
-    else
-        if _G.Tween then
-            _G.Tween:Cancel()
         end
     end
 end
+
+-- Bắt đầu vòng lặp farm chest
+spawn(farmChestLoop)
 
 
 
