@@ -518,10 +518,12 @@ AddButton(Tab11o, {
 local killAuraEnabled = false
 local killRadius = 10 -- Bán kính Kill Aura
 
-local function forceResetPlayer(targetPlayer)
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+local function damagePlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
         local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
-        humanoid.Health = 0 -- Cưỡng ép reset bằng cách giảm máu về 0
+        if humanoid then
+            humanoid:TakeDamage(humanoid.MaxHealth) -- Gây sát thương bằng máu tối đa
+        end
     end
 end
 
@@ -533,7 +535,7 @@ local function activateKillAura()
             if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
                 if distance <= killRadius then
-                    forceResetPlayer(player) -- Cưỡng ép reset người chơi gần nhất
+                    damagePlayer(player) -- Gây sát thương
                 end
             end
         end
@@ -590,8 +592,8 @@ end
 
 -- Nút bật/tắt Kill Aura
 AddButton(Tab11o, {
-    Name = "vượt qua thời không",
+    Name = "xóa player",
     Callback = function()
         activateKillAura()
     end
-})
+})     
