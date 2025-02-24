@@ -476,7 +476,7 @@ local function toggleFruitESP()
             gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui  
 
             fruitLabel = Instance.new("TextLabel")  
-            fruitLabel.Size = UDim2.new(0, 600, 0, 50) 
+            fruitLabel.Size = UDim2.new(0, 500, 0, 50) 
             fruitLabel.Position = UDim2.new(0.5, -300, 0.58, 0) 
             fruitLabel.BackgroundTransparency = 1  
             fruitLabel.TextColor3 = Color3.new(1, 1, 1)  
