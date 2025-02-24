@@ -72,25 +72,24 @@ AddButton(Tab1o, {
 local Player = game.Players.LocalPlayer
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
--- Tạo các biến cục bộ để tránh xung đột
-local chestTween = nil
-local isFarmPlaying = false
-local closeAllScript = false
-local currentChest = nil -- Biến lưu trữ rương hiện tại
+_G.Tween = nil
+_G.Play = false
+_G.CloseAllScript = false
+_G.CurrentChest = nil -- Biến lưu trữ rương hiện tại
 
 -- Tạo nút farm chest
 local function farmChestToggle()
-    isFarmPlaying = not isFarmPlaying
+    _G.Play = not _G.Play
 end
 
 -- Tạo nút next chest
 local function nextChest()
-    currentChest = nil -- Đặt lại rương hiện tại để bỏ qua rương đang nhặt
+    _G.CurrentChest = nil -- Đặt lại rương hiện tại để bỏ qua rương đang nhặt
 end
 
 -- Hàm để di chuyển đến rương gần nhất
 game:GetService('RunService').Stepped:connect(function()
-    if isFarmPlaying then
+    if _G.Play then
         local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
         local Humanoid = Player.Character:WaitForChild("Humanoid")
         HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
@@ -104,19 +103,19 @@ game:GetService('RunService').Stepped:connect(function()
 end)
 
 function Tween(Part)
-    if chestTween then
-        chestTween:Cancel()
+    if _G.Tween then
+        _G.Tween:Cancel()
     end
     local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
-    chestTween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new((Part.Position - HumanoidRootPart.Position).magnitude / 300, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
-    chestTween:Play()
+    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new((Part.Position - HumanoidRootPart.Position).magnitude / 300, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
+    _G.Tween:Play()
     local flying = true
-    while game:GetService("RunService").Stepped:Wait() and flying and isFarmPlaying do
-        if isFarmPlaying == false then
-            chestTween:Cancel()
+    while game:GetService("RunService").Stepped:Wait() and flying and _G.Play do
+        if _G.Play == false then
+            _G.Tween:Cancel()
         end
         if (Part.Position - HumanoidRootPart.Position).magnitude < 250 then
-            chestTween:Cancel()
+            _G.Tween:Cancel()
             for i = 1, 5 do
                 HumanoidRootPart.CFrame = Part.CFrame
                 wait()
@@ -193,22 +192,22 @@ AddButton(Tab2o, {
 })
 
 while wait(1) do
-    if isFarmPlaying then
+    if _G.Play then
         local chests, checkedchests = TableNearToFarChests()
         for i, v in pairs(checkedchests) do
             -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
-            if currentChest and v == currentChest then
+            if _G.CurrentChest and v == _G.CurrentChest then
                 continue
             end
             Tween(v)
-            currentChest = v -- Lưu rương hiện tại
-            if isFarmPlaying == false then
+            _G.CurrentChest = v -- Lưu rương hiện tại
+            if _G.Play == false then
                 break
             end
         end
     else
-        if chestTween then
-            chestTween:Cancel()
+        if _G.Tween then
+            _G.Tween:Cancel()
         end
     end
 end
@@ -230,7 +229,6 @@ AddButton(Tab5o, {
 
 
 -----Trái và raid
-
 
 local autoCollectFruits = false -- Biến bật/tắt Auto Nhặt Trái
 
@@ -288,7 +286,7 @@ AddButton(Tab6o, {
     Callback = function()
         toggleAutoCollect()
     end
-})       
+})
 
 
 -----esp player
@@ -621,17 +619,18 @@ AddButton(
 
 -----dibo
 
+-- Phiên bản 1: Đi trên nước
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local waterWalkEnabled = false
+local waterWalkEnabled1 = false -- Biến riêng cho Water Walk phiên bản 1
 local RunService = game:GetService("RunService")
 
-local function enableWaterWalk()
-    waterWalkEnabled = not waterWalkEnabled
+local function enableWaterWalk1()
+    waterWalkEnabled1 = not waterWalkEnabled1
 
-    if waterWalkEnabled then
+    if waterWalkEnabled1 then
         spawn(function()
-            while waterWalkEnabled do
+            while waterWalkEnabled1 do
                 if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
                     local root = character.HumanoidRootPart
                     local humanoid = character.Humanoid
@@ -642,10 +641,10 @@ local function enableWaterWalk()
                         root.Velocity = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
                         
                         -- Đảm bảo nhân vật không bị chìm dưới nước
-                        humanoid.WalkSpeed = 16 -- Giữ tốc độ đi bộ bình thường (hoặc tốc độ bạn muốn)
+                        humanoid.WalkSpeed = 16 -- Giữ tốc độ đi bộ bình thường
                         humanoid.JumpPower = 50 -- Cấp phép nhảy nếu cần thiết
                     else
-                        -- Nếu không ở dưới nước, đặt lại tốc độ đi bộ (nếu có thay đổi)
+                        -- Nếu không ở dưới nước, đặt lại tốc độ đi bộ
                         humanoid.WalkSpeed = 16
                     end
 
@@ -659,7 +658,7 @@ local function enableWaterWalk()
     end
 end
 
--- Đảm bảo Tab11o tồn tại
+-- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
 if not Tab11o then
     Tab11o = AddTab("Misc")
 end
@@ -668,30 +667,22 @@ end
 AddButton(Tab11o, {
     Name = "Đi trên nước",
     Callback = function()
-        enableWaterWalk()
+        enableWaterWalk1()
     end
 })
 
 
 
 
+-- Phiên bản 2: Đi trên nước
+local waterWalkEnabled2 = false -- Biến riêng cho Water Walk phiên bản 2
 
-----v2
+local function enableWaterWalk2()
+    waterWalkEnabled2 = not waterWalkEnabled2
 
-
-
-
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local waterWalkEnabled = false
-local RunService = game:GetService("RunService")
-
-local function enableWaterWalk()
-    waterWalkEnabled = not waterWalkEnabled
-
-    if waterWalkEnabled then
+    if waterWalkEnabled2 then
         spawn(function()
-            while waterWalkEnabled do
+            while waterWalkEnabled2 do
                 if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
                     local root = character.HumanoidRootPart
                     local humanoid = character.Humanoid
@@ -711,15 +702,20 @@ local function enableWaterWalk()
     end
 end
 
--- Đảm bảo Tab11o tồn tại
+-- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
 if not Tab11o then
     Tab11o = AddTab("Misc")
 end
 
--- Tạo nút bật/tắt đi trên nước
+-- Tạo nút bật/tắt đi trên nước v2
 AddButton(Tab11o, {
     Name = "Đi trên nước v2",
     Callback = function()
-        enableWaterWalk()
+        enableWaterWalk2()
     end
-})    
+})   
+
+
+
+
+   
