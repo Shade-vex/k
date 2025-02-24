@@ -75,16 +75,10 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 _G.Tween = nil
 _G.Play = false
 _G.CloseAllScript = false
-_G.CurrentChest = nil -- Biến lưu trữ rương hiện tại
 
 -- Tạo nút farm chest
 local function farmChestToggle()
     _G.Play = not _G.Play
-end
-
--- Tạo nút next chest
-local function nextChest()
-    _G.CurrentChest = nil -- Đặt lại rương hiện tại để bỏ qua rương đang nhặt
 end
 
 -- Hàm để di chuyển đến rương gần nhất
@@ -183,24 +177,11 @@ AddButton(Tab2o, {
     end
 })
 
--- Thêm nút next chest để bỏ qua rương hiện tại
-AddButton(Tab2o, {
-    Name = "Next Chest",
-    Callback = function()
-        nextChest()
-    end
-})
-
 while wait(1) do
     if _G.Play then
         local chests, checkedchests = TableNearToFarChests()
         for i, v in pairs(checkedchests) do
-            -- Nếu có rương hiện tại, bỏ qua nếu không phải rương hiện tại
-            if _G.CurrentChest and v == _G.CurrentChest then
-                continue
-            end
             Tween(v)
-            _G.CurrentChest = v -- Lưu rương hiện tại
             if _G.Play == false then
                 break
             end
