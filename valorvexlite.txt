@@ -521,7 +521,7 @@ local sliderValue = 16 -- Giá trị ban đầu của thanh trượt
 local player = game.Players.LocalPlayer
 
 -- Tạo tab mới
-local Tab11 = AddTab("Misc")
+local Tab11 = AddTab("Tab 11")
 
 -- Tạo thanh trượt (slider)
 local slider = AddSlider(Tab11, {
@@ -547,6 +547,37 @@ local button = AddButton(Tab11, {
     end
 })
 
+
+
+-----v2
+local speedEnabled = false -- Biến kiểm tra trạng thái bật/tắt tốc độ
+local defaultSpeed = 16 -- Tốc độ mặc định
+local boostedSpeed = 300 -- Tốc độ khi bật
+
+local player = game.Players.LocalPlayer
+
+-- Kiểm tra xem Tab11 đã tồn tại chưa, nếu chưa tạo mới
+local Tab11 = _G.Tab11 or AddTab("Tab 11")
+_G.Tab11 = Tab11  -- Lưu tab vào _G để tránh tạo lại
+
+-- Tạo nút "Speed v2"
+local button = AddButton(Tab11, {
+    Name = "Speed v2",
+    Callback = function()
+        -- Kiểm tra và thay đổi trạng thái tốc độ
+        speedEnabled = not speedEnabled
+
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local humanoid = character.Humanoid
+            if speedEnabled then
+                humanoid.WalkSpeed = boostedSpeed -- Đặt tốc độ khi bật
+            else
+                humanoid.WalkSpeed = defaultSpeed -- Đặt lại tốc độ khi tắt
+            end
+        end
+    end
+})
 
 
 -----clear skin player
