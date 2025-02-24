@@ -1,0 +1,39 @@
+-----Vật phẩm
+
+local function summonAndFightBlackbeard()
+    -- Triệu hồi Râu Đen nếu chưa có
+    local blackbeardBoss = game.Workspace:FindFirstChild("Blackbeard")
+    if not blackbeardBoss then
+        game.ReplicatedStorage.Remotes.SummonBlackbeard:FireServer()
+        wait(3) -- Đợi Râu Đen xuất hiện
+        blackbeardBoss = game.Workspace:FindFirstChild("Blackbeard")
+    end
+    
+    -- Nếu Râu Đen xuất hiện
+    if blackbeardBoss and blackbeardBoss:FindFirstChild("HumanoidRootPart") then
+        local hrp = blackbeardBoss.HumanoidRootPart
+        local player = game.Players.LocalPlayer
+        local char = player.Character
+        
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            -- Bay lên trên đầu Râu Đen
+            local humanoidRootPart = char.HumanoidRootPart
+            humanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, 50, 0) -- Lên cao 50 studs
+            
+            -- Tăng hitbox
+            local hitbox = hrp:FindFirstChild("Hitbox") or Instance.new("Part", hrp)
+            hitbox.Name = "Hitbox"
+            hitbox.Size = Vector3.new(50, 50, 50) -- Tăng kích thước
+            hitbox.Transparency = 1
+            hitbox.Anchored = true
+            hitbox.CanCollide = false
+            
+            -- Tự động đánh từ xa
+            while blackbeardBoss and blackbeardBoss:FindFirstChild("Humanoid") and blackbeardBoss.Humanoid.Health > 0 do
+                game.ReplicatedStorage.Remotes.Attack:FireServer(blackbeardBoss)
+                wait(0.5)
+            end
+        end
+    end
+end
+
