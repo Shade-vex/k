@@ -1,0 +1,33 @@
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceId = game.PlaceId
+
+local function switchServer()
+    local success, servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+
+    if success and servers and servers.data then
+        for _, server in pairs(servers.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+                return
+            end
+        end
+    end
+end
+
+-- Đảm bảo Tab11o tồn tại
+if not Tab11o then
+    Tab11o = AddTab("Server")
+end
+
+-- Tạo nút đổi server
+AddButton(
+    Tab11o,
+    {
+        Name = "Đổi Server",
+        Callback = function()
+            switchServer()
+        end
+    })

@@ -1,0 +1,19 @@
+local player = game.Players.LocalPlayer local character = player.Character or player.CharacterAdded:Wait() local waterWalkEnabled = false
+
+local function enableWaterWalk() waterWalkEnabled = not waterWalkEnabled
+
+if waterWalkEnabled then
+    spawn(function()
+        while waterWalkEnabled do
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local root = character.HumanoidRootPart
+                local isInWater = root.Position.Y < 2
+
+                if isInWater then
+                    root.Velocity = Vector3.new(0, 5, 0) -- Đẩy nhân vật lên trên để nổi trên mặt nước
+                end
+            end
+            wait(0.05) -- Kiểm tra lại mỗi 0.05 giây để giữ nhân vật trên mặt nước
+        end
+    end)
+end   
