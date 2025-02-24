@@ -350,14 +350,14 @@ local function toggleFruitESP()
             gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui  
 
             fruitLabel = Instance.new("TextLabel")  
-            fruitLabel.Size = UDim2.new(0, 350, 0, 40) 
-            fruitLabel.Position = UDim2.new(0.5, -175, 0.58, 0) 
+            fruitLabel.Size = UDim2.new(0, 600, 0, 50) 
+            fruitLabel.Position = UDim2.new(0.5, -300, 0.58, 0) 
             fruitLabel.BackgroundTransparency = 1  
             fruitLabel.TextColor3 = Color3.new(1, 1, 1)  
             fruitLabel.TextStrokeTransparency = 0 
             fruitLabel.TextStrokeColor3 = Color3.new(0, 0, 0) 
             fruitLabel.TextScaled = false  
-            fruitLabel.TextSize = 14  
+            fruitLabel.TextSize = 30  
             fruitLabel.Font = Enum.Font.SourceSansBold  
             fruitLabel.Text = "" 
             fruitLabel.TextXAlignment = Enum.TextXAlignment.Center 
@@ -392,7 +392,7 @@ AddButton(Tab9o, {
     Callback = function()
         toggleFruitESP()
     end
-})
+})    
 
 -----khac
 
