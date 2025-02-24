@@ -553,12 +553,11 @@ local function toggleHakiBáVương()
     end
 end
 
--- Đảm bảo Tab11 tồn tại
-if not Tab11 then
-    Tab11 = AddTab("Misc")
-end
+-- Kiểm tra xem Tab "Misc" đã tồn tại hay chưa, nếu chưa sẽ tạo mới
+local Tab11 = _G.Tab11 or AddTab("Misc")
+_G.Tab11 = Tab11  -- Lưu lại Tab11 trong _G để tránh việc tạo lại
 
--- Thêm nút bật/tắt Haki bá vương
+-- Đảm bảo rằng AddButton được sử dụng đúng cách
 AddButton(Tab11, {
     Name = "Haki bá vương",
     Callback = function()
