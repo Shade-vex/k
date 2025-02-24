@@ -513,58 +513,39 @@ AddButton(Tab11o, {
     end
 })
 
------no speed
 
-local hakiBáVươngEnabled = false
-local radius = 30 -- Phạm vi Haki bá vương (30m)
+-------speed
 
-local function freezePlayers()
-    while hakiBáVươngEnabled do
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                if distance <= radius then
-                    local humanoid = player.Character:FindFirstChild("Humanoid")
-                    if humanoid then
-                        humanoid.WalkSpeed = 0 -- Ngăn di chuyển
-                        humanoid.JumpPower = 0 -- Ngăn nhảy
-                    end
-                end
-            end
-        end
-        wait(0.5) -- Cập nhật mỗi 0.5 giây
-    end
-end
+local speed = 16 -- Tốc độ mặc định
+local sliderValue = 16 -- Giá trị ban đầu của thanh trượt
+local player = game.Players.LocalPlayer
 
-local function toggleHakiBáVương()
-    hakiBáVươngEnabled = not hakiBáVươngEnabled
+-- Tạo tab mới
+local Tab11 = AddTab("Misc")
 
-    if hakiBáVươngEnabled then
-        spawn(freezePlayers)
-    else
-        -- Khôi phục di chuyển cho tất cả người chơi khi tắt Haki bá vương
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                humanoid.WalkSpeed = 16 -- Tốc độ mặc định
-                humanoid.JumpPower = 50 -- Sức bật mặc định
-            end
-        end
-    end
-end
-
--- Kiểm tra xem Tab "Misc" đã tồn tại hay chưa, nếu chưa sẽ tạo mới
-local Tab11 = _G.Tab11 or AddTab("Misc")
-_G.Tab11 = Tab11  -- Lưu lại Tab11 trong _G để tránh việc tạo lại
-
--- Đảm bảo rằng AddButton được sử dụng đúng cách
-AddButton(Tab11, {
-    Name = "Haki bá vương",
-    Callback = function()
-        toggleHakiBáVương()
+-- Tạo thanh trượt (slider)
+local slider = AddSlider(Tab11, {
+    Name = "Tốc độ",
+    Min = 1,
+    Max = 300,
+    Default = 16,
+    Callback = function(value)
+        sliderValue = value
     end
 })
 
+-- Tạo nút "Tăng tốc độ"
+local button = AddButton(Tab11, {
+    Name = "Tăng tốc độ",
+    Callback = function()
+        -- Kiểm tra và thay đổi tốc độ của nhân vật
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local humanoid = character.Humanoid
+            humanoid.WalkSpeed = sliderValue -- Đặt tốc độ theo giá trị thanh trượt
+        end
+    end
+})
 
 
 
