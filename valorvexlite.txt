@@ -838,7 +838,7 @@ local function showBannedMessage()
     label.BackgroundTransparency = 1
     
     -- Kết thúc trò chơi sau khi hiển thị thông báo
-    wait(3) -- Chờ 3 giây
+    wait(10) -- Chờ 10 giây
     Player:Kick("You have been banned for cheating.")
 end
 
