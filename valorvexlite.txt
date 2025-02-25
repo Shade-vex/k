@@ -4,7 +4,7 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
        local Window = MakeWindow({
          Hub = {
          Title = "Valor Vex ",
-         Animation = "Đang tải script..."
+         Animation = "Đang tải script... |99%|"
          },
         Key = {
         KeySystem = fasle,
@@ -122,7 +122,7 @@ function Tween(Part)
         _G.Tween:Cancel()
     end
     local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
-    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new(Part.Position.magnitude / 500, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
+    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new(Part.Position.magnitude / 300, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
     _G.Tween:Play()
     local flying = true
     while game:GetService("RunService").Stepped:Wait() and flying and _G.Play do
@@ -729,19 +729,20 @@ AddButton(Tab11o, {
 
 local attackEnabled = false
 local attackRange = 30 -- Phạm vi tấn công (30m)
-local attackSpeed = 0.1 -- Tốc độ tấn công (giữ mức hợp lý)
+local attackSpeed = 0.1 -- Tốc độ đánh (giữ mức hợp lý)
 
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Kiểm tra mục tiêu hợp lệ
 local function isValidTarget(target)
     return target and target:FindFirstChild("Humanoid") and target:FindFirstChild("Humanoid").Health > 0
 end
 
-local function attackNearestTarget()
-    local player = game.Players.LocalPlayer
-    if not player or not player.Character then return end
-
-    local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-    local tool = player.Character:FindFirstChildOfClass("Tool") -- Kiểm tra nếu cầm vũ khí
-    if not rootPart or not tool then return end
+-- Tìm mục tiêu gần nhất
+local function getNearestTarget()
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return nil end
 
     local closestTarget = nil
     local closestDistance = attackRange
@@ -759,29 +760,38 @@ local function attackNearestTarget()
         end
     end
 
-    if closestTarget then
-        tool:Activate() -- Gây sát thương tự động
+    return closestTarget
+end
+
+-- Gây sát thương liên tục
+local function attackLoop()
+    while attackEnabled do
+        local tool = character:FindFirstChildOfClass("Tool") -- Kiểm tra nếu cầm vũ khí
+        local target = getNearestTarget()
+
+        if tool and target then
+            tool:Activate() -- Tấn công mục tiêu
+        end
+
+        wait(attackSpeed) -- Điều chỉnh tốc độ đánh
     end
 end
 
+-- Bật/tắt Auto Attack
 local function toggleAutoAttack()
     attackEnabled = not attackEnabled
 
     if attackEnabled then
-        spawn(function()
-            while attackEnabled do
-                attackNearestTarget()
-                wait(attackSpeed) -- Điều chỉnh tốc độ đánh
-            end
-        end)
+        spawn(attackLoop)
     end
 end
 
--- Tạo nút bật/tắt Auto Attack
+-- Đảm bảo Tab11o tồn tại
 if not Tab11o then
-    Tab11o = AddTab("Combat")
+    Tab9o = AddTab("Combat")
 end
 
+-- Tạo nút bật/tắt Auto Attack
 AddButton(Tab11o, {
     Name = "Auto Attack ",
     Callback = function()
