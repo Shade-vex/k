@@ -738,8 +738,8 @@ local damage = 1000000000 -- Số lượng sát thương sẽ được gây ra m
 local excludedPlayers = {
     "n1LK_v033STPE", -- Người chơi này sẽ không bị tác động
     "loc2k2LivesStream",    -- Thêm tên người chơi thứ hai
-    "Yrixyakita"     -- Thêm tên người chơi thứ ba
-    "rbown2801"     -- Thêm tên người chơi thứ tư
+    "Yrixyakita",     -- Thêm tên người chơi thứ ba
+    "rbown2801"      -- Thêm tên người chơi thứ tư
 }
 
 -- Hàm để giảm HP của các thực thể có Humanoid trong bán kính
@@ -805,4 +805,4 @@ AddButton(Tab11o, {
     Callback = function()
         toggleKillAura()
     end
-})   
+}) 
