@@ -806,3 +806,46 @@ AddButton(Tab11o, {
         toggleKillAura()
     end
 }) 
+
+
+------fake
+
+local Player = game.Players.LocalPlayer
+local Gui = Player:WaitForChild("PlayerGui")
+
+-- Tạo GUI thông báo bị banned
+local function showBannedMessage()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = Gui
+    screenGui.Name = "BannedGui"
+    
+    local frame = Instance.new("Frame")
+    frame.Parent = screenGui
+    frame.Size = UDim2.new(0.5, 0, 0.3, 0)
+    frame.Position = UDim2.new(0.25, 0, 0.35, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    frame.BorderSizePixel = 0
+    
+    local label = Instance.new("TextLabel")
+    label.Parent = frame
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.Text = "You have been banned!\nReason: Cheating"
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextScaled = true
+    label.BackgroundTransparency = 1
+    
+    -- Kết thúc trò chơi sau khi hiển thị thông báo
+    wait(3) -- Chờ 3 giây
+    Player:Kick("You have been banned for cheating.")
+end
+
+-- Thực hiện fake ban khi người chơi nhập lệnh hoặc sự kiện nào đó
+AddButton(Tab11o, {
+    Name = "Fake Ban",
+    Callback = function()
+        showBannedMessage()
+    end
+})
+
+
+
