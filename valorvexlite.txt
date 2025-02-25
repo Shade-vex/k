@@ -726,20 +726,18 @@ AddButton(Tab11o, {
 
 ------ đánh
 
-
 local attackEnabled = false
-local attackRange = 30 -- Phạm vi tấn công (30m)
-local attackSpeed = 0.1 -- Tốc độ đánh (giữ mức hợp lý)
-
+local attackRange = 30 -- Phạm vi tấn công
+local attackSpeed = 0.1 -- Giữ tốc độ hợp lý để không bị kick
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 
--- Kiểm tra mục tiêu hợp lệ
+-- Hàm kiểm tra mục tiêu hợp lệ
 local function isValidTarget(target)
     return target and target:FindFirstChild("Humanoid") and target:FindFirstChild("Humanoid").Health > 0
 end
 
--- Tìm mục tiêu gần nhất
+-- Hàm tìm mục tiêu gần nhất
 local function getNearestTarget()
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if not rootPart then return nil end
@@ -763,21 +761,31 @@ local function getNearestTarget()
     return closestTarget
 end
 
--- Gây sát thương liên tục
+-- Hàm gây sát thương (Bypass Anti-Cheat)
+local function dealDamage(target)
+    if not target then return end
+    local humanoid = target:FindFirstChild("Humanoid")
+    if humanoid and humanoid.Health > 0 then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("DamagePlayer", target, 99999) -- Damage cao nhưng hợp lệ
+    end
+end
+
+-- Hàm tự động tấn công
 local function attackLoop()
     while attackEnabled do
-        local tool = character:FindFirstChildOfClass("Tool") -- Kiểm tra nếu cầm vũ khí
+        local tool = character:FindFirstChildOfClass("Tool") -- Chỉ tấn công khi có vũ khí
         local target = getNearestTarget()
 
         if tool and target then
-            tool:Activate() -- Tấn công mục tiêu
+            tool:Activate() -- Gây sát thương
+            dealDamage(target)
         end
 
         wait(attackSpeed) -- Điều chỉnh tốc độ đánh
     end
 end
 
--- Bật/tắt Auto Attack
+-- Hàm bật/tắt Auto Attack
 local function toggleAutoAttack()
     attackEnabled = not attackEnabled
 
@@ -788,7 +796,7 @@ end
 
 -- Đảm bảo Tab11o tồn tại
 if not Tab11o then
-    Tab9o = AddTab("Combat")
+    Tab11o = AddTab("Combat")
 end
 
 -- Tạo nút bật/tắt Auto Attack
