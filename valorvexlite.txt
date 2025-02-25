@@ -739,6 +739,10 @@ local function setDragonV4Pose()
     local RightLeg = Character:WaitForChild("RightUpperLeg")
     local LeftArm = Character:WaitForChild("LeftUpperArm")
     local RightArm = Character:WaitForChild("RightUpperArm")
+    local Humanoid = Character:WaitForChild("Humanoid")
+
+    -- Đặt lại trạng thái ngồi nếu có
+    Humanoid.Sit = false
 
     -- Tạo dáng đứng với tư thế đặc trưng tộc rồng V4
     -- Di chuyển thân nhân vật và các bộ phận để tạo dáng đứng mạnh mẽ
@@ -784,4 +788,4 @@ AddButton(Tab11o, {
     Callback = function()
         toggleDragonPose() -- Khi nhấn nút, gọi hàm toggle
     end
-})   
+})
