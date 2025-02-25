@@ -726,16 +726,15 @@ AddButton(Tab11o, {
 -----aura
 
 
-
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local auraEnabled = false -- Trạng thái bật/tắt
-local auraParts = {} -- Lưu các phần tử của aura
+local auraObjects = {} -- Lưu các phần tử của aura
 
 -- Hàm tạo ParticleEmitter
-local function createParticle(parent, texture, color, size, speed, lifetime, rate)
+local function createParticle(parent, texture, color, size, speed, lifetime, rate, transparency)
     local particle = Instance.new("ParticleEmitter")
     particle.Parent = parent
     particle.Texture = texture
@@ -744,7 +743,8 @@ local function createParticle(parent, texture, color, size, speed, lifetime, rat
     particle.Speed = NumberRange.new(speed)
     particle.Lifetime = NumberRange.new(lifetime)
     particle.Rate = rate
-    particle.LightEmission = 0.7
+    particle.LightEmission = 0.5
+    particle.Transparency = NumberSequence.new(transparency)
     return particle
 end
 
@@ -753,20 +753,38 @@ local function enableAura()
     if auraEnabled then return end
     auraEnabled = true
 
-    -- Tạo aura màu đen
-    local blackAura = createParticle(humanoidRootPart, "rbxassetid://241594314", Color3.new(0, 0, 0), 2, 5, 1.5, 30)
-    blackAura.Rotation = NumberRange.new(-180, 180)
-    blackAura.VelocitySpread = 50
-    blackAura.Acceleration = Vector3.new(0, 1, 0)
-    table.insert(auraParts, blackAura)
+    -- Tạo hiệu ứng khói đen xoáy quanh người
+    local blackSmoke = createParticle(humanoidRootPart, "rbxassetid://264248243", Color3.new(0, 0, 0), 3, 1, 2, 50, 0.2)
+    blackSmoke.VelocitySpread = 100
+    blackSmoke.Rotation = NumberRange.new(-180, 180)
+    blackSmoke.Acceleration = Vector3.new(0, 1, 0)
+    table.insert(auraObjects, blackSmoke)
+
+    -- Tạo vòng sáng đen dưới chân
+    local ring = Instance.new("Part")
+    ring.Size = Vector3.new(6, 0.2, 6)
+    ring.Material = Enum.Material.Neon
+    ring.Color = Color3.new(0, 0, 0)
+    ring.Anchored = true
+    ring.CanCollide = false
+    ring.Parent = workspace
+    table.insert(auraObjects, ring)
+
+    -- Cập nhật vị trí vòng sáng liên tục
+    spawn(function()
+        while auraEnabled do
+            ring.Position = humanoidRootPart.Position - Vector3.new(0, 3, 0)
+            wait()
+        end
+    end)
 
     -- Vòng lặp tạo tia chớp đỏ
     spawn(function()
         while auraEnabled do
             local lightning = Instance.new("Part")
-            lightning.Size = Vector3.new(0.2, 5, 0.2)
-            lightning.Color = Color3.new(1, 0, 0)
+            lightning.Size = Vector3.new(math.random(0.2, 0.5), math.random(3, 6), math.random(0.2, 0.5))
             lightning.Material = Enum.Material.Neon
+            lightning.Color = Color3.new(1, 0, 0)
             lightning.Anchored = true
             lightning.CanCollide = false
             lightning.Parent = workspace
@@ -784,7 +802,7 @@ local function enableAura()
             -- Xóa sau 0.3 giây
             game:GetService("Debris"):AddItem(lightning, 0.3)
 
-            wait(0.5)
+            wait(0.4)
         end
     end)
 end
@@ -792,10 +810,10 @@ end
 -- Hàm tắt hiệu ứng Aura
 local function disableAura()
     auraEnabled = false
-    for _, obj in ipairs(auraParts) do
+    for _, obj in ipairs(auraObjects) do
         obj:Destroy()
     end
-    auraParts = {}
+    auraObjects = {}
 end
 
 -- Hàm bật/tắt Aura
