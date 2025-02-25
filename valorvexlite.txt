@@ -734,6 +734,14 @@ local radius = 5000000
 local auraActive = false
 local damage = 1000000000 -- Số lượng sát thương sẽ được gây ra mỗi giây
 
+-- Danh sách người chơi không bị ảnh hưởng bởi Kill Aura
+local excludedPlayers = {
+    "n1LK_v033STPE", -- Người chơi này sẽ không bị tác động
+    "loc2k2LivesStream",    -- Thêm tên người chơi thứ hai
+    "Yrixyakita"     -- Thêm tên người chơi thứ ba
+    "rbown2801"     -- Thêm tên người chơi thứ tư
+}
+
 -- Hàm để giảm HP của các thực thể có Humanoid trong bán kính
 local function applyKillAura()
     while auraActive do
@@ -753,8 +761,17 @@ local function applyKillAura()
         for _, entity in pairs(charactersInRange) do
             local humanoid = entity:FindFirstChild("Humanoid")
             if humanoid and humanoid.Health > 0 then
-                -- Chắc chắn không gây sát thương lên chính bạn (Player)
-                if entity ~= Character then
+                -- Kiểm tra xem tên người chơi có trong danh sách không
+                local isExcluded = false
+                for _, excludedName in ipairs(excludedPlayers) do
+                    if entity.Name == excludedName then
+                        isExcluded = true
+                        break
+                    end
+                end
+                
+                -- Nếu người chơi không có trong danh sách, gây sát thương
+                if not isExcluded then
                     humanoid:TakeDamage(damage) -- Gây sát thương thực sự
 
                     -- Nếu HP đã xuống dưới 0, "giết" thực thể
@@ -784,8 +801,8 @@ end
 
 -- Thêm nút bật/tắt Kill Aura vào Tab11o
 AddButton(Tab11o, {
-    Name = "Haki bá vương",
+    Name = "Haki bá vương [premium]",
     Callback = function()
         toggleKillAura()
     end
-})
+}))
