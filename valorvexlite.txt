@@ -723,103 +723,58 @@ AddButton(Tab11o, {
 
 
 
------v4fake
+-----kill entity
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
+local workspace = game:GetService("Workspace")
 
-local isDragonPoseActive = false -- Biến để theo dõi trạng thái tư thế
+-- Bán kính để kiểm tra các thực thể
+local radius = 10000
+local auraActive = false
 
--- Hàm để tạo dáng đứng tộc rồng V4
-local function setDragonV4Pose()
-    -- Đợi đến khi các bộ phận cơ thể nhân vật đã sẵn sàng
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-    local Torso = Character:WaitForChild("UpperTorso")
-    local LeftLeg = Character:WaitForChild("LeftUpperLeg")
-    local RightLeg = Character:WaitForChild("RightUpperLeg")
-    local LeftArm = Character:WaitForChild("LeftUpperArm")
-    local RightArm = Character:WaitForChild("RightUpperArm")
-    local Humanoid = Character:WaitForChild("Humanoid")
-
-    -- Đặt lại trạng thái ngồi nếu có
-    Humanoid.Sit = false
-
-    -- Cấu hình vị trí mặc định của nhân vật
-    local defaultPosition = HumanoidRootPart.Position
-    HumanoidRootPart.CFrame = CFrame.new(defaultPosition) -- Đảm bảo nhân vật không bị dịch chuyển lên cao hay xuyên qua mặt đất
-
-    -- Dùng tween để di chuyển mượt mà
-    local TweenService = game:GetService("TweenService")
-
-    -- Cấu hình vị trí các bộ phận cơ thể
-    local torsoTween = TweenService:Create(Torso, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Torso.CFrame * CFrame.Angles(math.rad(-30), 0, 0)}) -- Cúi nhẹ thân trên
-    local leftLegTween = TweenService:Create(LeftLeg, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = LeftLeg.CFrame * CFrame.Angles(math.rad(40), 0, math.rad(20))}) -- Chỉnh chân trái
-    local rightLegTween = TweenService:Create(RightLeg, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = RightLeg.CFrame * CFrame.Angles(math.rad(40), 0, math.rad(-20))}) -- Chỉnh chân phải
-    local leftArmTween = TweenService:Create(LeftArm, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = LeftArm.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(30))}) -- Chỉnh tay trái
-    local rightArmTween = TweenService:Create(RightArm, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = RightArm.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(-30))}) -- Chỉnh tay phải
-
-    -- Chạy các tween này
-    torsoTween:Play()
-    leftLegTween:Play()
-    rightLegTween:Play()
-    leftArmTween:Play()
-    rightArmTween:Play()
-
-    -- Chờ các tween hoàn thành
-    torsoTween.Completed:Wait()
-    leftLegTween.Completed:Wait()
-    rightLegTween.Completed:Wait()
-    leftArmTween.Completed:Wait()
-    rightArmTween.Completed:Wait()
-end
-
--- Hàm để tắt dáng đứng tộc rồng V4 (quay lại tư thế ban đầu)
-local function resetPose()
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-    local Torso = Character:WaitForChild("UpperTorso")
-    local LeftLeg = Character:WaitForChild("LeftUpperLeg")
-    local RightLeg = Character:WaitForChild("RightUpperLeg")
-    local LeftArm = Character:WaitForChild("LeftUpperArm")
-    local RightArm = Character:WaitForChild("RightUpperArm")
-
-    -- Quay lại tư thế ban đầu cho các bộ phận cơ thể
-    local TweenService = game:GetService("TweenService")
-
-    local torsoTween = TweenService:Create(Torso, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Torso.CFrame * CFrame.Angles(0, 0, 0)})
-    local leftLegTween = TweenService:Create(LeftLeg, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = LeftLeg.CFrame * CFrame.Angles(0, 0, 0)})
-    local rightLegTween = TweenService:Create(RightLeg, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = RightLeg.CFrame * CFrame.Angles(0, 0, 0)})
-    local leftArmTween = TweenService:Create(LeftArm, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = LeftArm.CFrame * CFrame.Angles(0, 0, 0)})
-    local rightArmTween = TweenService:Create(RightArm, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = RightArm.CFrame * CFrame.Angles(0, 0, 0)})
-
-    -- Chạy các tween này
-    torsoTween:Play()
-    leftLegTween:Play()
-    rightLegTween:Play()
-    leftArmTween:Play()
-    rightArmTween:Play()
-
-    -- Chờ các tween hoàn thành
-    torsoTween.Completed:Wait()
-    leftLegTween.Completed:Wait()
-    rightLegTween.Completed:Wait()
-    leftArmTween.Completed:Wait()
-    rightArmTween.Completed:Wait()
-end
-
--- Hàm để bật/tắt dáng đứng tộc rồng V4
-local function toggleDragonPose()
-    if isDragonPoseActive then
-        resetPose() -- Nếu tư thế đang hoạt động, tắt nó
-    else
-        setDragonV4Pose() -- Nếu tư thế đang tắt, bật nó
+-- Hàm để giảm HP của các thực thể có Humanoid trong bán kính
+local function applyKillAura()
+    while auraActive do
+        -- Tìm các đối tượng xung quanh Player trong bán kính 10000m
+        local charactersInRange = {}
+        for _, object in pairs(workspace:GetChildren()) do
+            if object:IsA("Model") and object:FindFirstChild("Humanoid") then
+                local humanoid = object:FindFirstChild("Humanoid")
+                local distance = (object.PrimaryPart.Position - Character.PrimaryPart.Position).Magnitude
+                if distance <= radius and humanoid.Health > 0 then
+                    table.insert(charactersInRange, object)
+                end
+            end
+        end
+        
+        -- Duyệt qua các đối tượng và giảm HP
+        for _, entity in pairs(charactersInRange) do
+            local humanoid = entity:FindFirstChild("Humanoid")
+            if humanoid and humanoid.Health > 0 then
+                humanoid:TakeDamage(99) -- Trừ 99 HP mỗi giây
+            end
+        end
+        
+        wait(1) -- Đợi 1 giây trước khi kiểm tra lại
     end
-    isDragonPoseActive = not isDragonPoseActive -- Chuyển trạng thái
 end
 
--- Thêm nút bật/tắt dáng đứng tộc rồng V4 trong giao diện
+-- Hàm để tạo nút bật/tắt Kill Aura
+local function toggleKillAura()
+    auraActive = not auraActive
+    if auraActive then
+        -- Khi bật Kill Aura
+        spawn(function()
+            applyKillAura()
+        end)
+    end
+end
+
+-- Thêm nút bật/tắt Kill Aura vào Tab11o
 AddButton(Tab11o, {
-    Name = "Draco V4",
+    Name = "Haki bá vương",
     Callback = function()
-        toggleDragonPose() -- Khi nhấn nút, gọi hàm toggle
+        toggleKillAura()
     end
-})
+})           
