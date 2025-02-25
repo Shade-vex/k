@@ -70,137 +70,113 @@ AddButton(Tab1o, {
 -------farm
 
 local Player = game.Players.LocalPlayer
-local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
 
-_G.Tween = nil
-_G.Play = false
-_G.CloseAllScript = false
-_G.CurrentChest = nil -- Biến lưu trữ rương hiện tại
+_G.FarmChestEnabled = false
+_G.FarmSpeed = 270 -- Tốc độ di chuyển an toàn
 _G.CheckedChests = {} -- Danh sách rương đã nhặt
+_G.CurrentChest = nil
 
--- Tạo nút farm chest
-local function farmChestToggle()
-    _G.Play = not _G.Play
-    if _G.Play then
-        _G.CheckedChests = {} -- Đặt lại danh sách rương khi bật farm chest
+-- **Hàm lấy danh sách rương chưa nhặt**
+local function GetAvailableChests()
+    local chests = {}
+
+    for _, v in pairs(workspace:GetDescendants()) do
+        if (v.Name == "Chest1" or v.Name == "Chest2" or v.Name == "Chest3") 
+            and v:IsA("Model") 
+            and v:FindFirstChild("HumanoidRootPart") 
+            and not _G.CheckedChests[v] then
+            
+            table.insert(chests, v)
+        end
+    end
+
+    return chests
+end
+
+-- **Hàm bay đến rương**
+local function MoveToChest(chest)
+    if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local hrp = Player.Character.HumanoidRootPart
+    local chestPosition = chest.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+
+    -- Tạo Tween di chuyển mượt hơn
+    local distance = (chestPosition - hrp.Position).Magnitude
+    local time = distance / _G.FarmSpeed
+
+    local tween = TweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {Position = chestPosition})
+    tween:Play()
+    tween.Completed:Wait()
+
+    -- Đợi một chút trước khi nhặt rương
+    wait(0.2)
+
+    -- Kiểm tra nếu rương vẫn tồn tại trước khi nhặt
+    if chest and chest.Parent and chest:FindFirstChild("HumanoidRootPart") then
+        local prompt = chest:FindFirstChildOfClass("ProximityPrompt")
+        if prompt then
+            fireproximityprompt(prompt)
+            _G.CheckedChests[chest] = true -- Đánh dấu đã nhặt rương này
+        end
+    end
+end
+
+-- **Hàm farm rương chính**
+local function FarmChests()
+    -- **CHỜ 5 GIÂY TRƯỚC KHI CHẠY (TRÁNH XUNG ĐỘT)**
+    wait(5)
+
+    while _G.FarmChestEnabled do
+        local availableChests = GetAvailableChests()
+
+        if #availableChests == 0 then
+            print("⚠️ Không còn rương nào có thể nhặt!")
+            wait(5) -- Đợi 5 giây trước khi tìm lại
+        else
+            for _, chest in pairs(availableChests) do
+                if not _G.FarmChestEnabled then return end
+                _G.CurrentChest = chest
+                MoveToChest(chest)
+                wait(0.5) -- Giữ khoảng cách giữa mỗi lần nhặt
+            end
+        end
+    end
+end
+
+-- **Hàm bỏ qua rương hiện tại**
+local function SkipChest()
+    _G.CurrentChest = nil -- Bỏ qua rương hiện tại
+    print("👉 Chuyển sang rương tiếp theo...")
+end
+
+-- **Hàm bật/tắt farm rương**
+local function ToggleChestFarm()
+    _G.FarmChestEnabled = not _G.FarmChestEnabled
+
+    if _G.FarmChestEnabled then
         print("✅ Farm Chest Đã Bật")
+        spawn(FarmChests)
     else
         print("❌ Farm Chest Đã Tắt")
     end
 end
 
--- Tạo nút next chest
-local function nextChest()
-    _G.CurrentChest = nil -- Đặt lại rương hiện tại để bỏ qua rương đang nhặt
-    print("👉 Chuyển sang rương tiếp theo...")
-end
-
--- Xóa rương khỏi danh sách nếu chúng spawn lại
-function UpdateCheckedChests()
-    for i, v in pairs(_G.CheckedChests) do
-        if not v or not v.Parent then
-            table.remove(_G.CheckedChests, i)
-        end
-    end
-end
-
--- Lấy danh sách rương chưa nhặt
-function TableNearToFarChests()
-    local chests = {}
-
-    -- Cập nhật danh sách rương đã nhặt
-    UpdateCheckedChests()
-
-    -- Lọc rương chưa nhặt
-    for i, v in pairs(workspace:GetDescendants()) do
-        if (v.Name == "Chest1" or v.Name == "Chest2" or v.Name == "Chest3") and not table.find(_G.CheckedChests, v) then
-            table.insert(chests, v)
-        end
-    end
-    return chests
-end
-
--- Hàm di chuyển đến rương
-function Tween(Part)
-    if _G.Tween then
-        _G.Tween:Cancel()
-    end
-    local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
-
-    -- Tạo Tween di chuyển với tốc độ 270 để tránh anti-cheat
-    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new(Part.Position.magnitude / 270, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
-    _G.Tween:Play()
-
-    local flying = true
-    while game:GetService("RunService").Stepped:Wait() and flying and _G.Play do
-        if not _G.Play then
-            _G.Tween:Cancel()
-        end
-        if (Part.Position - HumanoidRootPart.Position).magnitude < 250 then
-            _G.Tween:Cancel()
-            for i = 1, 5 do
-                HumanoidRootPart.CFrame = Part.CFrame
-                wait()
-            end
-            flying = false
-        end
-    end
-end
-
--- Đợi game load xong
-repeat wait() until game:IsLoaded()
-
--- Thêm nút farm chest
+-- **Tạo nút bật/tắt farm rương**
 AddButton(Tab2o, {
     Name = "Farm Chest",
     Callback = function()
-        farmChestToggle()
+        ToggleChestFarm()
     end
 })
 
--- Thêm nút next chest
+-- **Tạo nút bỏ qua rương hiện tại**
 AddButton(Tab2o, {
     Name = "Next Chest",
     Callback = function()
-        nextChest()
+        SkipChest()
     end
 })
-
--- Hàm chính để farm rương
-local function farmAllChests()
-    -- Đợi 5 giây trước khi bắt đầu
-    wait(5)
-
-    while wait(1) do
-        if _G.Play then
-            local chests = TableNearToFarChests()
-            if #chests == 0 then
-                print("⚠️ Không còn rương nào để nhặt!")
-                break
-            end
-            for i, v in pairs(chests) do
-                if _G.CurrentChest and v == _G.CurrentChest then
-                    continue
-                end
-                Tween(v) -- Di chuyển đến rương
-                _G.CurrentChest = v -- Lưu rương hiện tại
-                table.insert(_G.CheckedChests, v) -- Đánh dấu rương này đã nhặt
-                if not _G.Play then
-                    break
-                end
-            end
-        else
-            if _G.Tween then
-                _G.Tween:Cancel()
-            end
-        end
-    end
-end
-
--- Chạy farm rương
-spawn(function()
-    farmAllChests()
-end)
 
 
 
@@ -724,4 +700,4 @@ AddButton(Tab11o, {
     Callback = function()
         enableWaterWalk2()
     end
-})         
+}) 
