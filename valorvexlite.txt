@@ -492,7 +492,7 @@ local function toggleFruitESP()
             -- Tạo TextLabel cho Tiếng Việt
             fruitLabelVI = Instance.new("TextLabel")  
             fruitLabelVI.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.58, 0) 
+            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.68, 0) 
             fruitLabelVI.BackgroundTransparency = 1  
             fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)  
             fruitLabelVI.TextStrokeTransparency = 0 
@@ -508,7 +508,7 @@ local function toggleFruitESP()
             -- Tạo TextLabel cho Tiếng Anh
             fruitLabelEN = Instance.new("TextLabel")  
             fruitLabelEN.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.58, 0) 
+            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.68, 0) 
             fruitLabelEN.BackgroundTransparency = 1  
             fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)  
             fruitLabelEN.TextStrokeTransparency = 0 
