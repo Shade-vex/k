@@ -191,6 +191,119 @@ AddButton(Tab2o, {
 
 
 
+-------v2
+
+local Player = game.Players.LocalPlayer
+local CollectedChests = {} -- Danh sách rương đã nhặt
+local ChestFarmEnabled = false -- Trạng thái bật/tắt farm rương
+local CurrentChest = nil -- Lưu rương hiện tại
+
+-- **Hàm lấy danh sách rương chưa nhặt**
+local function GetAvailableChests()
+    local Chests = {}
+
+    for _, v in pairs(workspace:GetDescendants()) do
+        if (v.Name == "Chest1" or v.Name == "Chest2" or v.Name == "Chest3") 
+            and v:IsA("Model") 
+            and v:FindFirstChild("HumanoidRootPart") 
+            and not CollectedChests[v] then
+
+            table.insert(Chests, v)
+        end
+    end
+
+    return Chests
+end
+
+-- **Hàm kiểm tra nhân vật có tồn tại không**
+local function CheckCharacter()
+    while not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") do
+        wait(1)
+    end
+end
+
+-- **Hàm dịch chuyển đến rương**
+local function TeleportToChest(Chest)
+    CheckCharacter()
+    if not Chest or not Chest:FindFirstChild("HumanoidRootPart") then return end
+
+    local HRP = Player.Character.HumanoidRootPart
+    HRP.CFrame = Chest.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0) -- Dịch chuyển lên trên rương
+
+    wait(0.2) -- Chờ để tránh lỗi
+
+    -- **Nếu rương vẫn tồn tại thì nhặt**
+    if Chest and Chest.Parent and Chest:FindFirstChild("HumanoidRootPart") then
+        local Prompt = Chest:FindFirstChildOfClass("ProximityPrompt")
+        if Prompt then
+            fireproximityprompt(Prompt)
+            CollectedChests[Chest] = true -- Đánh dấu đã nhặt rương này
+        end
+    end
+end
+
+-- **Hàm farm rương chính**
+local function FarmChests()
+    print("⏳ Đang khởi động Farm Chest... Vui lòng đợi 5s.")
+    wait(5) -- CHỜ 5 GIÂY TRƯỚC KHI CHẠY ĐỂ TRÁNH XUNG ĐỘT
+
+    print("✅ Bắt đầu tìm rương...")
+    while ChestFarmEnabled do
+        local AvailableChests = GetAvailableChests()
+
+        if #AvailableChests == 0 then
+            print("⚠️ Không còn rương nào có thể nhặt!")
+            wait(5) -- Đợi 5 giây trước khi tìm lại
+        else
+            for _, Chest in pairs(AvailableChests) do
+                if not ChestFarmEnabled then return end
+                CurrentChest = Chest
+                print("📦 Đang nhặt rương: ", Chest.Name)
+                TeleportToChest(Chest)
+                wait(2) -- **Chờ 2 giây trước khi dịch chuyển tiếp**
+            end
+        end
+    end
+end
+
+-- **Hàm bỏ qua rương hiện tại**
+local function SkipChest()
+    CurrentChest = nil -- Bỏ qua rương hiện tại
+    print("👉 Chuyển sang rương tiếp theo...")
+end
+
+-- **Hàm bật/tắt farm rương**
+local function ToggleChestFarm()
+    ChestFarmEnabled = not ChestFarmEnabled
+
+    if ChestFarmEnabled then
+        print("✅ Farm Chest Đã Bật")
+        spawn(FarmChests)
+    else
+        print("❌ Farm Chest Đã Tắt")
+    end
+end
+
+-- **Tạo nút bật/tắt farm rương**
+AddButton(Tab2o, {
+    Name = "Farm Chest V2",
+    Callback = function()
+        ToggleChestFarm()
+    end
+})
+
+-- **Tạo nút bỏ qua rương hiện tại**
+AddButton(Tab2o, {
+    Name = "Next Chest",
+    Callback = function()
+        SkipChest()
+    end
+})
+
+
+
+
+
 ------item
 
 
@@ -710,7 +823,5 @@ AddButton(Tab11o, {
     Name = "Đi trên nước v2",
     Callback = function()
         enableWaterWalk2()
-    end
-}) erWalk2()
     end
 }) 
