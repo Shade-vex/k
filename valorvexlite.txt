@@ -728,16 +728,18 @@ AddButton(Tab11o, {
 
 local attackEnabled = false
 local attackRange = 30 -- Phạm vi tấn công
-local attackSpeed = 0.1 -- Giữ tốc độ hợp lý để không bị kick
+local attackSpeed = 0.05 -- Giữ tốc độ vừa phải để không bị kick
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local remoteEvent = replicatedStorage.Remotes.CommF_
 
--- Hàm kiểm tra mục tiêu hợp lệ
+-- Kiểm tra mục tiêu hợp lệ
 local function isValidTarget(target)
     return target and target:FindFirstChild("Humanoid") and target:FindFirstChild("Humanoid").Health > 0
 end
 
--- Hàm tìm mục tiêu gần nhất
+-- Tìm mục tiêu gần nhất
 local function getNearestTarget()
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if not rootPart then return nil end
@@ -745,8 +747,8 @@ local function getNearestTarget()
     local closestTarget = nil
     local closestDistance = attackRange
 
-    for _, obj in pairs(game.Workspace:GetChildren()) do
-        if obj:IsA("Model") and isValidTarget(obj) then
+    for _, obj in pairs(game.Workspace.Enemies:GetChildren()) do
+        if isValidTarget(obj) then
             local targetRoot = obj:FindFirstChild("HumanoidRootPart")
             if targetRoot then
                 local distance = (rootPart.Position - targetRoot.Position).Magnitude
@@ -761,23 +763,25 @@ local function getNearestTarget()
     return closestTarget
 end
 
--- Hàm gây sát thương (Bypass Anti-Cheat)
+-- Mô phỏng đánh hợp lệ để bypass anti-cheat
 local function dealDamage(target)
     if not target then return end
     local humanoid = target:FindFirstChild("Humanoid")
+
     if humanoid and humanoid.Health > 0 then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("DamagePlayer", target, 99999) -- Damage cao nhưng hợp lệ
+        -- Sử dụng event hợp lệ để tránh bị phát hiện
+        remoteEvent:InvokeServer("Hit", target, 1, "Melee", 1, "Normal")
     end
 end
 
--- Hàm tự động tấn công
+-- Hàm tấn công tự động
 local function attackLoop()
     while attackEnabled do
         local tool = character:FindFirstChildOfClass("Tool") -- Chỉ tấn công khi có vũ khí
         local target = getNearestTarget()
 
         if tool and target then
-            tool:Activate() -- Gây sát thương
+            tool:Activate() -- Kích hoạt đánh
             dealDamage(target)
         end
 
@@ -785,7 +789,7 @@ local function attackLoop()
     end
 end
 
--- Hàm bật/tắt Auto Attack
+-- Bật/tắt Auto Attack
 local function toggleAutoAttack()
     attackEnabled = not attackEnabled
 
@@ -794,7 +798,7 @@ local function toggleAutoAttack()
     end
 end
 
--- Đảm bảo Tab11o tồn tại
+-- Đảm bảo tab Combat tồn tại
 if not Tab11o then
     Tab11o = AddTab("Combat")
 end
