@@ -71,6 +71,7 @@ AddButton(Tab1o, {
 
 local Player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 _G.FarmChestEnabled = false
 _G.FarmSpeed = 270 -- Tốc độ di chuyển an toàn
@@ -94,9 +95,16 @@ local function GetAvailableChests()
     return chests
 end
 
+-- **Hàm kiểm tra nhân vật tồn tại**
+local function CheckCharacter()
+    while not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") do
+        wait(1)
+    end
+end
+
 -- **Hàm bay đến rương**
 local function MoveToChest(chest)
-    if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
+    CheckCharacter()
 
     local hrp = Player.Character.HumanoidRootPart
     local chestPosition = chest.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
@@ -125,8 +133,10 @@ end
 -- **Hàm farm rương chính**
 local function FarmChests()
     -- **CHỜ 5 GIÂY TRƯỚC KHI CHẠY (TRÁNH XUNG ĐỘT)**
+    print("⏳ Đang khởi động Farm Chest... Vui lòng đợi 5s.")
     wait(5)
 
+    print("✅ Bắt đầu tìm rương...")
     while _G.FarmChestEnabled do
         local availableChests = GetAvailableChests()
 
@@ -137,6 +147,7 @@ local function FarmChests()
             for _, chest in pairs(availableChests) do
                 if not _G.FarmChestEnabled then return end
                 _G.CurrentChest = chest
+                print("📦 Đang nhặt rương: ", chest.Name)
                 MoveToChest(chest)
                 wait(0.5) -- Giữ khoảng cách giữa mỗi lần nhặt
             end
