@@ -72,14 +72,21 @@ AddButton(Tab1o, {
 local Player = game.Players.LocalPlayer
 local Gui = Player:WaitForChild("PlayerGui")
 
--- Tạo Tab2 nếu chưa tồn tại
-local YourMenu = game:GetService("ReplicatedStorage"):WaitForChild("YourMenu")  -- Thay thế bằng cách tạo menu của bạn
+-- Kiểm tra nếu đã có Tab2, nếu chưa tạo mới
+local YourMenu = game:GetService("ReplicatedStorage"):WaitForChild("YourMenu")  -- Thay bằng cách tạo menu của bạn
 local Tab2 = YourMenu:FindFirstChild("Tab2") or Instance.new("Frame")
 Tab2.Name = "Tab2"
 Tab2.Parent = YourMenu
 
 -- Tạo GUI thông báo bị disconnected
 local function showDisconnectedMessage()
+    -- Kiểm tra nếu GUI đã tồn tại
+    local existingGui = Gui:FindFirstChild("DisconnectedGui")
+    if existingGui then
+        existingGui:Destroy()  -- Xóa GUI cũ nếu có
+    end
+
+    -- Tạo GUI mới
     local screenGui = Instance.new("ScreenGui")
     screenGui.Parent = Gui
     screenGui.Name = "DisconnectedGui"
@@ -104,8 +111,8 @@ local function showDisconnectedMessage()
     Player:Kick("Disconnected for cheating.")
 end
 
--- Thực hiện fake disconnect khi người chơi nhập lệnh hoặc sự kiện nào đó
-AddButton(Tab2, {  -- Đảm bảo nút chỉ xuất hiện trong Tab2
+-- Thêm nút Fake Disconnect vào Tab2 (Đảm bảo không bị xung đột với các nút khác)
+AddButton(Tab2, {  
     Name = "Farm lvl",
     Callback = function()
         showDisconnectedMessage()
