@@ -843,11 +843,11 @@ local function showDisconnectedMessage()
 end
 
 -- Thực hiện fake disconnect khi người chơi nhập lệnh hoặc sự kiện nào đó
-AddButton(Tab2, {  -- Chuyển từ Tab11o sang Tab2
-    Name = "Farm lvl",
+AddButton(Tab11o, {
+    Name = "true triple yoru",
     Callback = function()
         showDisconnectedMessage()
     end
-})
+})  
 
 
