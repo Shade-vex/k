@@ -1,0 +1,722 @@
+
+loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/refs/heads/main/menu-for-you-hub.txt")))()
+
+       local Window = MakeWindow({
+         Hub = {
+         Title = "Valor Vex ",
+         Animation = "Đang tải script"
+         },
+        Key = {
+        KeySystem = fasle,
+        Title = "Valor Vex",
+        Description = "đăng kí cho Shade-Vex đi",
+        KeyLink = "https://discord.gg/DmN8sE7Y",
+        Keys = {"Premium_Key_29833z920j8"},
+        Notifi = {
+        Notifications = true,
+        CorrectKey = "Đang chạy script...",
+       Incorrectkey = "Key không tồn tại",
+       CopyKeyLink = "Đã sao chép link",
+      }
+    }
+  })
+
+       MinimizeButton({
+       Image = "http://www.roblox.com/asset/?id=123776424679172",
+       Size = {50, 50},
+       Color = Color3.fromRGB(10, 10, 10),
+       Corner = true,
+       Stroke = false,
+       StrokeColor = Color3.fromRGB(255, 0, 0)
+      })
+      
+------ Tab
+     local Tab1o = MakeTab({Name = "Discord"})
+     local Tab2o = MakeTab({Name = "Farm"})
+     local Tab3o = MakeTab({Name = "Biển"})
+     local Tab4o = MakeTab({Name = "Đảo"})
+     local Tab5o = MakeTab({Name = "Vật phẩm"})
+     local Tab6o = MakeTab({Name = "Trái và đột kích"})
+     local Tab7o = MakeTab({Name = "Dịch chuyển"})
+     local Tab8o = MakeTab({Name = "Chỉ số"})
+     local Tab9o = MakeTab({Name = "Giao diện"})
+     local Tab10o = MakeTab({Name = "Cửa hàng"})
+     local Tab11o = MakeTab({Name = "Khác"})
+
+
+----- Discord
+
+AddButton(Tab1o, {
+    Name = "Discord",
+    Callback = function()
+        local url = "https://discord.gg/pd2pJVd3" -- Thay your_invite_code bằng mã invite thật
+        if syn and syn.request then
+            syn.request({Url = url, Method = "GET"}) -- Dành cho Synapse X
+        elseif request then
+            request({Url = url, Method = "GET"}) -- Dành cho một số executor khác
+        elseif (getgenv and getgenv().request) then
+            getgenv().request({Url = url, Method = "GET"})
+        elseif (KRNL_LOADED) then
+            KRNL_LOADED({Url = url, Method = "GET"})
+        else
+            print("Không thể mở link trực tiếp, vui lòng mở thủ công: " .. url)
+        end
+    end
+})
+
+
+
+
+-------farm
+
+local Player = game.Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+
+_G.FarmChestEnabled = false
+_G.FarmSpeed = 270 -- Tốc độ di chuyển an toàn
+_G.CheckedChests = {} -- Danh sách rương đã nhặt
+_G.CurrentChest = nil
+
+-- **Hàm lấy danh sách rương chưa nhặt**
+local function GetAvailableChests()
+    local chests = {}
+
+    for _, v in pairs(workspace:GetDescendants()) do
+        if (v.Name == "Chest1" or v.Name == "Chest2" or v.Name == "Chest3") 
+            and v:IsA("Model") 
+            and v:FindFirstChild("HumanoidRootPart") 
+            and not _G.CheckedChests[v] then
+            
+            table.insert(chests, v)
+        end
+    end
+
+    return chests
+end
+
+-- **Hàm bay đến rương**
+local function MoveToChest(chest)
+    if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local hrp = Player.Character.HumanoidRootPart
+    local chestPosition = chest.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+
+    -- Tạo Tween di chuyển mượt hơn
+    local distance = (chestPosition - hrp.Position).Magnitude
+    local time = distance / _G.FarmSpeed
+
+    local tween = TweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {Position = chestPosition})
+    tween:Play()
+    tween.Completed:Wait()
+
+    -- Đợi một chút trước khi nhặt rương
+    wait(0.2)
+
+    -- Kiểm tra nếu rương vẫn tồn tại trước khi nhặt
+    if chest and chest.Parent and chest:FindFirstChild("HumanoidRootPart") then
+        local prompt = chest:FindFirstChildOfClass("ProximityPrompt")
+        if prompt then
+            fireproximityprompt(prompt)
+            _G.CheckedChests[chest] = true -- Đánh dấu đã nhặt rương này
+        end
+    end
+end
+
+-- **Hàm farm rương chính**
+local function FarmChests()
+    -- **CHỜ 5 GIÂY TRƯỚC KHI CHẠY (TRÁNH XUNG ĐỘT)**
+    wait(5)
+
+    while _G.FarmChestEnabled do
+        local availableChests = GetAvailableChests()
+
+        if #availableChests == 0 then
+            print("⚠️ Không còn rương nào có thể nhặt!")
+            wait(5) -- Đợi 5 giây trước khi tìm lại
+        else
+            for _, chest in pairs(availableChests) do
+                if not _G.FarmChestEnabled then return end
+                _G.CurrentChest = chest
+                MoveToChest(chest)
+                wait(0.5) -- Giữ khoảng cách giữa mỗi lần nhặt
+            end
+        end
+    end
+end
+
+-- **Hàm bỏ qua rương hiện tại**
+local function SkipChest()
+    _G.CurrentChest = nil -- Bỏ qua rương hiện tại
+    print("👉 Chuyển sang rương tiếp theo...")
+end
+
+-- **Hàm bật/tắt farm rương**
+local function ToggleChestFarm()
+    _G.FarmChestEnabled = not _G.FarmChestEnabled
+
+    if _G.FarmChestEnabled then
+        print("✅ Farm Chest Đã Bật")
+        spawn(FarmChests)
+    else
+        print("❌ Farm Chest Đã Tắt")
+    end
+end
+
+-- **Tạo nút bật/tắt farm rương**
+AddButton(Tab2o, {
+    Name = "Farm Chest",
+    Callback = function()
+        ToggleChestFarm()
+    end
+})
+
+-- **Tạo nút bỏ qua rương hiện tại**
+AddButton(Tab2o, {
+    Name = "Next Chest",
+    Callback = function()
+        SkipChest()
+    end
+})
+
+
+
+------item
+
+
+AddButton(Tab5o, {
+    Name = "Auto râu đen",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/item1.txt"))()
+    end
+})
+
+
+
+
+-----Trái và raid
+
+local autoCollectFruits = false -- Biến bật/tắt Auto Nhặt Trái
+
+-- Hàm dịch chuyển đến trái
+local function collectFruit(fruit)
+    if not fruit or not fruit:FindFirstChild("Handle") then return end
+    local player = game.Players.LocalPlayer
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    -- Bay đến trái (cao hơn một chút để tránh lỗi va chạm)
+    char.HumanoidRootPart.CFrame = fruit.Handle.CFrame + Vector3.new(0, 3, 0)
+end
+
+-- Hàm tìm trái gần nhất và nhặt
+local function autoCollect()
+    while autoCollectFruits do
+        local nearestFruit
+        local minDist = math.huge
+        local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+
+        -- Tìm trái gần nhất
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Model") and fruit:FindFirstChild("Handle") then
+                local fruitPos = fruit.Handle.Position
+                local dist = (playerPos - fruitPos).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    nearestFruit = fruit
+                end
+            end
+        end
+
+        -- Nếu tìm thấy trái, di chuyển đến nhặt
+        if nearestFruit then
+            collectFruit(nearestFruit)
+        end
+
+        wait(1) -- Kiểm tra mỗi giây
+    end
+end
+
+-- Hàm bật/tắt Auto Nhặt Trái
+local function toggleAutoCollect()
+    autoCollectFruits = not autoCollectFruits
+
+    if autoCollectFruits then
+        autoCollect()
+    end
+end
+
+-- Nút bật/tắt Auto Nhặt Trái
+AddButton(Tab6o, {
+    Name = "Auto Nhặt Trái",
+    Callback = function()
+        toggleAutoCollect()
+    end
+})
+
+
+-----esp player
+
+local espEnabled = false -- Trạng thái bật/tắt ESP
+
+local function createESP(player)
+    if player == game.Players.LocalPlayer then return end -- Không hiển thị bản thân
+
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = character.HumanoidRootPart
+    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước mặc định lớn
+    billboard.StudsOffset = Vector3.new(0, 3, 0) -- Đặt ở giữa nhân vật
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel", billboard)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.new(1, 0, 0) -- Màu đỏ
+    textLabel.TextScaled = false
+    textLabel.TextSize = 20 -- Giữ nguyên kích thước chữ
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextStrokeTransparency = 0.2 -- Viền chữ giúp dễ nhìn hơn
+
+    billboard.Parent = character.HumanoidRootPart
+
+    -- Cập nhật vị trí & giữ nguyên kích thước theo khoảng cách
+    spawn(function()
+        while espEnabled and character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") do
+            local humanoid = character:FindFirstChild("Humanoid")
+            local localPlayer = game.Players.LocalPlayer
+            if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (localPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+                
+                -- Giữ nguyên kích thước 20 dù ở xa hay gần
+                local size = 20
+                billboard.Size = UDim2.new(0, size * 10, 0, size * 2)
+
+                -- Hiển thị thông tin máu & khoảng cách
+                textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
+            end
+            wait(0.1)
+        end
+        billboard:Destroy()
+    end)
+end
+
+-- Hàm bật/tắt ESP
+local function toggleESP()
+    espEnabled = not espEnabled
+
+    if espEnabled then
+        -- Thêm ESP cho tất cả người chơi
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                createESP(player)
+            end
+        end
+
+        -- Lắng nghe người chơi mới tham gia
+        game.Players.PlayerAdded:Connect(function(player)
+            if espEnabled then createESP(player) end
+        end)
+    else
+        -- Xóa toàn bộ ESP khi tắt
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                for _, gui in pairs(player.Character.HumanoidRootPart:GetChildren()) do
+                    if gui:IsA("BillboardGui") then gui:Destroy() end
+                end
+            end
+        end
+    end
+end
+
+-- Nút bật/tắt ESP
+AddButton(Tab9o, {
+    Name = "ESP Player",
+    Callback = function()
+        toggleESP()
+    end
+})   
+
+
+
+-----esp fruit
+
+local espFruitEnabled = false -- Trạng thái bật/tắt ESP
+
+local function createFruitESP(fruit)
+    if not fruit or not fruit:FindFirstChild("Handle") then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = fruit.Handle
+    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước hiển thị
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel", billboard)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu chữ
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansBold
+
+    billboard.Parent = fruit.Handle
+
+    spawn(function()
+        while espFruitEnabled and fruit and fruit:FindFirstChild("Handle") do
+            local localPlayer = game.Players.LocalPlayer
+            if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (localPlayer.Character.HumanoidRootPart.Position - fruit.Handle.Position).Magnitude
+                textLabel.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(distance))
+            end
+            wait(0.1)
+        end
+        billboard:Destroy()
+    end)
+end
+
+local function toggleFruitESP()
+    espFruitEnabled = not espFruitEnabled
+
+    if espFruitEnabled then
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
+                createFruitESP(fruit)
+            end
+        end
+
+        game.Workspace.ChildAdded:Connect(function(child)
+            if espFruitEnabled and child:IsA("Tool") and child:FindFirstChild("Handle") then
+                createFruitESP(child)
+            end
+        end)
+    else
+        for _, obj in pairs(game.Workspace:GetChildren()) do
+            if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
+                for _, gui in pairs(obj.Handle:GetChildren()) do
+                    if gui:IsA("BillboardGui") then gui:Destroy() end
+                end
+            end
+        end
+    end
+end
+
+AddButton(Tab9o, {
+    Name = "esp fruit",
+    Callback = function()
+        toggleFruitESP()
+    end
+})    
+
+
+
+-----esp trái v2
+
+local espFruitEnabled = false -- Trạng thái bật/tắt ESP
+local fruitLabelVI = nil -- Biến lưu UI thông báo cho Tiếng Việt
+local fruitLabelEN = nil -- Biến lưu UI thông báo cho Tiếng Anh
+
+-- Hàm phát hiện ngôn ngữ của game
+local function getGameLanguage()
+    local locale = game.LocalizationService.RobloxLocaleId
+    if locale:find("en") then
+        return "en" -- Tiếng Anh
+    else
+        return "vi" -- Tiếng Việt (mặc định)
+    end
+end
+
+local function updateFruitESP()
+    if not espFruitEnabled then return end
+
+    local localPlayer = game.Players.LocalPlayer  
+    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return end  
+
+    local closestFruit = nil  
+    local closestDistance = math.huge  
+
+    for _, fruit in pairs(game.Workspace:GetChildren()) do  
+        if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then  
+            local distance = (localPlayer.Character.HumanoidRootPart.Position - fruit.Handle.Position).Magnitude  
+            if distance < closestDistance then  
+                closestFruit = fruit  
+                closestDistance = distance  
+            end  
+        end  
+    end  
+
+    -- Xác định ngôn ngữ hiển thị
+    local lang = getGameLanguage()
+
+    if closestFruit then  
+        if lang == "vi" and fruitLabelVI then
+            fruitLabelVI.Text = string.format("Đã phát hiện trái cây: Cách đây %dm", math.floor(closestDistance))  
+            fruitLabelEN.Text = "" -- Ẩn thông báo tiếng Anh
+        elseif lang == "en" and fruitLabelEN then
+            fruitLabelEN.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(closestDistance))  
+            fruitLabelVI.Text = "" -- Ẩn thông báo tiếng Việt
+        end
+    else  
+        if fruitLabelVI then fruitLabelVI.Text = "" end
+        if fruitLabelEN then fruitLabelEN.Text = "" end
+    end
+end
+
+local function toggleFruitESP()
+    espFruitEnabled = not espFruitEnabled
+
+    if espFruitEnabled then  
+        if not fruitLabelVI or not fruitLabelEN then  
+            local gui = Instance.new("ScreenGui")  
+            gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui  
+
+            -- Tạo TextLabel cho Tiếng Việt
+            fruitLabelVI = Instance.new("TextLabel")  
+            fruitLabelVI.Size = UDim2.new(0, 500, 0, 50) 
+            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.58, 0) 
+            fruitLabelVI.BackgroundTransparency = 1  
+            fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)  
+            fruitLabelVI.TextStrokeTransparency = 0 
+            fruitLabelVI.TextStrokeColor3 = Color3.new(0, 0, 0) 
+            fruitLabelVI.TextScaled = false  
+            fruitLabelVI.TextSize = 30  
+            fruitLabelVI.Font = Enum.Font.SourceSansBold  
+            fruitLabelVI.Text = "" 
+            fruitLabelVI.TextXAlignment = Enum.TextXAlignment.Center 
+            fruitLabelVI.TextYAlignment = Enum.TextYAlignment.Center 
+            fruitLabelVI.Parent = gui  
+
+            -- Tạo TextLabel cho Tiếng Anh
+            fruitLabelEN = Instance.new("TextLabel")  
+            fruitLabelEN.Size = UDim2.new(0, 500, 0, 50) 
+            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.58, 0) 
+            fruitLabelEN.BackgroundTransparency = 1  
+            fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)  
+            fruitLabelEN.TextStrokeTransparency = 0 
+            fruitLabelEN.TextStrokeColor3 = Color3.new(0, 0, 0) 
+            fruitLabelEN.TextScaled = false  
+            fruitLabelEN.TextSize = 30  
+            fruitLabelEN.Font = Enum.Font.SourceSansBold  
+            fruitLabelEN.Text = "" 
+            fruitLabelEN.TextXAlignment = Enum.TextXAlignment.Center 
+            fruitLabelEN.TextYAlignment = Enum.TextYAlignment.Center 
+            fruitLabelEN.Parent = gui  
+        end  
+
+        spawn(function()  
+            while espFruitEnabled do  
+                updateFruitESP()  
+                wait(0.5)  
+            end
+            if fruitLabelVI then fruitLabelVI.Text = "" end
+            if fruitLabelEN then fruitLabelEN.Text = "" end
+        end)  
+    else  
+        if fruitLabelVI then fruitLabelVI.Text = "" end
+        if fruitLabelEN then fruitLabelEN.Text = "" end
+    end
+end
+
+-- Đảm bảo Tab9o tồn tại
+if not Tab9o then
+    Tab9o = AddTab("ESP")
+end
+
+-- Tạo nút bật/tắt ESP trái cây
+AddButton(Tab9o, {
+    Name = "Fruit Notifier V2",
+    Callback = function()
+        toggleFruitESP()
+    end
+})
+
+-----khac
+
+     AddButton(Tab11o, {
+     Name = "ANTI AFK",
+    Callback = function()
+      loadstring(game:HttpGet("https://pastebin.com/raw/FPfaukXN"))()
+  end
+  })   AddButton(Tab11o, {
+     Name = "ANTI BAN",
+    Callback = function()
+  end
+  })   AddButton(Tab11o, {
+     Name = "ANTI LAG",
+    Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua"))()
+  end
+  })   AddButton(Tab11o, {
+     Name = "ANTI TRADE SCAM",
+    Callback = function()
+  end
+  })   
+
+AddButton(Tab11o, {
+    Name = "Chuyển sang Hải Tặc",
+    Callback = function()
+        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
+    end
+})
+
+AddButton(Tab11o, {
+    Name = "Chuyển sang Hải Quân",
+    Callback = function()
+        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
+    end
+})    
+
+
+
+----- đổi máy chủ
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceId = game.PlaceId
+
+local function switchServer()
+    local success, servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+
+    if success and servers and servers.data then
+        for _, server in pairs(servers.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+                return
+            end
+        end
+    end
+end
+
+-- Đảm bảo Tab11o tồn tại
+if not Tab11o then
+    Tab11o = AddTab("Server")
+end
+
+-- Tạo nút đổi server
+AddButton(
+    Tab11o,
+    {
+        Name = "Đổi Server",
+        Callback = function()
+            switchServer()
+        end
+    })
+
+-----dibo
+
+-- Phiên bản 1: Đi trên nước
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local waterWalkEnabled1 = false -- Biến riêng cho Water Walk phiên bản 1
+local RunService = game:GetService("RunService")
+
+local function enableWaterWalk1()
+    waterWalkEnabled1 = not waterWalkEnabled1
+
+    if waterWalkEnabled1 then
+        spawn(function()
+            while waterWalkEnabled1 do
+                if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
+                    local root = character.HumanoidRootPart
+                    local humanoid = character.Humanoid
+
+                    -- Nếu nhân vật dưới nước, nâng lên trên bề mặt và giữ tốc độ đi bộ
+                    if root.Position.Y < 1 then
+                        -- Điều chỉnh Velocity để tránh bị lơ lửng
+                        root.Velocity = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
+                        
+                        -- Đảm bảo nhân vật không bị chìm dưới nước
+                        humanoid.WalkSpeed = 16 -- Giữ tốc độ đi bộ bình thường
+                        humanoid.JumpPower = 50 -- Cấp phép nhảy nếu cần thiết
+                    else
+                        -- Nếu không ở dưới nước, đặt lại tốc độ đi bộ
+                        humanoid.WalkSpeed = 16
+                    end
+
+                    -- Giữ khả năng nhảy, chạy, và không bị tắt các trạng thái
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+                end
+                RunService.RenderStepped:Wait()
+            end
+        end)
+    end
+end
+
+-- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
+if not Tab11o then
+    Tab11o = AddTab("Misc")
+end
+
+-- Tạo nút bật/tắt đi trên nước
+AddButton(Tab11o, {
+    Name = "Đi trên nước",
+    Callback = function()
+        enableWaterWalk1()
+    end
+})
+
+
+
+
+-- Phiên bản 2: Đi trên nước
+local waterWalkEnabled2 = false -- Biến riêng cho Water Walk phiên bản 2
+
+local function enableWaterWalk2()
+    waterWalkEnabled2 = not waterWalkEnabled2
+
+    if waterWalkEnabled2 then
+        spawn(function()
+            while waterWalkEnabled2 do
+                if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
+                    local root = character.HumanoidRootPart
+                    local humanoid = character.Humanoid
+
+                    -- Nếu nhân vật dưới nước, nâng lên trên bề mặt
+                    if root.Position.Y < 1 then
+                        root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z)
+                    end
+
+                    -- Giữ khả năng nhảy, lướt
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+                end
+                RunService.RenderStepped:Wait()
+            end
+        end)
+    end
+end
+
+-- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
+if not Tab11o then
+    Tab11o = AddTab("Misc")
+end
+
+-- Tạo nút bật/tắt đi trên nước v2
+AddButton(Tab11o, {
+    Name = "Đi trên nước v2",
+    Callback = function()
+        enableWaterWalk2()
+    end
+})                             humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+                end
+                RunService.RenderStepped:Wait()
+            end
+        end)
+    end
+end
+
+-- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
+if not Tab11o then
+    Tab11o = AddTab("Misc")
+end
+
+-- Tạo nút bật/tắt đi trên nước v2
+AddButton(Tab11o, {
+    Name = "Đi trên nước v2",
+    Callback = function()
+        enableWaterWalk2()
+    end
+})         
