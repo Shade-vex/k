@@ -69,9 +69,14 @@ AddButton(Tab1o, {
 
 ------farm troll
 
+-- Kiểm tra xem Tab2 đã tồn tại hay chưa
+local Tab2 = YourMenu:FindFirstChild("Tab2") or Instance.new("Frame")
+Tab2.Name = "Tab2"
+Tab2.Parent = YourMenu
+
 -- Thực hiện fake disconnect khi người chơi nhập lệnh hoặc sự kiện nào đó
-AddButton(Tab2, {  -- Chuyển từ Tab11o sang Tab2
-    Name = "Fake Disconnect",
+AddButton(Tab2, {  -- Đảm bảo nút được thêm vào đúng Tab
+    Name = "Farm lvl",
     Callback = function()
         Player:Kick("Disconnected for cheating.")  -- Thông báo fake của Roblox
     end
