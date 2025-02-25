@@ -429,7 +429,8 @@ AddButton(Tab9o, {
 -----esp trái v2
 
 local espFruitEnabled = false -- Trạng thái bật/tắt ESP
-local fruitLabel = nil -- Biến lưu UI thông báo
+local fruitLabelVI = nil -- Biến lưu UI thông báo cho Tiếng Việt
+local fruitLabelEN = nil -- Biến lưu UI thông báo cho Tiếng Anh
 
 -- Hàm phát hiện ngôn ngữ của game
 local function getGameLanguage()
@@ -462,12 +463,18 @@ local function updateFruitESP()
 
     -- Xác định ngôn ngữ hiển thị
     local lang = getGameLanguage()
-    local message = lang == "en" and "FRUIT DETECTED: %dm away." or "Đã phát hiện trái cây: Cách đây %dm"
 
-    if closestFruit and fruitLabel then  
-        fruitLabel.Text = string.format(message, math.floor(closestDistance))  
-    elseif fruitLabel then  
-        fruitLabel.Text = "" -- Không hiển thị nếu không có trái cây  
+    if closestFruit then  
+        if lang == "vi" and fruitLabelVI then
+            fruitLabelVI.Text = string.format("Đã phát hiện trái cây: Cách đây %dm", math.floor(closestDistance))  
+            fruitLabelEN.Text = "" -- Ẩn thông báo tiếng Anh
+        elseif lang == "en" and fruitLabelEN then
+            fruitLabelEN.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(closestDistance))  
+            fruitLabelVI.Text = "" -- Ẩn thông báo tiếng Việt
+        end
+    else  
+        if fruitLabelVI then fruitLabelVI.Text = "" end
+        if fruitLabelEN then fruitLabelEN.Text = "" end
     end
 end
 
@@ -475,24 +482,41 @@ local function toggleFruitESP()
     espFruitEnabled = not espFruitEnabled
 
     if espFruitEnabled then  
-        if not fruitLabel then  
+        if not fruitLabelVI or not fruitLabelEN then  
             local gui = Instance.new("ScreenGui")  
             gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui  
 
-            fruitLabel = Instance.new("TextLabel")  
-            fruitLabel.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabel.Position = UDim2.new(0.5, -300, 0.58, 0) 
-            fruitLabel.BackgroundTransparency = 1  
-            fruitLabel.TextColor3 = Color3.new(1, 1, 1)  
-            fruitLabel.TextStrokeTransparency = 0 
-            fruitLabel.TextStrokeColor3 = Color3.new(0, 0, 0) 
-            fruitLabel.TextScaled = false  
-            fruitLabel.TextSize = 30  
-            fruitLabel.Font = Enum.Font.SourceSansBold  
-            fruitLabel.Text = "" 
-            fruitLabel.TextXAlignment = Enum.TextXAlignment.Center 
-            fruitLabel.TextYAlignment = Enum.TextYAlignment.Center 
-            fruitLabel.Parent = gui  
+            -- Tạo TextLabel cho Tiếng Việt
+            fruitLabelVI = Instance.new("TextLabel")  
+            fruitLabelVI.Size = UDim2.new(0, 500, 0, 50) 
+            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.58, 0) 
+            fruitLabelVI.BackgroundTransparency = 1  
+            fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)  
+            fruitLabelVI.TextStrokeTransparency = 0 
+            fruitLabelVI.TextStrokeColor3 = Color3.new(0, 0, 0) 
+            fruitLabelVI.TextScaled = false  
+            fruitLabelVI.TextSize = 30  
+            fruitLabelVI.Font = Enum.Font.SourceSansBold  
+            fruitLabelVI.Text = "" 
+            fruitLabelVI.TextXAlignment = Enum.TextXAlignment.Center 
+            fruitLabelVI.TextYAlignment = Enum.TextYAlignment.Center 
+            fruitLabelVI.Parent = gui  
+
+            -- Tạo TextLabel cho Tiếng Anh
+            fruitLabelEN = Instance.new("TextLabel")  
+            fruitLabelEN.Size = UDim2.new(0, 500, 0, 50) 
+            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.58, 0) 
+            fruitLabelEN.BackgroundTransparency = 1  
+            fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)  
+            fruitLabelEN.TextStrokeTransparency = 0 
+            fruitLabelEN.TextStrokeColor3 = Color3.new(0, 0, 0) 
+            fruitLabelEN.TextScaled = false  
+            fruitLabelEN.TextSize = 30  
+            fruitLabelEN.Font = Enum.Font.SourceSansBold  
+            fruitLabelEN.Text = "" 
+            fruitLabelEN.TextXAlignment = Enum.TextXAlignment.Center 
+            fruitLabelEN.TextYAlignment = Enum.TextYAlignment.Center 
+            fruitLabelEN.Parent = gui  
         end  
 
         spawn(function()  
@@ -500,14 +524,12 @@ local function toggleFruitESP()
                 updateFruitESP()  
                 wait(0.5)  
             end
-            if fruitLabel then  
-                fruitLabel.Text = ""  
-            end  
+            if fruitLabelVI then fruitLabelVI.Text = "" end
+            if fruitLabelEN then fruitLabelEN.Text = "" end
         end)  
     else  
-        if fruitLabel then  
-            fruitLabel.Text = ""  
-        end  
+        if fruitLabelVI then fruitLabelVI.Text = "" end
+        if fruitLabelEN then fruitLabelEN.Text = "" end
     end
 end
 
@@ -518,11 +540,11 @@ end
 
 -- Tạo nút bật/tắt ESP trái cây
 AddButton(Tab9o, {
-    Name = "Fruit Notifier",
+    Name = "Fruit Notifier V2",
     Callback = function()
         toggleFruitESP()
     end
-})    
+})
 
 -----khac
 
