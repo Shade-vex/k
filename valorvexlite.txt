@@ -732,7 +732,7 @@ local workspace = game:GetService("Workspace")
 -- Bán kính để kiểm tra các thực thể
 local radius = 5000000
 local auraActive = false
-local damage = 1000000000 -- Số lượng sát thương sẽ được gây ra mỗi giây
+local damage = 100000000000 -- Số lượng sát thương sẽ được gây ra mỗi giây
 
 -- Hàm để giảm HP của các thực thể có Humanoid trong bán kính
 local function applyKillAura()
