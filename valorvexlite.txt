@@ -744,9 +744,19 @@ local function setDragonV4Pose()
     -- Đặt lại trạng thái ngồi nếu có
     Humanoid.Sit = false
 
-    -- Tạo dáng đứng với tư thế đặc trưng tộc rồng V4
+    -- Dùng tween để di chuyển mượt mà
+    local TweenService = game:GetService("TweenService")
+
     -- Di chuyển thân nhân vật và các bộ phận để tạo dáng đứng mạnh mẽ
-    HumanoidRootPart.CFrame = CFrame.new(0, 0, 0) -- Đặt vị trí gốc
+    local goal = {CFrame = HumanoidRootPart.CFrame * CFrame.new(0, 0, 0)}
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+
+    -- Tạo tween cho các bộ phận
+    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, goal)
+    tween:Play()
+    tween.Completed:Wait()
+
+    -- Cấu hình dáng đứng đặc trưng
     Torso.CFrame = Torso.CFrame * CFrame.Angles(math.rad(-30), 0, 0) -- Cúi nhẹ thân trên
     LeftLeg.CFrame = LeftLeg.CFrame * CFrame.Angles(math.rad(40), 0, math.rad(20)) -- Chỉnh chân trái
     RightLeg.CFrame = RightLeg.CFrame * CFrame.Angles(math.rad(40), 0, math.rad(-20)) -- Chỉnh chân phải
