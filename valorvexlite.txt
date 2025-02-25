@@ -730,29 +730,30 @@ local Character = Player.Character or Player.CharacterAdded:Wait()
 local workspace = game:GetService("Workspace")
 
 -- Bán kính để kiểm tra các thực thể
-local radius = 10000
+local radius = 500000
 local auraActive = false
 
 -- Hàm để giảm HP của các thực thể có Humanoid trong bán kính
 local function applyKillAura()
     while auraActive do
-        -- Tìm các đối tượng xung quanh Player trong bán kính 10000m
+        -- Tìm các đối tượng xung quanh Player trong bán kính 500000m
         local charactersInRange = {}
         for _, object in pairs(workspace:GetChildren()) do
             if object:IsA("Model") and object:FindFirstChild("Humanoid") then
                 local humanoid = object:FindFirstChild("Humanoid")
                 local distance = (object.PrimaryPart.Position - Character.PrimaryPart.Position).Magnitude
-                if distance <= radius and humanoid.Health > 0 then
+                if distance <= radius and humanoid.Health > 0 and object ~= Character then
                     table.insert(charactersInRange, object)
                 end
             end
         end
         
-        -- Duyệt qua các đối tượng và giảm HP
+        -- Duyệt qua các đối tượng và giảm HP (đảm bảo chúng chết)
         for _, entity in pairs(charactersInRange) do
             local humanoid = entity:FindFirstChild("Humanoid")
             if humanoid and humanoid.Health > 0 then
-                humanoid:TakeDamage(99) -- Trừ 99 HP mỗi giây
+                -- Áp dụng sát thương lớn đủ để giết các mục tiêu
+                humanoid.Health = 0 -- Đảm bảo mục tiêu chết
             end
         end
         
@@ -773,8 +774,8 @@ end
 
 -- Thêm nút bật/tắt Kill Aura vào Tab11o
 AddButton(Tab11o, {
-    Name = "Haki bá vương",
+    Name = "Toggle Kill Aura",
     Callback = function()
         toggleKillAura()
     end
-})           
+})
