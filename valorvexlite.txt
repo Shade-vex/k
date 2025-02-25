@@ -723,70 +723,94 @@ AddButton(Tab11o, {
 
 
 
+-----aura
 
------- đánh
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local AttackRemote = ReplicatedStorage.Remotes:FindFirstChild("CommF_") -- Remote tấn công
-local AttackEnabled = false
 
--- **Tìm tất cả entity có máu trong 30m**
-local function getTargets()
-    local targets = {}
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
-            local distance = (HumanoidRootPart.Position - obj.HumanoidRootPart.Position).Magnitude
-            if distance <= 30 then
-                table.insert(targets, obj)
-            end
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local auraEnabled = false -- Trạng thái bật/tắt
+local auraParts = {} -- Lưu các phần tử của aura
+
+-- Hàm tạo ParticleEmitter
+local function createParticle(parent, texture, color, size, speed, lifetime, rate)
+    local particle = Instance.new("ParticleEmitter")
+    particle.Parent = parent
+    particle.Texture = texture
+    particle.Color = ColorSequence.new(color)
+    particle.Size = NumberSequence.new(size)
+    particle.Speed = NumberRange.new(speed)
+    particle.Lifetime = NumberRange.new(lifetime)
+    particle.Rate = rate
+    particle.LightEmission = 0.7
+    return particle
+end
+
+-- Hàm tạo hiệu ứng Aura
+local function enableAura()
+    if auraEnabled then return end
+    auraEnabled = true
+
+    -- Tạo aura màu đen
+    local blackAura = createParticle(humanoidRootPart, "rbxassetid://241594314", Color3.new(0, 0, 0), 2, 5, 1.5, 30)
+    blackAura.Rotation = NumberRange.new(-180, 180)
+    blackAura.VelocitySpread = 50
+    blackAura.Acceleration = Vector3.new(0, 1, 0)
+    table.insert(auraParts, blackAura)
+
+    -- Vòng lặp tạo tia chớp đỏ
+    spawn(function()
+        while auraEnabled do
+            local lightning = Instance.new("Part")
+            lightning.Size = Vector3.new(0.2, 5, 0.2)
+            lightning.Color = Color3.new(1, 0, 0)
+            lightning.Material = Enum.Material.Neon
+            lightning.Anchored = true
+            lightning.CanCollide = false
+            lightning.Parent = workspace
+
+            -- Random vị trí xung quanh nhân vật
+            local randomOffset = Vector3.new(math.random(-5, 5), math.random(3, 6), math.random(-5, 5))
+            lightning.Position = humanoidRootPart.Position + randomOffset
+
+            -- Hiệu ứng biến mất
+            game:GetService("TweenService"):Create(
+                lightning, TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+                {Transparency = 1}
+            ):Play()
+
+            -- Xóa sau 0.3 giây
+            game:GetService("Debris"):AddItem(lightning, 0.3)
+
+            wait(0.5)
         end
+    end)
+end
+
+-- Hàm tắt hiệu ứng Aura
+local function disableAura()
+    auraEnabled = false
+    for _, obj in ipairs(auraParts) do
+        obj:Destroy()
     end
-    return targets
+    auraParts = {}
 end
 
--- **Kích hoạt tấn công hợp pháp**
-local function attackTarget(target)
-    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
-    if not AttackRemote then return end
-
-    -- Đưa nhân vật lại gần target để đảm bảo hitbox hợp lệ
-    HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame * CFrame.new(0, 0, -2)
-
-    -- Gửi lệnh tấn công hợp lệ đến server
-    AttackRemote:InvokeServer("Hit", target.HumanoidRootPart)
-
-    -- Hiển thị số sát thương lên target
-    game:GetService("ReplicatedStorage").Remotes.Damage:FireServer(target.Humanoid, math.random(1000, 5000))
-end
-
--- **Tăng tốc đánh bằng cách gửi lệnh liên tục**
-local function autoAttack()
-    while AttackEnabled do
-        local targets = getTargets()
-        for _, target in pairs(targets) do
-            attackTarget(target)
-        end
-        wait(0.1) -- Tốc độ đánh nhanh nhưng vẫn hợp lệ
+-- Hàm bật/tắt Aura
+local function toggleAura()
+    if auraEnabled then
+        disableAura()
+    else
+        enableAura()
     end
 end
 
--- **Bật/tắt Auto Attack**
-local function toggleAutoAttack()
-    AttackEnabled = not AttackEnabled
-    if AttackEnabled then
-        spawn(autoAttack)
-    end
-end
-
--- **Tạo nút bật/tắt Auto Attack**
+-- **Thêm nút vào menu**
 AddButton(Tab11o, {
-    Name = "Auto Attack",
+    Name = "Black Aura",
     Callback = function()
-        toggleAutoAttack()
+        toggleAura()
     end
 })
