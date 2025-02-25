@@ -122,7 +122,7 @@ function Tween(Part)
         _G.Tween:Cancel()
     end
     local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
-    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new(Part.Position.magnitude / 285, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
+    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new(Part.Position.magnitude / 500, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
     _G.Tween:Play()
     local flying = true
     while game:GetService("RunService").Stepped:Wait() and flying and _G.Play do
@@ -492,7 +492,7 @@ local function toggleFruitESP()
             -- Tạo TextLabel cho Tiếng Việt
             fruitLabelVI = Instance.new("TextLabel")  
             fruitLabelVI.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.50, 0) 
+            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.56, 0) 
             fruitLabelVI.BackgroundTransparency = 1  
             fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)  
             fruitLabelVI.TextStrokeTransparency = 0 
@@ -508,7 +508,7 @@ local function toggleFruitESP()
             -- Tạo TextLabel cho Tiếng Anh
             fruitLabelEN = Instance.new("TextLabel")  
             fruitLabelEN.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.50, 0) 
+            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.56, 0) 
             fruitLabelEN.BackgroundTransparency = 1  
             fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)  
             fruitLabelEN.TextStrokeTransparency = 0 
@@ -718,5 +718,73 @@ AddButton(Tab11o, {
     Name = "Đi trên nước v2",
     Callback = function()
         enableWaterWalk2()
+    end
+})
+
+
+
+
+------ đánh
+
+
+local attackEnabled = false
+local attackRange = 30 -- Phạm vi tấn công (30m)
+local attackSpeed = 0.1 -- Tốc độ tấn công (giữ mức hợp lý)
+
+local function isValidTarget(target)
+    return target and target:FindFirstChild("Humanoid") and target:FindFirstChild("Humanoid").Health > 0
+end
+
+local function attackNearestTarget()
+    local player = game.Players.LocalPlayer
+    if not player or not player.Character then return end
+
+    local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+    local tool = player.Character:FindFirstChildOfClass("Tool") -- Kiểm tra nếu cầm vũ khí
+    if not rootPart or not tool then return end
+
+    local closestTarget = nil
+    local closestDistance = attackRange
+
+    for _, obj in pairs(game.Workspace:GetChildren()) do
+        if obj:IsA("Model") and isValidTarget(obj) then
+            local targetRoot = obj:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                local distance = (rootPart.Position - targetRoot.Position).Magnitude
+                if distance < closestDistance then
+                    closestTarget = obj
+                    closestDistance = distance
+                end
+            end
+        end
+    end
+
+    if closestTarget then
+        tool:Activate() -- Gây sát thương tự động
+    end
+end
+
+local function toggleAutoAttack()
+    attackEnabled = not attackEnabled
+
+    if attackEnabled then
+        spawn(function()
+            while attackEnabled do
+                attackNearestTarget()
+                wait(attackSpeed) -- Điều chỉnh tốc độ đánh
+            end
+        end)
+    end
+end
+
+-- Tạo nút bật/tắt Auto Attack
+if not Tab11o then
+    Tab11o = AddTab("Combat")
+end
+
+AddButton(Tab11o, {
+    Name = "Auto Attack ",
+    Callback = function()
+        toggleAutoAttack()
     end
 })
