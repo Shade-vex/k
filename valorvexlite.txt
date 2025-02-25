@@ -734,31 +734,31 @@ local isDragonPoseActive = false -- Biến để theo dõi trạng thái tư th�
 local function setDragonV4Pose()
     -- Đợi đến khi các bộ phận cơ thể nhân vật đã sẵn sàng
     local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-    local Torso = Character:WaitForChild("UpperTorso") -- Hoặc LowerTorso tùy vào từng phần
+    local Torso = Character:WaitForChild("UpperTorso")
     local LeftLeg = Character:WaitForChild("LeftUpperLeg")
     local RightLeg = Character:WaitForChild("RightUpperLeg")
     local LeftArm = Character:WaitForChild("LeftUpperArm")
     local RightArm = Character:WaitForChild("RightUpperArm")
-    
-    -- Tạo một dáng đứng với tư thế đặc trưng
-    -- Di chuyển thân nhân vật và các bộ phận
+
+    -- Tạo dáng đứng với tư thế đặc trưng tộc rồng V4
+    -- Di chuyển thân nhân vật và các bộ phận để tạo dáng đứng mạnh mẽ
     HumanoidRootPart.CFrame = CFrame.new(0, 0, 0) -- Đặt vị trí gốc
-    Torso.CFrame = Torso.CFrame * CFrame.Angles(math.rad(-10), 0, 0) -- Cúi nhẹ thân trên
-    LeftLeg.CFrame = LeftLeg.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(10)) -- Chỉnh chân trái
-    RightLeg.CFrame = RightLeg.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(-10)) -- Chỉnh chân phải
-    LeftArm.CFrame = LeftArm.CFrame * CFrame.Angles(math.rad(20), 0, math.rad(10)) -- Chỉnh tay trái
-    RightArm.CFrame = RightArm.CFrame * CFrame.Angles(math.rad(20), 0, math.rad(-10)) -- Chỉnh tay phải
+    Torso.CFrame = Torso.CFrame * CFrame.Angles(math.rad(-30), 0, 0) -- Cúi nhẹ thân trên
+    LeftLeg.CFrame = LeftLeg.CFrame * CFrame.Angles(math.rad(40), 0, math.rad(20)) -- Chỉnh chân trái
+    RightLeg.CFrame = RightLeg.CFrame * CFrame.Angles(math.rad(40), 0, math.rad(-20)) -- Chỉnh chân phải
+    LeftArm.CFrame = LeftArm.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(30)) -- Chỉnh tay trái
+    RightArm.CFrame = RightArm.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(-30)) -- Chỉnh tay phải
 end
 
 -- Hàm để tắt dáng đứng tộc rồng V4 (quay lại tư thế ban đầu)
 local function resetPose()
     local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-    local Torso = Character:WaitForChild("UpperTorso") -- Hoặc LowerTorso tùy vào từng phần
+    local Torso = Character:WaitForChild("UpperTorso")
     local LeftLeg = Character:WaitForChild("LeftUpperLeg")
     local RightLeg = Character:WaitForChild("RightUpperLeg")
     local LeftArm = Character:WaitForChild("LeftUpperArm")
     local RightArm = Character:WaitForChild("RightUpperArm")
-    
+
     -- Đặt lại các bộ phận về vị trí ban đầu (tư thế đứng tự nhiên)
     HumanoidRootPart.CFrame = CFrame.new(0, 0, 0) -- Đặt vị trí gốc lại
     Torso.CFrame = Torso.CFrame * CFrame.Angles(0, 0, 0) -- Đặt lại thân
@@ -784,4 +784,4 @@ AddButton(Tab11o, {
     Callback = function()
         toggleDragonPose() -- Khi nhấn nút, gọi hàm toggle
     end
-})  
+})   
