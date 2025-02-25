@@ -723,112 +723,65 @@ AddButton(Tab11o, {
 
 
 
------aura
+-----v4fake
 
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local isDragonPoseActive = false -- Biến để theo dõi trạng thái tư thế
 
-local auraEnabled = false -- Trạng thái bật/tắt
-local auraObjects = {} -- Lưu các phần tử của aura
-
--- Hàm tạo ParticleEmitter
-local function createParticle(parent, texture, color, size, speed, lifetime, rate, transparency)
-    local particle = Instance.new("ParticleEmitter")
-    particle.Parent = parent
-    particle.Texture = texture
-    particle.Color = ColorSequence.new(color)
-    particle.Size = NumberSequence.new(size)
-    particle.Speed = NumberRange.new(speed)
-    particle.Lifetime = NumberRange.new(lifetime)
-    particle.Rate = rate
-    particle.LightEmission = 0.5
-    particle.Transparency = NumberSequence.new(transparency)
-    return particle
+-- Hàm để tạo dáng đứng tộc rồng V4
+local function setDragonV4Pose()
+    -- Đợi đến khi các bộ phận cơ thể nhân vật đã sẵn sàng
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    local Torso = Character:WaitForChild("UpperTorso") -- Hoặc LowerTorso tùy vào từng phần
+    local LeftLeg = Character:WaitForChild("LeftUpperLeg")
+    local RightLeg = Character:WaitForChild("RightUpperLeg")
+    local LeftArm = Character:WaitForChild("LeftUpperArm")
+    local RightArm = Character:WaitForChild("RightUpperArm")
+    
+    -- Tạo một dáng đứng với tư thế đặc trưng
+    -- Di chuyển thân nhân vật và các bộ phận
+    HumanoidRootPart.CFrame = CFrame.new(0, 0, 0) -- Đặt vị trí gốc
+    Torso.CFrame = Torso.CFrame * CFrame.Angles(math.rad(-10), 0, 0) -- Cúi nhẹ thân trên
+    LeftLeg.CFrame = LeftLeg.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(10)) -- Chỉnh chân trái
+    RightLeg.CFrame = RightLeg.CFrame * CFrame.Angles(math.rad(30), 0, math.rad(-10)) -- Chỉnh chân phải
+    LeftArm.CFrame = LeftArm.CFrame * CFrame.Angles(math.rad(20), 0, math.rad(10)) -- Chỉnh tay trái
+    RightArm.CFrame = RightArm.CFrame * CFrame.Angles(math.rad(20), 0, math.rad(-10)) -- Chỉnh tay phải
 end
 
--- Hàm tạo hiệu ứng Aura
-local function enableAura()
-    if auraEnabled then return end
-    auraEnabled = true
-
-    -- Tạo hiệu ứng khói đen xoáy quanh người
-    local blackSmoke = createParticle(humanoidRootPart, "rbxassetid://264248243", Color3.new(0, 0, 0), 3, 1, 2, 50, 0.2)
-    blackSmoke.VelocitySpread = 100
-    blackSmoke.Rotation = NumberRange.new(-180, 180)
-    blackSmoke.Acceleration = Vector3.new(0, 1, 0)
-    table.insert(auraObjects, blackSmoke)
-
-    -- Tạo vòng sáng đen dưới chân
-    local ring = Instance.new("Part")
-    ring.Size = Vector3.new(6, 0.2, 6)
-    ring.Material = Enum.Material.Neon
-    ring.Color = Color3.new(0, 0, 0)
-    ring.Anchored = true
-    ring.CanCollide = false
-    ring.Parent = workspace
-    table.insert(auraObjects, ring)
-
-    -- Cập nhật vị trí vòng sáng liên tục
-    spawn(function()
-        while auraEnabled do
-            ring.Position = humanoidRootPart.Position - Vector3.new(0, 3, 0)
-            wait()
-        end
-    end)
-
-    -- Vòng lặp tạo tia chớp đỏ
-    spawn(function()
-        while auraEnabled do
-            local lightning = Instance.new("Part")
-            lightning.Size = Vector3.new(math.random(0.2, 0.5), math.random(3, 6), math.random(0.2, 0.5))
-            lightning.Material = Enum.Material.Neon
-            lightning.Color = Color3.new(1, 0, 0)
-            lightning.Anchored = true
-            lightning.CanCollide = false
-            lightning.Parent = workspace
-
-            -- Random vị trí xung quanh nhân vật
-            local randomOffset = Vector3.new(math.random(-5, 5), math.random(3, 6), math.random(-5, 5))
-            lightning.Position = humanoidRootPart.Position + randomOffset
-
-            -- Hiệu ứng biến mất
-            game:GetService("TweenService"):Create(
-                lightning, TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-                {Transparency = 1}
-            ):Play()
-
-            -- Xóa sau 0.3 giây
-            game:GetService("Debris"):AddItem(lightning, 0.3)
-
-            wait(0.4)
-        end
-    end)
+-- Hàm để tắt dáng đứng tộc rồng V4 (quay lại tư thế ban đầu)
+local function resetPose()
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    local Torso = Character:WaitForChild("UpperTorso") -- Hoặc LowerTorso tùy vào từng phần
+    local LeftLeg = Character:WaitForChild("LeftUpperLeg")
+    local RightLeg = Character:WaitForChild("RightUpperLeg")
+    local LeftArm = Character:WaitForChild("LeftUpperArm")
+    local RightArm = Character:WaitForChild("RightUpperArm")
+    
+    -- Đặt lại các bộ phận về vị trí ban đầu (tư thế đứng tự nhiên)
+    HumanoidRootPart.CFrame = CFrame.new(0, 0, 0) -- Đặt vị trí gốc lại
+    Torso.CFrame = Torso.CFrame * CFrame.Angles(0, 0, 0) -- Đặt lại thân
+    LeftLeg.CFrame = LeftLeg.CFrame * CFrame.Angles(0, 0, 0) -- Đặt lại chân trái
+    RightLeg.CFrame = RightLeg.CFrame * CFrame.Angles(0, 0, 0) -- Đặt lại chân phải
+    LeftArm.CFrame = LeftArm.CFrame * CFrame.Angles(0, 0, 0) -- Đặt lại tay trái
+    RightArm.CFrame = RightArm.CFrame * CFrame.Angles(0, 0, 0) -- Đặt lại tay phải
 end
 
--- Hàm tắt hiệu ứng Aura
-local function disableAura()
-    auraEnabled = false
-    for _, obj in ipairs(auraObjects) do
-        obj:Destroy()
-    end
-    auraObjects = {}
-end
-
--- Hàm bật/tắt Aura
-local function toggleAura()
-    if auraEnabled then
-        disableAura()
+-- Hàm để bật/tắt dáng đứng tộc rồng V4
+local function toggleDragonPose()
+    if isDragonPoseActive then
+        resetPose() -- Nếu tư thế đang hoạt động, tắt nó
     else
-        enableAura()
+        setDragonV4Pose() -- Nếu tư thế đang tắt, bật nó
     end
+    isDragonPoseActive = not isDragonPoseActive -- Chuyển trạng thái
 end
 
--- **Thêm nút vào menu**
+-- Thêm nút bật/tắt dáng đứng tộc rồng V4 trong giao diện
 AddButton(Tab11o, {
-    Name = "Black Aura",
+    Name = "Draco V4",
     Callback = function()
-        toggleAura()
+        toggleDragonPose() -- Khi nhấn nút, gọi hàm toggle
     end
-})
+})  
