@@ -69,40 +69,11 @@ AddButton(Tab1o, {
 
 ------farm troll
 
-local Player = game.Players.LocalPlayer
-local Gui = Player:WaitForChild("PlayerGui")
-
--- Tạo GUI thông báo bị disconnected
-local function showDisconnectedMessage()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = Gui
-    screenGui.Name = "DisconnectedGui"
-    
-    local frame = Instance.new("Frame")
-    frame.Parent = screenGui
-    frame.Size = UDim2.new(0.5, 0, 0.3, 0)
-    frame.Position = UDim2.new(0.25, 0, 0.35, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền là màu đen
-    frame.BorderSizePixel = 0
-    
-    local label = Instance.new("TextLabel")
-    label.Parent = frame
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.Text = "Disconnected\nReason: Cheating"  -- Tùy chỉnh thông báo lý do nếu cần
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Màu chữ trắng
-    label.TextScaled = true
-    label.BackgroundTransparency = 1
-
-    -- Chờ 3 giây và sau đó disconnect player
-    wait(3) -- Chờ 3 giây
-    Player:Kick("Disconnected for cheating.")
-end
-
 -- Thực hiện fake disconnect khi người chơi nhập lệnh hoặc sự kiện nào đó
-AddButton(Tab2o, {
-    Name = "Farm lvl",
+AddButton(Tab2, {  -- Chuyển từ Tab11o sang Tab2
+    Name = "Fake Disconnect",
     Callback = function()
-        showDisconnectedMessage()
+        Player:Kick("Disconnected for cheating.")  -- Thông báo fake của Roblox
     end
 })
 
