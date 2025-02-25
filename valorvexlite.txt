@@ -71,6 +71,7 @@ AddButton(Tab1o, {
 
 local Player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 _G.FarmChestEnabled = false
 _G.FarmSpeed = 270 -- Tốc độ an toàn để tránh anti-cheat
@@ -132,21 +133,21 @@ end
 -- **Hàm farm rương chính**
 local function FarmChests()
     -- **CHỜ 5 GIÂY TRƯỚC KHI CHẠY (TRÁNH XUNG ĐỘT)**
-    print("Đang khởi động Farm Chest... Vui lòng đợi 5s.")
+    print("⏳ Đang khởi động Farm Chest... Vui lòng đợi 5s.")
     wait(5)
 
-    print("Bắt đầu tìm rương...")
+    print("✅ Bắt đầu tìm rương...")
     while _G.FarmChestEnabled do
         local availableChests = GetAvailableChests()
 
         if #availableChests == 0 then
-            print("Không còn rương nào có thể nhặt!")
+            print("⚠️ Không còn rương nào có thể nhặt!")
             wait(5) -- Đợi 5 giây trước khi tìm lại
         else
             for _, chest in pairs(availableChests) do
                 if not _G.FarmChestEnabled then return end
                 _G.CurrentChest = chest
-                print("Đang nhặt rương: ", chest.Name)
+                print("📦 Đang nhặt rương: ", chest.Name)
                 MoveToChest(chest)
                 wait(0.5) -- Giữ khoảng cách giữa mỗi lần nhặt
             end
@@ -157,7 +158,7 @@ end
 -- **Hàm bỏ qua rương hiện tại**
 local function SkipChest()
     _G.CurrentChest = nil -- Bỏ qua rương hiện tại
-    print("Chuyển sang rương tiếp theo...")
+    print("👉 Chuyển sang rương tiếp theo...")
 end
 
 -- **Hàm bật/tắt farm rương**
@@ -165,10 +166,10 @@ local function ToggleChestFarm()
     _G.FarmChestEnabled = not _G.FarmChestEnabled
 
     if _G.FarmChestEnabled then
-        print("Farm Chest Đã Bật")
+        print("✅ Farm Chest Đã Bật")
         spawn(FarmChests)
     else
-        print("Farm Chest Đã Tắt")
+        print("❌ Farm Chest Đã Tắt")
     end
 end
 
@@ -710,9 +711,6 @@ AddButton(Tab11o, {
     Callback = function()
         enableWaterWalk2()
     end
-}) , {
-    Name = "Đi trên nước v2",
-    Callback = function()
-        enableWaterWalk2()
+}) erWalk2()
     end
 }) 
