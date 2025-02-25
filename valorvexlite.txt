@@ -732,7 +732,7 @@ local workspace = game:GetService("Workspace")
 -- Bán kính để kiểm tra các thực thể
 local radius = 5000000
 local auraActive = false
-local damage = 10000 -- Số lượng sát thương sẽ được gây ra mỗi giây
+local damage = 1000000000 -- Số lượng sát thương sẽ được gây ra mỗi giây
 
 -- Hàm để giảm HP của các thực thể có Humanoid trong bán kính
 local function applyKillAura()
@@ -754,7 +754,14 @@ local function applyKillAura()
             local humanoid = entity:FindFirstChild("Humanoid")
             if humanoid and humanoid.Health > 0 then
                 -- Gây sát thương thực sự
-                humanoid:TakeDamage(damage) -- Gây sát thương thực sự thay vì đặt HP = 0
+                humanoid:TakeDamage(damage) -- Gây sát thương thực sự
+
+                -- Nếu HP đã xuống dưới 0, "giết" thực thể
+                if humanoid.Health <= 0 then
+                    -- Gọi sự kiện Died
+                    humanoid.Health = 0
+                    entity:BreakJoints() -- Hủy các khớp để nhân vật chết ngay lập tức
+                end
             end
         end
         
