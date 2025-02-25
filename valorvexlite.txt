@@ -754,7 +754,7 @@ AddButton(Tab11o, {
 
 -----aimbot player
 
-    AddButton(Tab1o, {
+    AddButton(Tab11o, {
      Name = "AimBot Skill",
     Callback = function()
     getgenv().setting = {
