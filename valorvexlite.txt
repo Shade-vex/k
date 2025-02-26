@@ -754,146 +754,165 @@ AddButton(Tab11o, {
 
 -----aimbot player
 
-AddButton(Tap11o, {
-    Name = "AimBot Skill",
-    Callback = function()
-        getgenv().setting = {
-            Fov = 50,
-            Color = Color3.fromRGB(191, 255, 209),
-            LockPlayers = false,
-            LockPlayersBind = Enum.KeyCode.L,
-            resetPlayersBind = Enum.KeyCode.P,
-        }
+-- Đảm bảo Tab11o đã tồn tại
+if not Tab11o then
+    Tab11o = AddTab("Aimbot") -- Hoặc đổi tên nếu muốn
+end
 
-        Playersaimbot = nil
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        local guiservice = game:GetService("GuiService")
-        local players = game:GetService("Players")
-        local localPlayer = players.LocalPlayer
-        local currentCamera = game:GetService("Workspace").CurrentCamera
-        local circle = Drawing.new("Circle")
+-- Cài đặt mặc định cho AimBot
+getgenv().setting = {
+    Fov = 50,
+    Color = Color3.fromRGB(191, 255, 209),
+    LockPlayers = false,
+    LockPlayersBind = Enum.KeyCode.L,
+    resetPlayersBind = Enum.KeyCode.P,
+}
 
-        if game:GetService("CoreGui"):FindFirstChild('infoplayers') then 
-            game:GetService("CoreGui"):FindFirstChild('infoplayers'):Destroy()
+local Playersaimbot = nil
+local mouse = game.Players.LocalPlayer:GetMouse()
+local guiservice = game:GetService("GuiService")
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
+local currentCamera = game:GetService("Workspace").CurrentCamera
+local circle = Drawing.new("Circle")
+
+-- Vòng tròn AimBot
+function updateCircle(Fov, colorCircle)
+    if circle.__OBJECT_EXISTS then
+        circle.Transparency = 1
+        circle.Visible = true
+        circle.Thickness = 2
+        circle.Color = colorCircle
+        circle.NumSides = 100
+        circle.Radius = (Fov * 6) / 2
+        circle.Filled = false
+        circle.Position = Vector2.new(mouse.X, mouse.Y + (guiservice:GetGuiInset().Y))
+    end
+end
+
+-- Theo dõi vị trí kẻ địch trong phạm vi FOV
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        pcall(function()
+            updateCircle(getgenv().setting['Fov'], getgenv().setting['Color'])
+        end)
+    end)
+end)
+
+-- Xác định mục tiêu
+spawn(function()
+    pcall(function()
+        while wait() do
+            for i, v in pairs(players:GetPlayers()) do
+                if v ~= localPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local pos = currentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
+                    local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+                    if magnitude < (getgenv().setting['Fov'] * 6 - 8) / 2 then
+                        if (v.Character.HumanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude <= 1000 then
+                            if getgenv().setting['LockPlayers'] == false then
+                                Playersaimbot = v.Name
+                            end
+                        end
+                    end
+                end
+            end
         end
+    end)
+end)
 
-        local function updateCircle(Fov, colorCircle)
-            if circle.__OBJECT_EXISTS then
-                circle.Transparency = 1
-                circle.Visible = true
-                circle.Thickness = 2
-                circle.Color = colorCircle
-                circle.NumSides = 100
-                circle.Radius = (Fov * 6) / 2
-                circle.Filled = false
-                circle.Position = Vector2.new(mouse.X, mouse.Y + (guiservice:GetGuiInset().Y))
+-- Cập nhật vị trí đối thủ
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if Playersaimbot then
+            for _, v in pairs(game.Players:GetChildren()) do
+                if v.Name == Playersaimbot and v.Character then
+                    PlayersPosition = v.Character.HumanoidRootPart.Position
+                end
             end
         end
+    end)
+end)
 
-        spawn(function()
-            game:GetService("RunService").RenderStepped:Connect(function()
-                pcall(function()
-                    updateCircle(getgenv().setting['Fov'], getgenv().setting['Color'])
-                end)
-            end)
-        end)
-
-        spawn(function()
-            pcall(function()
-                while wait() do
-                    for _, v in pairs(players:GetPlayers()) do
-                        if v.Character and v.Character:FindFirstChild('HumanoidRootPart') then
-                            local pos = currentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
-                            local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
-                            if magnitude < (getgenv().setting['Fov'] * 6 - 8) / 2 then
-                                if (v.Character.HumanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude <= 1000 then
-                                    if v.Name ~= localPlayer.Name then
-                                        if not getgenv().setting['LockPlayers'] then
-                                            Playersaimbot = v.Name
-                                            PlayersPosition = v.Character.HumanoidRootPart.Position
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end)
-
-        spawn(function()
-            game:GetService("RunService").RenderStepped:Connect(function()
-                if Playersaimbot then
-                    for _, v in pairs(players:GetPlayers()) do
-                        if v.Name == Playersaimbot then
-                            if v.Character and v.Character:FindFirstChild('HumanoidRootPart') then
-                                PlayersPosition = v.Character.HumanoidRootPart.Position
-                            end
-                        end
-                    end
-                end
-            end)
-        end)
-
-        game:GetService("UserInputService").InputBegan:Connect(function(io, p)
-            if io.KeyCode == getgenv().setting['LockPlayersBind'] then
-                getgenv().setting['LockPlayers'] = not getgenv().setting['LockPlayers']
+-- Hook vào RemoteEvent để tự động nhắm
+spawn(function()
+    local gg = getrawmetatable(game)
+    local old = gg.__namecall
+    setreadonly(gg, false)
+    gg.__namecall = newcclosure(function(...)
+        local method = getnamecallmethod()
+        local args = { ... }
+        if tostring(method) == "FireServer" and tostring(args[1]) == "RemoteEvent" then
+            if Playersaimbot then
+                args[2] = PlayersPosition
+                return old(unpack(args))
             end
-            if io.KeyCode == getgenv().setting['resetPlayersBind'] then
-                Playersaimbot = nil
-                PlayersPosition = nil
+        end
+        return old(...)
+    end)
+end)
+
+-- Tự động Aim khi bắn súng
+mouse.Button1Down:Connect(function()
+    pcall(function()
+        if Playersaimbot and localPlayer.Character then
+            local weapon = localPlayer.Character:FindFirstChildOfClass("Tool")
+            if weapon and weapon:FindFirstChild("RemoteFunctionShoot") then
+                local args = {
+                    [1] = PlayersPosition,
+                    [2] = players:FindFirstChild(Playersaimbot).Character.HumanoidRootPart
+                }
+                weapon.RemoteFunctionShoot:InvokeServer(unpack(args))
             end
-        end)
+        end
+    end)
+end)
 
-        spawn(function()
-            while wait() do
-                for _, v in pairs(players:GetPlayers()) do
-                    if v.Name == Playersaimbot then
-                        PlayersPosition = v.Character.HumanoidRootPart.Position
-                    end
-                end
-            end
-        end)
-
-        spawn(function()
-            local mt = getrawmetatable(game)
-            local old = mt.__namecall
-            setreadonly(mt, false)
-            mt.__namecall = newcclosure(function(...)
-                local method = getnamecallmethod()
-                local args = {...}
-                if tostring(method) == "FireServer" then
-                    if tostring(args[1]) == "RemoteEvent" then
-                        if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
-                            if Playersaimbot then
-                                args[2] = PlayersPosition
-                                return old(unpack(args))
-                            end
-                        end
-                    end
-                end
-                return old(...)
-            end)
-        end)
-
-        mouse.Button1Down:Connect(function()
-            pcall(function()
-                if Playersaimbot then
+-- Tự động Aim cho tất cả vũ khí
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if Playersaimbot and localPlayer.Character then
+            local weapon = localPlayer.Character:FindFirstChildOfClass("Tool")
+            if weapon then
+                -- Xử lý riêng cho Melee, Sword, Gun, và Trái Ác Quỷ
+                if weapon:IsA("Tool") and (weapon.ToolTip:find("Melee") or weapon.ToolTip:find("Sword") or weapon.ToolTip:find("Gun") or weapon.ToolTip:find("Fruit")) then
                     local args = {
                         [1] = PlayersPosition,
-                        [2] = game:GetService("Players"):FindFirstChild(Playersaimbot).Character.HumanoidRootPart
+                        [2] = players:FindFirstChild(Playersaimbot).Character.HumanoidRootPart
                     }
-                    local weapon = localPlayer.Character:FindFirstChildOfClass("Tool")
-                    if weapon then
-                        if weapon:FindFirstChild("RemoteFunctionShoot") then
-                            weapon.RemoteFunctionShoot:InvokeServer(unpack(args))
-                        elseif weapon:FindFirstChild("RemoteFunction") then
-                            weapon.RemoteFunction:InvokeServer(unpack(args))
-                        end
+                    if weapon:FindFirstChild("RemoteFunctionShoot") then
+                        weapon.RemoteFunctionShoot:InvokeServer(unpack(args))
+                    elseif weapon:FindFirstChild("RemoteEvent") then
+                        weapon.RemoteEvent:FireServer(unpack(args))
                     end
                 end
-            end)
-        end)
+            end
+        end
+    end)
+end)
+
+-- Điều khiển bật/tắt AimBot
+game:GetService("UserInputService").InputBegan:Connect(function(io, p)
+    if io.KeyCode == getgenv().setting['LockPlayersBind'] then
+        getgenv().setting['LockPlayers'] = not getgenv().setting['LockPlayers']
+        print("Lock Players:", getgenv().setting['LockPlayers'])
+    end
+    if io.KeyCode == getgenv().setting['resetPlayersBind'] then
+        Playersaimbot = nil
+        PlayersPosition = nil
+        print("Reset AimBot Target")
+    end
+end)
+
+-- Thêm nút vào menu
+AddButton(Tab11o, {
+    Name = "Toggle AimBot",
+    Callback = function()
+        getgenv().setting['LockPlayers'] = not getgenv().setting['LockPlayers']
+        if getgenv().setting['LockPlayers'] then
+            print("AimBot ON")
+        else
+            print("AimBot OFF")
+        end
     end
 })
 
@@ -1022,4 +1041,4 @@ AddButton(Tab11o, {
     Callback = function()
         showBannedMessage()
     end
-})   
+})          
