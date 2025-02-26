@@ -814,114 +814,12 @@ AddButton(Tab9o, {
     Callback = function()
       loadstring(game:HttpGet("https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua"))()
   end
+  })   AddButton(Tab11o, {
+     Name = "ANTI TRADE SCAM",
+    Callback = function()
+  end
   })   
 
-
--- Server-side code
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local scamWarningEvent = Instance.new("RemoteEvent")
-scamWarningEvent.Name = "TradeScamWarning"
-scamWarningEvent.Parent = ReplicatedStorage
-
--- Xử lý sự kiện từ client khi phát hiện gian lận
-scamWarningEvent.OnServerEvent:Connect(function(player, scamMessage)
-    -- Thông báo cho tất cả người chơi khác về hành vi scam
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= player then
-            -- Gửi thông báo đến GUI của người chơi
-            local screenGui = Instance.new("ScreenGui")
-            screenGui.Parent = p.PlayerGui
-            screenGui.Name = "ScamWarningGui"
-            
-            local frame = Instance.new("Frame")
-            frame.Parent = screenGui
-            frame.Size = UDim2.new(0.5, 0, 0.3, 0)
-            frame.Position = UDim2.new(0.25, 0, 0.35, 0)
-            frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Màu nền đỏ
-            frame.BorderSizePixel = 0
-            
-            local label = Instance.new("TextLabel")
-            label.Parent = frame
-            label.Size = UDim2.new(1, 0, 1, 0)
-            label.Text = scamMessage  -- Nội dung cảnh báo
-            label.TextColor3 = Color3.fromRGB(255, 255, 255)
-            label.TextScaled = true
-            label.BackgroundTransparency = 1
-            
-            -- Hiển thị thông báo trong 5 giây
-            wait(5)
-            screenGui:Destroy()
-
-            -- Reset nhân vật của người chơi nếu có hành vi gian lận
-            if p.Character then
-                p.Character:BreakJoints()  -- Hủy khớp để nhân vật reset
-            end
-        end
-    end
-end)
-
--- Client-side code
-local Player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local scamWarningEvent = ReplicatedStorage:WaitForChild("TradeScamWarning")
-
--- Tạo GUI thông báo cảnh báo giống Roblox
-local function showScamWarning()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = Player:WaitForChild("PlayerGui")
-    screenGui.Name = "ScamWarningGui"
-    
-    local frame = Instance.new("Frame")
-    frame.Parent = screenGui
-    frame.Size = UDim2.new(0.5, 0, 0.3, 0)
-    frame.Position = UDim2.new(0.25, 0, 0.35, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Màu nền đỏ
-    frame.BorderSizePixel = 0
-    
-    local label = Instance.new("TextLabel")
-    label.Parent = frame
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.Text = "WARNING: Trade Scam Detected!"  -- Nội dung cảnh báo
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextScaled = true
-    label.BackgroundTransparency = 1
-
-    -- Gửi thông báo đến server để thông báo đến các người chơi khác
-    scamWarningEvent:FireServer("Trade Scam Attempt Detected by " .. Player.Name)
-
-    -- Hiển thị thông báo trong 5 giây
-    wait(5)
-    screenGui:Destroy()
-    
-    -- Reset nhân vật sau khi cảnh báo (có thể làm thêm xử lý khác nếu cần)
-    if Player.Character then
-        Player.Character:BreakJoints()  -- Hủy khớp để nhân vật reset
-    end
-end
-
--- Biến để kiểm soát trạng thái bật/tắt
-local antiScamActive = false  
-
--- Hàm bật/tắt anti trade scam
-local function toggleAntiScam()
-    antiScamActive = not antiScamActive
-    if antiScamActive then
-        print("Anti-Trade Scam is now ACTIVE")
-    else
-        print("Anti-Trade Scam is now INACTIVE")
-    end
-end
-
--- Thêm nút bật/tắt vào Tab2
-AddButton(Tab2, {
-    Name = "Anti-Trade Scam",
-    Callback = function()
-        toggleAntiScam()  -- Bật/tắt tính năng khi nhấn nút
-        if antiScamActive then
-            showScamWarning()  -- Hiển thị thông báo khi bật tính năng
-        end
-    end
-})
 
 
 
