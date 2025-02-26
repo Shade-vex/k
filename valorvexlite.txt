@@ -72,7 +72,7 @@ AddButton(Tab1o, {
 AddButton(Tab2o, {
     Name = "farm chest (hub) ",
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/x-hub-beta/refs/heads/main/Skull_Hub_Free_Script_Auto_Farm_Chest_Update_25.txt"))() 
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/farm%20chest.txt"))() 
     end
 })   
 
@@ -384,9 +384,9 @@ AddButton(TabVo, {
 ------fly
 
 AddButton(TabVo, {
-    Name = "Fly mobie v1",
+    Name = "Fly VIP",
     Callback = function()
-       loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Mobile-Fly-20327"))() 
+       loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Mobile-Fly-20327"))()
     end
 })   
 
@@ -980,4 +980,4 @@ AddButton(Tab11o, {
     Callback = function()
         showBannedMessage()
     end
-})            
+})        
