@@ -68,155 +68,122 @@ AddButton(Tab1o, {
 
 
 
+-------farm code
 
+local MaxSpeed = 300 -- Studs per second 380 no flag but kick
+local Enabled = false -- Trạng thái bật/tắt Auto Farm
 
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local Locations = workspace._WorldOrigin.Locations
 
--------farm
-
-local Player = game.Players.LocalPlayer
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
-_G.Tween = nil
-_G.Play = false
-_G.CloseAllScript = false
-_G.CurrentChest = nil -- Biến lưu trữ rương hiện tại
-_G.CheckedChests = {} -- Danh sách rương đã nhặt
-
--- Tạo nút farm chest
-local function farmChestToggle()
-    _G.Play = not _G.Play
-    if _G.Play then
-        _G.CheckedChests = {} -- Đặt lại danh sách rương khi bật farm chest
+local function getCharacter()
+    if not LocalPlayer.Character then
+        LocalPlayer.CharacterAdded:Wait()
     end
+    LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+    return LocalPlayer.Character
 end
 
--- Tạo nút next chest
-local function nextChest()
-    _G.CurrentChest = nil -- Đặt lại rương hiện tại để bỏ qua rương đang nhặt
+local function DistanceFromPlrSort(ObjectList)
+    local RootPart = getCharacter().HumanoidRootPart
+    table.sort(ObjectList, function(ChestA, ChestB)
+        local RootPos = RootPart.Position
+        local DistanceA = (RootPos - ChestA.Position).Magnitude
+        local DistanceB = (RootPos - ChestB.Position).Magnitude
+        return DistanceA < DistanceB
+    end)
 end
 
--- Xóa rương khỏi danh sách nếu chúng spawn lại
-function UpdateCheckedChests()
-    for i, v in pairs(_G.CheckedChests) do
-        if not v or not v.Parent then
-            table.remove(_G.CheckedChests, i)
-        end
-    end
-end
+local UncheckedChests = {}
+local FirstRun = true
 
--- Lấy danh sách rương chưa nhặt
-function TableNearToFarChests()
-    local chests = {}
-
-    -- Cập nhật danh sách rương đã nhặt
-    UpdateCheckedChests()
-
-    -- Lọc rương chưa nhặt
-    for i, v in pairs(workspace:GetDescendants()) do
-        if (v.Name == "Chest1" or v.Name == "Chest2" or v.Name == "Chest3") and not table.find(_G.CheckedChests, v) then
-            table.insert(chests, v)
-        end
-    end
-    return chests
-end
-
--- Hàm di chuyển đến rương
-function Tween(Part)
-    if _G.Tween then
-        _G.Tween:Cancel()
-    end
-    local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
-    _G.Tween = game:GetService("TweenService"):Create(HumanoidRootPart, TweenInfo.new(Part.Position.magnitude / 300, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {CFrame = Part.CFrame})
-    _G.Tween:Play()
-    local flying = true
-    while game:GetService("RunService").Stepped:Wait() and flying and _G.Play do
-        if _G.Play == false then
-            _G.Tween:Cancel()
-        end
-        if (Part.Position - HumanoidRootPart.Position).magnitude < 250 then
-            _G.Tween:Cancel()
-            for i = 1, 5 do
-                HumanoidRootPart.CFrame = Part.CFrame
-                wait()
+local function getChestsSorted()
+    if FirstRun then
+        FirstRun = false
+        local Objects = game:GetDescendants()
+        for _, Object in pairs(Objects) do
+            if Object.Name:find("Chest") and Object.ClassName == "Part" then
+                table.insert(UncheckedChests, Object)
             end
-            flying = false
+        end
+    end
+
+    local Chests = {}
+    for _, Chest in pairs(UncheckedChests) do
+        if Chest:FindFirstChild("TouchInterest") then
+            table.insert(Chests, Chest)
+        end
+    end
+
+    DistanceFromPlrSort(Chests)
+    return Chests
+end
+
+local function toggleNoclip(Toggle)
+    for _, v in pairs(getCharacter():GetChildren()) do
+        if v:IsA("Part") then
+            v.CanCollide = not Toggle
         end
     end
 end
 
--- Đợi game load xong
-repeat wait() until game:IsLoaded()
+local function Teleport(Goal, Speed)
+    if not Speed then
+        Speed = MaxSpeed
+    end
+    toggleNoclip(true)
+    local RootPart = getCharacter().HumanoidRootPart
+    local Magnitude = (RootPart.Position - Goal.Position).Magnitude
 
--- Thêm nút farm chest
+    while not (Magnitude < 1) do
+        local Direction = (Goal.Position - RootPart.Position).unit
+        RootPart.CFrame = RootPart.CFrame + Direction * (Speed * task.wait())
+        Magnitude = (RootPart.Position - Goal.Position).Magnitude
+    end
+
+    toggleNoclip(false)
+end
+
+local function toggleAutoFarm()
+    Enabled = not Enabled
+    print("Auto Chest: ", Enabled and "ON" or "OFF")
+end
+
+-- Thêm nút vào menu
 AddButton(Tab2o, {
-    Name = "Farm Chest (sea1)",
+    Name = "farm chest v1",
     Callback = function()
-        farmChestToggle()
+        toggleAutoFarm()
     end
 })
 
--- Thêm nút next chest
-AddButton(Tab2o, {
-    Name = "Next Chest",
-    Callback = function()
-        nextChest()
-    end
-})
+local function main()
+    task.wait(5) -- Chờ 5 giây trước khi chạy vòng lặp chính
 
--- Hàm chính để farm rương
-local function farmAllChests()
-    -- Đợi 5 giây trước khi bắt đầu
-    wait(5)
+    while task.wait() do
+        if not Enabled then continue end -- Nếu chưa bật thì bỏ qua vòng lặp
 
-    while wait(1) do
-        if _G.Play then
-            local chests = TableNearToFarChests()
-            if #chests == 0 then
-                print("Không còn rương nào để nhặt!")
-                break
-            end
-            for i, v in pairs(chests) do
-                if _G.CurrentChest and v == _G.CurrentChest then
-                    continue
-                end
-                Tween(v) -- Di chuyển đến rương
-                _G.CurrentChest = v -- Lưu rương hiện tại
-                table.insert(_G.CheckedChests, v) -- Đánh dấu rương này đã nhặt
-                if _G.Play == false then
-                    break
-                end
-            end
+        local Chests = getChestsSorted()
+        if #Chests > 0 then
+            Teleport(Chests[1].CFrame)
         else
-            if _G.Tween then
-                _G.Tween:Cancel()
-            end
+            -- Bạn có thể thêm server hop ở đây nếu cần
         end
     end
 end
 
--- Chạy farm rương
-spawn(function()
-    farmAllChests()
-end)
+task.wait = task.wait
+main()
 
 
-
-AddButton(Tab2o, {
-    Name = "farm chest (sea2)",
-    Callback = function()
-        loadstring(game:HttpGet("https://gist.githubusercontent.com/Yomkaa/cb706db9b2f3862d11f17d2dd71aaa80/raw/d62aa5a6bf5d79647c236281fc0556c44778e5a6/YOMKA%20CHEST%20FARM%20(%20ONLY%20SECOND%20SEA)",true))()
-    end
-})
-
-
-
+-------farm hub
 
 AddButton(Tab2o, {
-    Name = "farm chest (sea3)",
+    Name = "farm chest (hub) ",
     Callback = function()
-        loadstring(game:HttpGet("https://gist.githubusercontent.com/Yomkaa/daa5e464529c6b1d55573d73dbd77a0c/raw/12b1ab7d384aad2beea357b8f68c705a155fc1c8/YOMKA%20CHEST%20FARM%20(%20ONLY%20THIRD%20SEA)",true))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/x-hub-beta/refs/heads/main/Skull_Hub_Free_Script_Auto_Farm_Chest_Update_25.txt"))() 
     end
-})
+})   
 
 
 
@@ -521,6 +488,25 @@ AddButton(TabVo, {
 })
 
 
+
+
+------fly
+
+AddButton(TabVo, {
+    Name = "Fly mobie v1",
+    Callback = function()
+       loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Mobile-Fly-20327"))() 
+    end
+})   
+
+-------kill aura
+
+AddButton(TabVo, {
+    Name = "Kill Aura",
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/Crazy/main/Crazy"))() 
+    end
+})   
 
 -----esp player
 
@@ -1103,4 +1089,4 @@ AddButton(Tab11o, {
     Callback = function()
         showBannedMessage()
     end
-})          
+})           
