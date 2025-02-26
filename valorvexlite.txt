@@ -981,3 +981,48 @@ AddButton(Tab11o, {
         showBannedMessage()
     end
 })        
+
+
+-----fix
+
+local Whitelist = { "n1LK_v033STPE", "JuJuBo_RBX", "Yrixyakita", "mrbeast", "kittgaming" } -- Danh sách tài khoản Roblox đáng tin cậy
+local AntiCheatEnabled = true -- Trạng thái mặc định: bật
+
+function isWhitelisted(player)
+    for _, v in pairs(Whitelist) do
+        if player.Name == v then
+            return true
+        end
+    end
+    return false
+end
+
+function checkPlayer(player)
+    if not AntiCheatEnabled then return end -- Nếu anti-cheat đang tắt, bỏ qua kiểm tra
+    if isWhitelisted(player) then return end -- Nếu là người trong whitelist, bỏ qua kiểm tra
+
+    local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+    if humanoid then
+        local speed = humanoid.WalkSpeed
+        if speed > 50 then
+            warn(player.Name .. " có thể đang dùng speed hack!")
+            player:Kick("Phát hiện speed hack!") 
+        end
+    end
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        wait(5) -- Chờ nhân vật load xong để tránh lỗi
+        checkPlayer(player)
+    end)
+end)
+
+-- Nút bật/tắt anti-cheat
+AddButton(Tab11o, {
+    Name = "Anti Cheat off",
+    Callback = function()
+        AntiCheatEnabled = not AntiCheatEnabled -- Đảo trạng thái bật/tắt
+        print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
+    end
+})
