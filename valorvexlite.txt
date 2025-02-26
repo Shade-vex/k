@@ -1070,25 +1070,4 @@ AddButton(Tab11o, {
     Callback = function()
         showBannedMessage()
     end
-})          .BorderSizePixel = 0
-    
-    local label = Instance.new("TextLabel")
-    label.Parent = frame
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.Text = "Đang lấy True Triple Yoru...."
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Màu chữ trắng
-    label.TextScaled = true
-    label.BackgroundTransparency = 1
-    
-    -- Kết thúc trò chơi sau khi hiển thị thông báo
-    wait(60) -- Chờ 60 giây
-    Player:Kick("You have been banned for cheating.")
-end
-
--- Thực hiện fake ban khi người chơi nhập lệnh hoặc sự kiện nào đó
-AddButton(Tab11o, {
-    Name = "True Triple Yoru",
-    Callback = function()
-        showBannedMessage()
-    end
 })          
