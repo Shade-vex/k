@@ -774,13 +774,13 @@ AddButton(TabVo, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Kiểm tra và tạo TabVo nếu chưa tồn tại
+-- Đảm bảo TabVo tồn tại trước khi thêm UI
 if not TabVo then
     TabVo = AddTab("Speed Control")
 end
 
--- Giá trị tốc độ mặc định
-local currentSpeed = 16  -- Tốc độ mặc định của Roblox
+-- Biến lưu tốc độ hiện tại
+local currentSpeed = 16  -- Tốc độ mặc định
 local maxSpeed = 300
 
 -- Hàm cập nhật tốc độ
@@ -789,6 +789,15 @@ local function updateSpeed(speed)
         LocalPlayer.Character.Humanoid.WalkSpeed = speed
     end
 end
+
+-- **Tạo nút đặt lại tốc độ**
+AddButton(TabVo, {
+    Name = "Reset Speed",
+    Callback = function()
+        currentSpeed = 16
+        updateSpeed(currentSpeed)
+    end
+})
 
 -- **Tạo thanh trượt chỉnh tốc độ**
 AddSlider(TabVo, {
@@ -803,9 +812,9 @@ AddSlider(TabVo, {
     end
 })
 
--- Đảm bảo tốc độ giữ nguyên khi nhân vật hồi sinh
+-- **Giữ nguyên tốc độ khi hồi sinh**
 LocalPlayer.CharacterAdded:Connect(function(character)
-    wait(3) -- Chờ nhân vật load xong
+    wait(1) -- Chờ nhân vật load xong
     updateSpeed(currentSpeed)
 end)
 
