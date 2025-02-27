@@ -190,39 +190,34 @@ updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Đảm bảo UI hiển thị bằng cách thêm vào hệ thống UI
-task.spawn(function()
-    wait(1) -- Chờ một chút để UI tải xong
+-- Dropdown danh sách người chơi trong Tab7o
+playerDropdown = AddDropdown(Tab7o, {
+    Name = "Danh Sách Player",
+    Options = playerList,
+    Callback = function(selected)
+        selectedPlayer = Players:FindFirstChild(selected)
+    end
+})
 
-    -- Dropdown danh sách người chơi trong Tab7
-    playerDropdown = AddDropdown(Tab7, {
-        Name = "Danh Sách Player",
-        Options = playerList,
-        Callback = function(selected)
-            selectedPlayer = Players:FindFirstChild(selected)
-        end
-    })
+-- Nút cập nhật danh sách người chơi trong Tab7o
+AddButton(Tab7o, {
+    Name = "Cập Nhật Danh Sách",
+    Callback = function()
+        updatePlayerList()
+    end
+})
 
-    -- Nút cập nhật danh sách người chơi trong Tab7
-    AddButton(Tab7, {
-        Name = "Cập Nhật Danh Sách",
-        Callback = function()
-            updatePlayerList()
+-- Nút dịch chuyển đến người chơi đã chọn trong Tab7o
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển",
+    Callback = function()
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
+        else
+            warn("Không thể dịch chuyển! Người chơi không hợp lệ hoặc đã rời game.")
         end
-    })
-
-    -- Nút dịch chuyển đến người chơi đã chọn trong Tab7
-    AddButton(Tab7, {
-        Name = "Dịch Chuyển",
-        Callback = function()
-            if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
-            else
-                warn("Không thể dịch chuyển! Người chơi không hợp lệ hoặc đã rời game.")
-            end
-        end
-    })
-end)
+    end
+})
 
 
 
