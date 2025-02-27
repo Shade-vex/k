@@ -113,7 +113,7 @@ local function updateBossList()
 end
 
 -- **Dropdown chọn boss**
-local bossDropdown = AddDropdown(Tab7o, {
+local bossDropdown = AddDropdown(Tab2o, {
     Name = "Chọn Boss",
     Options = activeBosses,
     Callback = function(selected)
@@ -178,7 +178,7 @@ local function farmAllBosses()
 end
 
 -- **Nút bắt đầu farm boss**
-AddButton(Tab7o, {
+AddButton(Tab2o, {
     Name = "Bắt Đầu Farm Boss",
     Callback = function()
         farmBoss()
@@ -186,7 +186,7 @@ AddButton(Tab7o, {
 })
 
 -- **Nút farm tất cả boss**
-AddButton(Tab7o, {
+AddButton(Tab2o, {
     Name = "Farm Tất Cả Boss",
     Callback = function()
         farmAllBosses()
