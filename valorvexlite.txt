@@ -169,49 +169,15 @@ AddButton(Tab6o, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Tạo GUI chọn người chơi
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.CoreGui
+-- Tạo biến lưu danh sách player
+local playerList = {}
 
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 400)
-Frame.Position = UDim2.new(0.5, -150, 0.3, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.Parent = ScreenGui
-
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Parent = Frame
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Text = "Chọn người chơi để dịch chuyển"
-Title.TextSize = 15
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundTransparency = 1
-Title.Parent = Frame
-
--- Biến lưu trữ người chơi đã chọn
-local SelectedPlayer = nil
-
--- Tạo nút cho mỗi người chơi
+-- Hàm cập nhật danh sách player
 local function updatePlayerList()
-    for _, obj in pairs(Frame:GetChildren()) do
-        if obj:IsA("TextButton") then obj:Destroy() end
-    end
-
+    playerList = {}
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            local PlayerButton = Instance.new("TextButton")
-            PlayerButton.Size = UDim2.new(1, 0, 0, 30)
-            PlayerButton.Text = player.Name
-            PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            PlayerButton.Parent = Frame
-
-            PlayerButton.MouseButton1Click:Connect(function()
-                SelectedPlayer = player
-                Title.Text = "Đã chọn: " .. player.Name
-            end)
+            table.insert(playerList, player.Name)
         end
     end
 end
@@ -220,26 +186,41 @@ updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Nút dịch chuyển
-local function teleportToSelectedPlayer()
-    if SelectedPlayer and SelectedPlayer.Character and SelectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = SelectedPlayer.Character.HumanoidRootPart.CFrame
-    end
-end
+-- Biến lưu player đã chọn
+local SelectedPlayer = nil
 
 -- Đảm bảo Tab7 tồn tại
 if not Tab7 then
     Tab7 = AddTab("Teleport")
 end
 
--- Thêm nút dịch chuyển vào menu
-AddButton(Tab7, {
-    Name = "Dịch Chuyển",
-    Callback = function()
-        teleportToSelectedPlayer()
+-- Thêm danh sách thả xuống để chọn player
+AddDropdown(Tab7, {
+    Name = "Danh Sách Player",
+    Options = playerList,
+    Default = 1,
+    Callback = function(selected)
+        SelectedPlayer = Players:FindFirstChild(selected)
     end
 })
 
+-- Thêm nút cập nhật danh sách player
+AddButton(Tab7, {
+    Name = "Cập Nhật Danh Sách",
+    Callback = function()
+        updatePlayerList()
+    end
+})
+
+-- Thêm nút dịch chuyển
+AddButton(Tab7, {
+    Name = "Dịch Chuyển Đến Player",
+    Callback = function()
+        if SelectedPlayer and SelectedPlayer.Character and SelectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = SelectedPlayer.Character.HumanoidRootPart.CFrame
+        end
+    end
+})
 
 
 
