@@ -202,12 +202,7 @@ AddButton(Tab2o, {
 
 -------farm hub
 
-AddButton(Tab2o, {
-    Name = "farm chest (hub) ",
-    Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/farm%20chest.txt"))() 
-    end
-})   
+
 
 ------code
 
