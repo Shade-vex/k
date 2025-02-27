@@ -294,16 +294,35 @@ AddButton(Tab5o, {
 -----Trái và raid
 
 local autoCollectFruits = false -- Biến bật/tắt Auto Nhặt Trái
+local player = game.Players.LocalPlayer
+local tweenService = game:GetService("TweenService")
 
--- Hàm dịch chuyển đến trái
-local function collectFruit(fruit)
+-- Hàm bật/tắt xuyên tường
+local function toggleNoClip(state)
+    for _, part in pairs(player.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not state
+        end
+    end
+end
+
+-- Hàm bay đến trái cây
+local function flyToFruit(fruit)
     if not fruit or not fruit:FindFirstChild("Handle") then return end
-    local player = game.Players.LocalPlayer
     local char = player.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
-    -- Bay đến trái (cao hơn một chút để tránh lỗi va chạm)
-    char.HumanoidRootPart.CFrame = fruit.Handle.CFrame + Vector3.new(0, 3, 0)
+    toggleNoClip(true) -- Bật xuyên tường
+
+    -- Bay đến trái với tốc độ 300
+    local hrp = char.HumanoidRootPart
+    local goalCFrame = fruit.Handle.CFrame + Vector3.new(0, 3, 0)
+    local tween = tweenService:Create(hrp, TweenInfo.new((hrp.Position - fruit.Handle.Position).Magnitude / 300, Enum.EasingStyle.Linear), {CFrame = goalCFrame})
+
+    tween:Play()
+    tween.Completed:Wait()
+
+    toggleNoClip(false) -- Tắt xuyên tường khi đến nơi
 end
 
 -- Hàm tìm trái gần nhất và nhặt
@@ -311,7 +330,7 @@ local function autoCollect()
     while autoCollectFruits do
         local nearestFruit
         local minDist = math.huge
-        local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+        local playerPos = player.Character.HumanoidRootPart.Position
 
         -- Tìm trái gần nhất
         for _, fruit in pairs(game.Workspace:GetChildren()) do
@@ -325,9 +344,9 @@ local function autoCollect()
             end
         end
 
-        -- Nếu tìm thấy trái, di chuyển đến nhặt
+        -- Nếu tìm thấy trái, bay đến nhặt
         if nearestFruit then
-            collectFruit(nearestFruit)
+            flyToFruit(nearestFruit)
         end
 
         wait(1) -- Kiểm tra mỗi giây
