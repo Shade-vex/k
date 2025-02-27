@@ -164,7 +164,7 @@ AddButton(Tab6o, {
 
 
 
-   Section = AddSection(Tab1o, {"Dịch chuyển V1"})          
+   Section = AddSection(Tab7o, {"Dịch chuyển V1"})          
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -222,7 +222,7 @@ AddButton(Tab7o, {
 
 
 
-   Section = AddSection(Tab1o, {"Dịch chuyển V2"})          
+   Section = AddSection(Tab7o, {"Dịch chuyển V2"})          
 
 
 local Players = game:GetService("Players")
@@ -230,52 +230,52 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
 -- Biến cục bộ để tránh xung đột
-local selectedPlayer = nil
-local playerList = {}
-_G.Flying = false
+local selectedPlayerV2 = nil
+local playerListV2 = {}
+_G.FlyingV2 = false
 
 -- Hàm cập nhật danh sách người chơi
-local function updatePlayerList()
-    table.clear(playerList) -- Xóa danh sách cũ để tránh trùng lặp
+local function updatePlayerListV2()
+    table.clear(playerListV2) -- Xóa danh sách cũ để tránh trùng lặp
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            table.insert(playerList, player.Name)
+            table.insert(playerListV2, player.Name)
         end
     end
-    if playerDropdown then
-        playerDropdown:SetOptions(playerList) -- Cập nhật dropdown với danh sách mới
+    if playerDropdownV2 then
+        playerDropdownV2:SetOptions(playerListV2) -- Cập nhật dropdown với danh sách mới
     end
 end
 
-updatePlayerList()
-Players.PlayerAdded:Connect(updatePlayerList)
-Players.PlayerRemoving:Connect(updatePlayerList)
+updatePlayerListV2()
+Players.PlayerAdded:Connect(updatePlayerListV2)
+Players.PlayerRemoving:Connect(updatePlayerListV2)
 
 -- Nút cập nhật danh sách người chơi (Để lên đầu)
 AddButton(Tab7o, {
-    Name = "Cập Nhật Danh Sách",
+    Name = "Cập Nhật Danh Sách V2",
     Callback = function()
-        updatePlayerList()
+        updatePlayerListV2()
     end
 })
 
 -- Dropdown danh sách người chơi
-playerDropdown = AddDropdown(Tab7o, {
-    Name = "Danh Sách Player",
-    Options = playerList,
+playerDropdownV2 = AddDropdown(Tab7o, {
+    Name = "Danh Sách Player V2",
+    Options = playerListV2,
     Callback = function(selected)
-        selectedPlayer = Players:FindFirstChild(selected)
+        selectedPlayerV2 = Players:FindFirstChild(selected)
     end
 })
 
--- **🚀 Dịch Chuyển An Toàn (Bay & Xuyên Tường)**
-local function teleportToPlayer()
-    if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+-- **🚀 Dịch Chuyển V2 (Bay & Xuyên Tường)**
+local function teleportToPlayerV2()
+    if selectedPlayerV2 and selectedPlayerV2.Character and selectedPlayerV2.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local targetHrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetHrp = selectedPlayerV2.Character:FindFirstChild("HumanoidRootPart")
 
         if hrp and targetHrp then
-            _G.Flying = true -- Bật chế độ bay
+            _G.FlyingV2 = true -- Bật chế độ bay
 
             -- Xuyên tường khi di chuyển
             for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
@@ -292,7 +292,7 @@ local function teleportToPlayer()
             tween:Play()
             tween.Completed:Wait() -- Chờ đến nơi thì dừng bay
 
-            _G.Flying = false -- Tắt chế độ bay
+            _G.FlyingV2 = false -- Tắt chế độ bay
 
             -- Khôi phục va chạm sau khi dịch chuyển xong
             for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
@@ -306,11 +306,11 @@ local function teleportToPlayer()
     end
 end
 
--- Nút dịch chuyển đến người chơi đã chọn (Vừa bay vừa xuyên tường)
+-- Nút dịch chuyển đến người chơi đã chọn (V2)
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển An Toàn",
+    Name = "Dịch Chuyển V2",
     Callback = function()
-        teleportToPlayer()
+        teleportToPlayerV2()
     end
 })
 
