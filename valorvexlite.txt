@@ -169,7 +169,13 @@ AddButton(Tab6o, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Biến cục bộ để tránh xung đột
+-- Kiểm tra Tab7 có tồn tại không
+if not Tab7 then
+    warn("Tab7 chưa được khởi tạo!")
+    return
+end
+
+-- Biến lưu người chơi được chọn
 local selectedPlayer = nil
 local playerList = {}
 
@@ -187,8 +193,8 @@ updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Dropdown danh sách người chơi trong Tab7
-AddDropdown(Tab7, {
+-- Thêm dropdown danh sách người chơi vào Tab7
+local playerDropdown = AddDropdown(Tab7, {
     Name = "Danh Sách Player",
     Options = playerList,
     Callback = function(selected)
@@ -196,23 +202,30 @@ AddDropdown(Tab7, {
     end
 })
 
--- Nút cập nhật danh sách người chơi trong Tab7
-AddButton(Tab7, {
+-- Nút cập nhật danh sách người chơi
+local updateButton = AddButton(Tab7, {
     Name = "Cập Nhật Danh Sách",
     Callback = function()
         updatePlayerList()
+        if playerDropdown then
+            playerDropdown:SetOptions(playerList) -- Cập nhật dropdown với danh sách mới
+        end
     end
 })
 
--- Nút dịch chuyển đến người chơi đã chọn trong Tab7
-AddButton(Tab7, {
+-- Nút dịch chuyển đến người chơi đã chọn
+local teleportButton = AddButton(Tab7, {
     Name = "Dịch Chuyển",
     Callback = function()
         if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
             LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
+        else
+            warn("Không thể dịch chuyển! Người chơi không hợp lệ hoặc đã rời game.")
         end
     end
 })
+
+print("Script dịch chuyển đã load thành công!")
 
 
 
