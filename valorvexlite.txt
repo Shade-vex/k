@@ -773,19 +773,19 @@ AddButton(TabVo, {
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 
-local speedValue = 16 -- Giá trị tốc độ mặc định
-local maxSpeed = 300 -- Giới hạn tốc độ tối đa
+-- Biến lưu tốc độ hiện tại
+local speedValue = 16
+local maxSpeed = 300
 
 -- Cập nhật tốc độ
-local function updateSpeed(newSpeed)
-    if Humanoid then
-        Humanoid.WalkSpeed = newSpeed
+local function updateSpeed(value)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
     end
 end
 
--- Dropdown chỉnh tốc độ
+-- Tạo thanh chỉnh tốc độ
 local speedSlider = AddSlider(TabVo, {
     Name = "Chỉnh Tốc Độ",
     Min = 16,
@@ -803,13 +803,13 @@ AddButton(TabVo, {
     Callback = function()
         speedValue = 16
         updateSpeed(speedValue)
-        speedSlider:Set(16) -- Cập nhật giá trị trên thanh trượt
+        speedSlider:Set(16) -- Cập nhật thanh trượt
     end
 })
 
--- Đảm bảo khi nhân vật hồi sinh, tốc độ sẽ giữ nguyên
+-- Đảm bảo tốc độ không bị reset khi hồi sinh
 LocalPlayer.CharacterAdded:Connect(function(character)
-    Humanoid = character:FindFirstChildOfClass("Humanoid")
+    wait(1) -- Đợi nhân vật tải xong
     updateSpeed(speedValue)
 end)
 
@@ -1442,4 +1442,4 @@ AddButton(Tab11o, {
         AntiCheatEnabled = not AntiCheatEnabled -- Đảo trạng thái bật/tắt
         print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
     end
-})        
+})         
