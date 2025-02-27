@@ -73,46 +73,64 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 
+local bossList = {}
+local selectedBoss = nil
 local bossFarmEnabled = false
 
--- **Hàm tìm boss gần nhất**
-local function getNearestBoss()
-    local closestBoss = nil
-    local closestDistance = math.huge
+-- **Cập nhật danh sách boss hiện có trong map**
+local function updateBossList()
+    table.clear(bossList)
     for _, enemy in pairs(Workspace:GetChildren()) do
         if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
-            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-            if distance < closestDistance then
-                closestBoss = enemy
-                closestDistance = distance
-            end
+            table.insert(bossList, enemy.Name)
         end
     end
-    return closestBoss
+    if bossDropdown then
+        bossDropdown:SetOptions(bossList)
+    end
 end
+
+-- **Dropdown chọn boss**
+bossDropdown = AddDropdown(Tab2o, {
+    Name = "Danh Sách Boss",
+    Options = bossList,
+    Callback = function(selected)
+        selectedBoss = selected
+    end
+})
+
+-- **Nút cập nhật danh sách boss**
+AddButton(Tab2o, {
+    Name = "Cập Nhật Boss",
+    Callback = function()
+        updateBossList()
+    end
+})
 
 -- **Hàm farm boss**
 local function farmBoss()
     bossFarmEnabled = not bossFarmEnabled
     while bossFarmEnabled do
-        local boss = getNearestBoss()
-        if boss and boss:FindFirstChild("HumanoidRootPart") then
-            -- Bay trên đầu boss
-            LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-            -- Tăng hitbox boss x10 lần
-            boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-            -- Tự động đánh
-            if LocalPlayer.Character:FindFirstChildOfClass("Tool") then
-                LocalPlayer.Character:FindFirstChildOfClass("Tool"):Activate()
+        if selectedBoss then
+            local boss = Workspace:FindFirstChild(selectedBoss)
+            if boss and boss:FindFirstChild("HumanoidRootPart") then
+                -- Bay trên đầu boss
+                LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+                -- Tăng hitbox boss x10 lần
+                boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                -- Tự động đánh
+                if LocalPlayer.Character:FindFirstChildOfClass("Tool") then
+                    LocalPlayer.Character:FindFirstChildOfClass("Tool"):Activate()
+                end
             end
         end
-        wait(0.1) -- Giữ vị trí trên đầu boss
+        wait(0.1)
     end
 end
 
--- **Nút bật/tắt farm boss**
+-- **Nút bắt đầu farm boss**
 AddButton(Tab2o, {
-    Name = "Farm All Boss",
+    Name = "Bật/Tắt Farm Boss",
     Callback = function()
         farmBoss()
     end
