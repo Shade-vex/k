@@ -218,6 +218,7 @@ local TweenService = game:GetService("TweenService")
 
 _G.FarmChests = false
 _G.Tween = nil
+local Speed = 300
 
 -- **Tìm rương gần nhất**
 local function getClosestChest()
@@ -244,17 +245,13 @@ local function getClosestChest()
     return closestChest
 end
 
--- **Xuyên tường khi bay**
-local function enableNoClip()
-    RunService.Stepped:Connect(function()
-        if _G.FarmChests then
-            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                end
-            end
+-- **Bật/tắt xuyên tường**
+local function setNoClip(state)
+    for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = not state
         end
-    end)
+    end
 end
 
 -- **Bay đến rương**
@@ -265,27 +262,26 @@ local function moveToChest(chest)
     if not humanoidRootPart then return end
 
     -- Bật xuyên tường khi di chuyển
-    enableNoClip()
+    setNoClip(true)
 
     local goalCFrame = chest.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
-    local tweenInfo = TweenInfo.new((humanoidRootPart.Position - chest.HumanoidRootPart.Position).Magnitude / 300, Enum.EasingStyle.Linear)
+    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear) -- Tốc độ di chuyển cố định
     local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = goalCFrame})
     
     tween:Play()
     tween.Completed:Wait()
 
     -- Tắt xuyên tường khi đến nơi để nhặt rương
-    for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = true
-        end
-    end
+    setNoClip(false)
 
     -- Kích hoạt prompt để nhặt rương nếu có
     local prompt = chest:FindFirstChildOfClass("ProximityPrompt")
     if prompt then
         fireproximityprompt(prompt)
     end
+
+    -- Bật lại xuyên tường sau khi nhặt xong
+    setNoClip(true)
 end
 
 -- **Hàm farm rương chính**
