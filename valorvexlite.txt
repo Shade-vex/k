@@ -771,39 +771,47 @@ AddButton(TabVo, {
 
 ------speed
 
-local player = game.Players.LocalPlayer
-local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 
 local speedValue = 16 -- Giá trị tốc độ mặc định
+local maxSpeed = 300 -- Giới hạn tốc độ tối đa
 
--- Hàm cập nhật tốc độ
-local function updateSpeed(value)
-    if humanoid then
-        humanoid.WalkSpeed = value
+-- Cập nhật tốc độ
+local function updateSpeed(newSpeed)
+    if Humanoid then
+        Humanoid.WalkSpeed = newSpeed
     end
 end
 
--- Tạo Slider điều chỉnh tốc độ
-AddSlider(TabVo, {
-    Name = "Tăng Tốc Độ",
+-- Dropdown chỉnh tốc độ
+local speedSlider = AddSlider(TabVo, {
+    Name = "Chỉnh Tốc Độ",
     Min = 16,
-    Max = 300,
+    Max = maxSpeed,
     Default = speedValue,
-    Increment = 1,
     Callback = function(value)
         speedValue = value
         updateSpeed(speedValue)
     end
 })
 
--- Nút đặt lại tốc độ về mặc định (16)
+-- Nút đặt lại tốc độ về mặc định
 AddButton(TabVo, {
-    Name = "Đặt lại tốc độ",
+    Name = "Đặt Lại Tốc Độ",
     Callback = function()
         speedValue = 16
         updateSpeed(speedValue)
+        speedSlider:Set(16) -- Cập nhật giá trị trên thanh trượt
     end
 })
+
+-- Đảm bảo khi nhân vật hồi sinh, tốc độ sẽ giữ nguyên
+LocalPlayer.CharacterAdded:Connect(function(character)
+    Humanoid = character:FindFirstChildOfClass("Humanoid")
+    updateSpeed(speedValue)
+end)
 
 
 
