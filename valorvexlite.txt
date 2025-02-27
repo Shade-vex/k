@@ -67,6 +67,141 @@ AddButton(Tab1o, {
 
 
 
+------farm boss
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+-- Danh sách boss theo từng Sea
+local BossList = {
+    ["Sea 1"] = {"Saber Expert", "Bobby", "Yeti", "Vice Admiral", "Warden"},
+    ["Sea 2"] = {"Don Swan", "Jeremy", "Fajita", "Magma Admiral", "Cursed Captain"},
+    ["Sea 3"] = {"Dough King", "Beautiful Pirate", "Captain Elephant", "Kilo Admiral", "Cake Prince"}
+}
+
+local activeBosses = {} -- Danh sách boss đang tồn tại
+local selectedBoss = nil
+local farming = false
+
+-- **Hàm cập nhật danh sách boss mỗi phút**
+local function updateBossList()
+    table.clear(activeBosses)
+    for _, boss in pairs(Workspace:GetChildren()) do
+        if boss:IsA("Model") and boss:FindFirstChild("Humanoid") then
+            for _, name in ipairs(BossList["Sea 1"]) do
+                if boss.Name == name then
+                    table.insert(activeBosses, boss.Name)
+                end
+            end
+            for _, name in ipairs(BossList["Sea 2"]) do
+                if boss.Name == name then
+                    table.insert(activeBosses, boss.Name)
+                end
+            end
+            for _, name in ipairs(BossList["Sea 3"]) do
+                if boss.Name == name then
+                    table.insert(activeBosses, boss.Name)
+                end
+            end
+        end
+    end
+    if bossDropdown then
+        bossDropdown:SetOptions(activeBosses)
+    end
+end
+
+-- **Dropdown chọn boss**
+local bossDropdown = AddDropdown(Tab7o, {
+    Name = "Chọn Boss",
+    Options = activeBosses,
+    Callback = function(selected)
+        selectedBoss = selected
+    end
+})
+
+-- Cập nhật danh sách boss mỗi 1 phút
+spawn(function()
+    while true do
+        updateBossList()
+        wait(60)
+    end
+end)
+
+-- **Hàm tìm boss đã chọn**
+local function getBoss()
+    for _, boss in pairs(Workspace:GetChildren()) do
+        if boss:IsA("Model") and boss:FindFirstChild("Humanoid") and boss.Name == selectedBoss then
+            return boss
+        end
+    end
+    return nil
+end
+
+-- **Hàm farm boss**
+local function farmBoss()
+    farming = not farming
+    while farming do
+        local boss = getBoss()
+        if boss and boss:FindFirstChild("HumanoidRootPart") then
+            -- Bay trên đầu boss
+            LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+            -- Tăng hitbox boss lên x10 lần
+            boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+            -- Tự động đánh boss
+            game:GetService("ReplicatedStorage").Remotes:FindFirstChild("MeleeAttack"):FireServer()
+        end
+        wait(0.1) -- Giữ vị trí trên đầu boss
+    end
+end
+
+-- **Hàm farm tất cả boss**
+local function farmAllBosses()
+    farming = not farming
+    while farming do
+        for _, bossName in ipairs(activeBosses) do
+            selectedBoss = bossName
+            local boss = getBoss()
+            if boss and boss:FindFirstChild("HumanoidRootPart") then
+                -- Bay trên đầu boss
+                LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+                -- Tăng hitbox boss lên x10 lần
+                boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                -- Tự động đánh boss
+                game:GetService("ReplicatedStorage").Remotes:FindFirstChild("MeleeAttack"):FireServer()
+            end
+            wait(0.1) -- Giữ vị trí trên đầu boss
+        end
+        wait(0.5)
+    end
+end
+
+-- **Nút bắt đầu farm boss**
+AddButton(Tab7o, {
+    Name = "Bắt Đầu Farm Boss",
+    Callback = function()
+        farmBoss()
+    end
+})
+
+-- **Nút farm tất cả boss**
+AddButton(Tab7o, {
+    Name = "Farm Tất Cả Boss",
+    Callback = function()
+        farmAllBosses()
+    end
+})
+
+
+
+
+
+
+
+
+
+
 -------farm hub
 
 AddButton(Tab2o, {
