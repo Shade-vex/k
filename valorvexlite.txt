@@ -73,97 +73,50 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 
--- Danh sách boss hiện tại
-local bossList = {}
-local selectedBoss = nil
-local farming = false
+local bossFarmEnabled = false
 
--- **Hàm kiểm tra xem có phải boss không**
-local function isBoss(model)
-    return model:IsA("Model") 
-        and model:FindFirstChild("Humanoid") 
-        and model:FindFirstChild("HumanoidRootPart") 
-        and model.Humanoid.Health > 0
-        and (model.Name:find("Boss") or model.Name:find("King") or model.Name:find("Captain") or model.Name:find("Admiral"))
-end
-
--- **Hàm cập nhật danh sách boss**
-local function updateBossList()
-    bossList = {} -- Xóa danh sách cũ
-    for _, obj in pairs(Workspace:GetChildren()) do
-        if isBoss(obj) then
-            table.insert(bossList, obj.Name)
+-- **Hàm tìm boss gần nhất**
+local function getNearestBoss()
+    local closestBoss = nil
+    local closestDistance = math.huge
+    for _, enemy in pairs(Workspace:GetChildren()) do
+        if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+            if distance < closestDistance then
+                closestBoss = enemy
+                closestDistance = distance
+            end
         end
     end
-    if bossDropdown then
-        bossDropdown:SetOptions(bossList)
-    end
-end
-
--- **Dropdown chọn boss**
-local bossDropdown = AddDropdown(Tab2o, {
-    Name = "Danh Sách Boss",
-    Options = bossList,
-    Callback = function(selected)
-        selectedBoss = selected
-    end
-})
-
--- **Nút cập nhật danh sách boss**
-AddButton(Tab2o, {
-    Name = "Cập Nhật Danh Sách",
-    Callback = function()
-        updateBossList()
-    end
-})
-
--- **Hàm tìm boss đã chọn**
-local function getBoss()
-    for _, boss in pairs(Workspace:GetChildren()) do
-        if isBoss(boss) and boss.Name == selectedBoss then
-            return boss
-        end
-    end
-    return nil
+    return closestBoss
 end
 
 -- **Hàm farm boss**
 local function farmBoss()
-    farming = not farming
-    while farming do
-        local boss = getBoss()
+    bossFarmEnabled = not bossFarmEnabled
+    while bossFarmEnabled do
+        local boss = getNearestBoss()
         if boss and boss:FindFirstChild("HumanoidRootPart") then
             -- Bay trên đầu boss
             LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-            -- Tăng hitbox x10 lần
+            -- Tăng hitbox boss x10 lần
             boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-            -- Gây sát thương tự động
+            -- Tự động đánh
             if LocalPlayer.Character:FindFirstChildOfClass("Tool") then
-                local weapon = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                if weapon:FindFirstChild("RemoteEvent") then
-                    weapon.RemoteEvent:FireServer()
-                end
+                LocalPlayer.Character:FindFirstChildOfClass("Tool"):Activate()
             end
         end
         wait(0.1) -- Giữ vị trí trên đầu boss
     end
 end
 
--- **Nút bắt đầu farm**
+-- **Nút bật/tắt farm boss**
 AddButton(Tab2o, {
-    Name = "Bắt Đầu Farm",
+    Name = "Farm All Boss",
     Callback = function()
         farmBoss()
     end
 })
-
--- **Cập nhật danh sách boss mỗi phút**
-spawn(function()
-    while true do
-        updateBossList()
-        wait(60) -- Mỗi 60 giây cập nhật lại danh sách boss
-    end
-end)
 
 
 
@@ -1284,4 +1237,4 @@ AddButton(Tab11o, {
         AntiCheatEnabled = not AntiCheatEnabled -- Đảo trạng thái bật/tắt
         print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
     end
-})     
+})        
