@@ -47,6 +47,11 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
 ----- Discord
 
+
+   Section = AddSection(Tab1o, {"Tham gia discord của tôi tại đây"})          
+
+
+
 AddButton(Tab1o, {
     Name = "Discord",
     Callback = function()
@@ -68,6 +73,8 @@ AddButton(Tab1o, {
 
 
 ------farm boss
+
+   Section = AddSection(Tab2o, {"Farm boss beta"})          
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -137,8 +144,56 @@ AddButton(Tab2o, {
 })
 
 
+   Section = AddSection(Tab2o, {"Code nhà làm"})          
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
+local featureEnabled = false -- Trạng thái bật/tắt tính năng
+
+-- **Hàm tăng hitbox, auto-click và đánh nhanh**
+local function enableFeatures()
+    while featureEnabled do
+        -- Tăng hitbox x15 lần
+        for _, entity in pairs(Workspace:GetChildren()) do
+            if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity:FindFirstChild("HumanoidRootPart") then
+                entity.HumanoidRootPart.Size = Vector3.new(75, 75, 75) -- Hitbox x15 lần
+            end
+        end
+
+        -- Auto click + Đánh nhanh không delay
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool") then
+            local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+
+            -- Bỏ delay đòn đánh
+            if tool:FindFirstChild("RemoteEvent") then
+                tool.RemoteEvent:FireServer()
+            elseif tool:FindFirstChild("RemoteFunction") then
+                tool.RemoteFunction:InvokeServer()
+            end
+
+            -- Tấn công nhanh hơn
+            for i = 1, 5 do -- Tăng tốc độ đánh gấp 5 lần
+                tool:Activate()
+            end
+        end
+
+        wait(0.05) -- Cập nhật liên tục
+    end
+end
+
+-- **Nút bật/tắt tính năng**
+AddButton(Tab2o, {
+    Name = "Đánh quái nhanh",
+    Callback = function()
+        featureEnabled = not featureEnabled
+        if featureEnabled then
+            spawn(enableFeatures)
+        end
+    end
+})
 
 
 
