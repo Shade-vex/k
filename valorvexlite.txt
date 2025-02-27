@@ -198,7 +198,7 @@ AddButton(Tab2o, {
 
 
 
-
+   Section = AddSection(Tab2o, {"Farm chest"})        
 
 -------farm hub
 
@@ -209,7 +209,86 @@ AddButton(Tab2o, {
     end
 })   
 
+------code
 
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local FarmChests = false  -- Biến trạng thái bật/tắt farm rương
+
+-- **Tìm rương gần nhất**
+local function getClosestChest()
+    local closestChest = nil
+    local closestDistance = math.huge
+    local character = LocalPlayer.Character
+
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+
+    local playerPos = character.HumanoidRootPart.Position
+
+    for _, obj in pairs(game.Workspace:GetChildren()) do
+        if obj:IsA("Model") and (obj.Name == "Chest1" or obj.Name == "Chest2" or obj.Name == "Chest3") and obj:FindFirstChild("HumanoidRootPart") then
+            local distance = (obj.HumanoidRootPart.Position - playerPos).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestChest = obj
+            end
+        end
+    end
+
+    return closestChest
+end
+
+-- **Bay đến rương**
+local function moveToChest(chest)
+    if not chest or not chest:FindFirstChild("HumanoidRootPart") then return end
+
+    local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    local goalCFrame = chest.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0) -- Bay lên một chút để tránh va chạm
+    local tweenInfo = TweenInfo.new((humanoidRootPart.Position - chest.HumanoidRootPart.Position).Magnitude / 300, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = goalCFrame})
+    
+    tween:Play()
+    tween.Completed:Wait()
+    
+    -- Kích hoạt prompt để nhặt rương nếu có
+    local prompt = chest:FindFirstChildOfClass("ProximityPrompt")
+    if prompt then
+        fireproximityprompt(prompt)
+    end
+end
+
+-- **Hàm farm rương chính**
+local function farmChests()
+    while FarmChests do
+        local chest = getClosestChest()
+        if chest then
+            moveToChest(chest)
+        end
+        wait(0.5) -- Chờ 0.5s trước khi tìm rương tiếp theo
+    end
+end
+
+-- **Bật/tắt farm rương**
+local function toggleChestFarm()
+    FarmChests = not FarmChests
+    if FarmChests then
+        spawn(farmChests)
+    end
+end
+
+-- **Thêm nút bật/tắt farm rương**
+AddButton(Tab2o, {
+    Name = "Farm Rương",
+    Callback = function()
+        toggleChestFarm()
+    end
+})
 
 ------item
 
