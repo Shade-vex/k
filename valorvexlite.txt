@@ -78,14 +78,21 @@ local bossList = {}
 local selectedBoss = nil
 local farming = false
 
+-- **Hàm kiểm tra xem có phải boss không**
+local function isBoss(model)
+    return model:IsA("Model") 
+        and model:FindFirstChild("Humanoid") 
+        and model:FindFirstChild("HumanoidRootPart") 
+        and model.Humanoid.Health > 0
+        and (model.Name:find("Boss") or model.Name:find("King") or model.Name:find("Captain") or model.Name:find("Admiral"))
+end
+
 -- **Hàm cập nhật danh sách boss**
 local function updateBossList()
     bossList = {} -- Xóa danh sách cũ
     for _, obj in pairs(Workspace:GetChildren()) do
-        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
-            if obj.Humanoid.Health > 0 then -- Chỉ lấy boss còn sống
-                table.insert(bossList, obj.Name)
-            end
+        if isBoss(obj) then
+            table.insert(bossList, obj.Name)
         end
     end
     if bossDropdown then
@@ -113,7 +120,7 @@ AddButton(Tab2o, {
 -- **Hàm tìm boss đã chọn**
 local function getBoss()
     for _, boss in pairs(Workspace:GetChildren()) do
-        if boss:IsA("Model") and boss:FindFirstChild("Humanoid") and boss.Name == selectedBoss then
+        if isBoss(boss) and boss.Name == selectedBoss then
             return boss
         end
     end
