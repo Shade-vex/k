@@ -72,57 +72,43 @@ AddButton(Tab1o, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Danh sách boss theo từng Sea
-local BossList = {
-    ["Sea 1"] = {"Saber Expert", "Bobby", "Yeti", "Vice Admiral", "Warden"},
-    ["Sea 2"] = {"Don Swan", "Jeremy", "Fajita", "Magma Admiral", "Cursed Captain"},
-    ["Sea 3"] = {"Dough King", "Beautiful Pirate", "Captain Elephant", "Kilo Admiral", "Cake Prince"}
-}
-
-local activeBosses = {} -- Danh sách boss đang tồn tại
+-- Danh sách boss hiện tại
+local bossList = {}
 local selectedBoss = nil
 local farming = false
 
--- **Hàm kiểm tra boss tồn tại trong game**
-local function checkActiveBosses()
-    table.clear(activeBosses)
-    for _, boss in pairs(Workspace:GetChildren()) do
-        if boss:IsA("Model") and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") then
-            for _, sea in pairs(BossList) do
-                for _, name in pairs(sea) do
-                    if boss.Name == name then
-                        table.insert(activeBosses, boss.Name)
-                    end
-                end
+-- **Hàm cập nhật danh sách boss**
+local function updateBossList()
+    bossList = {} -- Xóa danh sách cũ
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+            if obj.Humanoid.Health > 0 then -- Chỉ lấy boss còn sống
+                table.insert(bossList, obj.Name)
             end
         end
+    end
+    if bossDropdown then
+        bossDropdown:SetOptions(bossList)
     end
 end
 
 -- **Dropdown chọn boss**
 local bossDropdown = AddDropdown(Tab2o, {
-    Name = "Chọn Boss",
-    Options = {},
+    Name = "Danh Sách Boss",
+    Options = bossList,
     Callback = function(selected)
         selectedBoss = selected
     end
 })
 
--- **Hàm cập nhật danh sách boss**
-local function updateBossList()
-    checkActiveBosses()
-    bossDropdown:SetOptions(activeBosses)
-end
-
--- Cập nhật danh sách boss mỗi 1 phút
-spawn(function()
-    while true do
+-- **Nút cập nhật danh sách boss**
+AddButton(Tab2o, {
+    Name = "Cập Nhật Danh Sách",
+    Callback = function()
         updateBossList()
-        wait(60)
     end
-end)
+})
 
 -- **Hàm tìm boss đã chọn**
 local function getBoss()
@@ -142,59 +128,35 @@ local function farmBoss()
         if boss and boss:FindFirstChild("HumanoidRootPart") then
             -- Bay trên đầu boss
             LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-            -- Tăng hitbox boss lên x10 lần
+            -- Tăng hitbox x10 lần
             boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-            -- Tự động đánh boss
-            ReplicatedStorage.Remotes:FindFirstChild("MeleeAttack"):FireServer()
+            -- Gây sát thương tự động
+            if LocalPlayer.Character:FindFirstChildOfClass("Tool") then
+                local weapon = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                if weapon:FindFirstChild("RemoteEvent") then
+                    weapon.RemoteEvent:FireServer()
+                end
+            end
         end
         wait(0.1) -- Giữ vị trí trên đầu boss
     end
 end
 
--- **Hàm farm tất cả boss**
-local function farmAllBosses()
-    farming = not farming
-    while farming do
-        for _, bossName in ipairs(activeBosses) do
-            selectedBoss = bossName
-            local boss = getBoss()
-            if boss and boss:FindFirstChild("HumanoidRootPart") then
-                -- Bay trên đầu boss
-                LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-                -- Tăng hitbox boss lên x10 lần
-                boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                -- Tự động đánh boss
-                ReplicatedStorage.Remotes:FindFirstChild("MeleeAttack"):FireServer()
-            end
-            wait(0.1) -- Giữ vị trí trên đầu boss
-        end
-        wait(0.5)
-    end
-end
-
--- **Nút cập nhật danh sách boss**
+-- **Nút bắt đầu farm**
 AddButton(Tab2o, {
-    Name = "Cập Nhật Danh Sách Boss",
-    Callback = function()
-        updateBossList()
-    end
-})
-
--- **Nút bắt đầu farm boss**
-AddButton(Tab2o, {
-    Name = "Bắt Đầu Farm Boss",
+    Name = "Bắt Đầu Farm",
     Callback = function()
         farmBoss()
     end
 })
 
--- **Nút farm tất cả boss**
-AddButton(Tab2o, {
-    Name = "Farm Tất Cả Boss",
-    Callback = function()
-        farmAllBosses()
+-- **Cập nhật danh sách boss mỗi phút**
+spawn(function()
+    while true do
+        updateBossList()
+        wait(60) -- Mỗi 60 giây cập nhật lại danh sách boss
     end
-})
+end)
 
 
 
