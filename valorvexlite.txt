@@ -172,10 +172,11 @@ local LocalPlayer = Players.LocalPlayer
 -- Biến cục bộ để tránh xung đột
 local selectedPlayer = nil
 local playerList = {}
+local playerDropdown -- Biến lưu dropdown
 
 -- Hàm cập nhật danh sách người chơi
 local function updatePlayerList()
-    table.clear(playerList) -- Xóa danh sách cũ để tránh trùng lặp
+    playerList = {} -- Xóa danh sách cũ
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             table.insert(playerList, player.Name)
@@ -190,7 +191,7 @@ updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Nút cập nhật danh sách người chơi trong Tab7o (Đưa lên đầu)
+-- Nút cập nhật danh sách người chơi trong Tab7o
 AddButton(Tab7o, {
     Name = "Cập Nhật Danh Sách",
     Callback = function()
@@ -198,7 +199,7 @@ AddButton(Tab7o, {
     end
 })
 
--- Dropdown danh sách người chơi trong Tab7o (Giữ nguyên)
+-- Dropdown danh sách người chơi trong Tab7o
 playerDropdown = AddDropdown(Tab7o, {
     Name = "Danh Sách Player",
     Options = playerList,
@@ -994,7 +995,7 @@ end
 
 -- Thêm nút bật/tắt Kill Aura vào Tab11o
 AddButton(Tab11o, {
-    Name = "Haki bá vương [premium]",
+    Name = "Haki bá vương",
     Callback = function()
         toggleKillAura()
     end
