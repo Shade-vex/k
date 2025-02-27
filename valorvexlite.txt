@@ -773,6 +773,8 @@ AddButton(TabVo, {
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
 local speedEnabled = false
 local defaultSpeed = 16
 local superSpeed = 300
@@ -788,6 +790,13 @@ local function updateSpeed()
         LocalPlayer.Character.Humanoid.WalkSpeed = speedEnabled and superSpeed or defaultSpeed
     end
 end
+
+-- Bật/Tắt tốc độ mỗi khung hình để đảm bảo không bị reset
+RunService.RenderStepped:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speedEnabled and superSpeed or defaultSpeed
+    end
+end)
 
 -- Nút bật/tắt Super Speed
 AddButton(TabVo, {
