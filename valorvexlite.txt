@@ -164,7 +164,7 @@ AddButton(Tab6o, {
 
 
 
-----dich chuyen
+   Section = AddSection(Tab1o, {"Dịch chuyển V1"})          
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -220,6 +220,99 @@ AddButton(Tab7o, {
     end
 })
 
+
+
+   Section = AddSection(Tab1o, {"Dịch chuyển V2"})          
+
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- Biến cục bộ để tránh xung đột
+local selectedPlayer = nil
+local playerList = {}
+_G.Flying = false
+
+-- Hàm cập nhật danh sách người chơi
+local function updatePlayerList()
+    table.clear(playerList) -- Xóa danh sách cũ để tránh trùng lặp
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerList, player.Name)
+        end
+    end
+    if playerDropdown then
+        playerDropdown:SetOptions(playerList) -- Cập nhật dropdown với danh sách mới
+    end
+end
+
+updatePlayerList()
+Players.PlayerAdded:Connect(updatePlayerList)
+Players.PlayerRemoving:Connect(updatePlayerList)
+
+-- Nút cập nhật danh sách người chơi (Để lên đầu)
+AddButton(Tab7o, {
+    Name = "Cập Nhật Danh Sách",
+    Callback = function()
+        updatePlayerList()
+    end
+})
+
+-- Dropdown danh sách người chơi
+playerDropdown = AddDropdown(Tab7o, {
+    Name = "Danh Sách Player",
+    Options = playerList,
+    Callback = function(selected)
+        selectedPlayer = Players:FindFirstChild(selected)
+    end
+})
+
+-- **🚀 Dịch Chuyển An Toàn (Bay & Xuyên Tường)**
+local function teleportToPlayer()
+    if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetHrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if hrp and targetHrp then
+            _G.Flying = true -- Bật chế độ bay
+
+            -- Xuyên tường khi di chuyển
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+
+            -- Tween bay đến mục tiêu
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new((hrp.Position - targetHrp.Position).Magnitude / 300, Enum.EasingStyle.Linear)
+            local tween = tweenService:Create(hrp, tweenInfo, {CFrame = targetHrp.CFrame})
+
+            tween:Play()
+            tween.Completed:Wait() -- Chờ đến nơi thì dừng bay
+
+            _G.Flying = false -- Tắt chế độ bay
+
+            -- Khôi phục va chạm sau khi dịch chuyển xong
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    else
+        warn("Không thể dịch chuyển! Người chơi không hợp lệ hoặc đã rời game.")
+    end
+end
+
+-- Nút dịch chuyển đến người chơi đã chọn (Vừa bay vừa xuyên tường)
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển An Toàn",
+    Callback = function()
+        teleportToPlayer()
+    end
+})
 
 
 
