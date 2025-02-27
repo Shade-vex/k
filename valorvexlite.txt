@@ -211,103 +211,75 @@ AddButton(Tab2o, {
 
 ------code
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
+local Player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local HumanoidRootPart = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
 
-_G.FarmChests = false
-_G.Tween = nil
-local Speed = 300
+_G.FarmChest = false
+local speed = 300 -- Tốc độ bay cố định
 
--- **Tìm rương gần nhất**
+-- Hàm tìm rương gần nhất
 local function getClosestChest()
     local closestChest = nil
-    local closestDistance = math.huge
-    local character = LocalPlayer.Character
+    local shortestDistance = math.huge
+    if not HumanoidRootPart then return nil end
 
-    if not character or not character:FindFirstChild("HumanoidRootPart") then
-        return nil
-    end
-
-    local playerPos = character.HumanoidRootPart.Position
-
-    for _, obj in pairs(game.Workspace:GetChildren()) do
-        if obj:IsA("Model") and (obj.Name == "Chest1" or obj.Name == "Chest2" or obj.Name == "Chest3") and obj:FindFirstChild("HumanoidRootPart") then
-            local distance = (obj.HumanoidRootPart.Position - playerPos).Magnitude
-            if distance < closestDistance then
-                closestDistance = distance
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and (obj.Name == "Chest1" or obj.Name == "Chest2" or obj.Name == "Chest3") then
+            local distance = (HumanoidRootPart.Position - obj.Position).Magnitude
+            if distance < shortestDistance then
                 closestChest = obj
+                shortestDistance = distance
             end
         end
     end
-
     return closestChest
 end
 
--- **Bật/tắt xuyên tường**
-local function setNoClip(state)
-    for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = not state
+-- Hàm di chuyển đến rương
+local function moveToChest(chest)
+    if not chest or not HumanoidRootPart then return end
+
+    -- Bật xuyên tường
+    for _, part in ipairs(Player.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+
+    -- Tween di chuyển
+    local tween = TweenService:Create(HumanoidRootPart, TweenInfo.new((HumanoidRootPart.Position - chest.Position).Magnitude / speed, Enum.EasingStyle.Linear), {CFrame = chest.CFrame})
+    tween:Play()
+    tween.Completed:Wait()
+
+    -- Tắt xuyên tường khi nhặt rương
+    for _, part in ipairs(Player.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
         end
     end
 end
 
--- **Bay đến rương**
-local function moveToChest(chest)
-    if not chest or not chest:FindFirstChild("HumanoidRootPart") then return end
-
-    local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
-
-    -- Bật xuyên tường khi di chuyển
-    setNoClip(true)
-
-    local goalCFrame = chest.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
-    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear) -- Tốc độ di chuyển cố định
-    local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = goalCFrame})
-    
-    tween:Play()
-    tween.Completed:Wait()
-
-    -- Tắt xuyên tường khi đến nơi để nhặt rương
-    setNoClip(false)
-
-    -- Kích hoạt prompt để nhặt rương nếu có
-    local prompt = chest:FindFirstChildOfClass("ProximityPrompt")
-    if prompt then
-        fireproximityprompt(prompt)
-    end
-
-    -- Bật lại xuyên tường sau khi nhặt xong
-    setNoClip(true)
-end
-
--- **Hàm farm rương chính**
+-- Hàm farm rương
 local function farmChests()
-    while _G.FarmChests do
+    while _G.FarmChest do
         local chest = getClosestChest()
         if chest then
             moveToChest(chest)
         end
-        wait(0.5) -- Giữ khoảng cách giữa các lần nhặt
+        wait(0.5) -- Giảm tải xử lý
     end
 end
 
--- **Bật/tắt farm rương**
-local function toggleChestFarm()
-    _G.FarmChests = not _G.FarmChests
-    if _G.FarmChests then
-        spawn(farmChests)
-    end
-end
-
--- **Thêm nút bật/tắt farm rương**
+-- Nút bật/tắt farm rương
 AddButton(Tab2o, {
-    Name = "Farm Rương V2",
+    Name = "Farm Chest",
     Callback = function()
-        toggleChestFarm()
+        _G.FarmChest = not _G.FarmChest
+        if _G.FarmChest then
+            spawn(farmChests)
+        end
     end
 })
 
