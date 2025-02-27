@@ -169,13 +169,7 @@ AddButton(Tab6o, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Kiểm tra Tab7 có tồn tại không
-if not Tab7 then
-    warn("Tab7 chưa được khởi tạo!")
-    return
-end
-
--- Biến lưu người chơi được chọn
+-- Biến cục bộ để tránh xung đột
 local selectedPlayer = nil
 local playerList = {}
 
@@ -187,45 +181,48 @@ local function updatePlayerList()
             table.insert(playerList, player.Name)
         end
     end
+    if playerDropdown then
+        playerDropdown:SetOptions(playerList) -- Cập nhật dropdown với danh sách mới
+    end
 end
 
 updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Thêm dropdown danh sách người chơi vào Tab7
-local playerDropdown = AddDropdown(Tab7, {
-    Name = "Danh Sách Player",
-    Options = playerList,
-    Callback = function(selected)
-        selectedPlayer = Players:FindFirstChild(selected)
-    end
-})
+-- Đảm bảo UI hiển thị bằng cách thêm vào hệ thống UI
+task.spawn(function()
+    wait(1) -- Chờ một chút để UI tải xong
 
--- Nút cập nhật danh sách người chơi
-local updateButton = AddButton(Tab7, {
-    Name = "Cập Nhật Danh Sách",
-    Callback = function()
-        updatePlayerList()
-        if playerDropdown then
-            playerDropdown:SetOptions(playerList) -- Cập nhật dropdown với danh sách mới
+    -- Dropdown danh sách người chơi trong Tab7
+    playerDropdown = AddDropdown(Tab7, {
+        Name = "Danh Sách Player",
+        Options = playerList,
+        Callback = function(selected)
+            selectedPlayer = Players:FindFirstChild(selected)
         end
-    end
-})
+    })
 
--- Nút dịch chuyển đến người chơi đã chọn
-local teleportButton = AddButton(Tab7, {
-    Name = "Dịch Chuyển",
-    Callback = function()
-        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
-        else
-            warn("Không thể dịch chuyển! Người chơi không hợp lệ hoặc đã rời game.")
+    -- Nút cập nhật danh sách người chơi trong Tab7
+    AddButton(Tab7, {
+        Name = "Cập Nhật Danh Sách",
+        Callback = function()
+            updatePlayerList()
         end
-    end
-})
+    })
 
-print("Script dịch chuyển đã load thành công!")
+    -- Nút dịch chuyển đến người chơi đã chọn trong Tab7
+    AddButton(Tab7, {
+        Name = "Dịch Chuyển",
+        Callback = function()
+            if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
+            else
+                warn("Không thể dịch chuyển! Người chơi không hợp lệ hoặc đã rời game.")
+            end
+        end
+    })
+end)
 
 
 
