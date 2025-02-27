@@ -769,6 +769,44 @@ AddButton(TabVo, {
 })   
 
 
+------speed
+
+local player = game.Players.LocalPlayer
+local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+
+local speedValue = 16 -- Giá trị tốc độ mặc định
+
+-- Hàm cập nhật tốc độ
+local function updateSpeed(value)
+    if humanoid then
+        humanoid.WalkSpeed = value
+    end
+end
+
+-- Tạo Slider điều chỉnh tốc độ
+AddSlider(TabVo, {
+    Name = "Tăng Tốc Độ",
+    Min = 16,
+    Max = 300,
+    Default = speedValue,
+    Increment = 1,
+    Callback = function(value)
+        speedValue = value
+        updateSpeed(speedValue)
+    end
+})
+
+-- Nút đặt lại tốc độ về mặc định (16)
+AddButton(TabVo, {
+    Name = "Đặt lại tốc độ",
+    Callback = function()
+        speedValue = 16
+        updateSpeed(speedValue)
+    end
+})
+
+
+
 
 -----esp player
 
