@@ -774,45 +774,40 @@ AddButton(TabVo, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Biến lưu tốc độ hiện tại
-local speedValue = 16
+-- Kiểm tra và tạo TabVo nếu chưa tồn tại
+if not TabVo then
+    TabVo = AddTab("Speed Control")
+end
+
+-- Giá trị tốc độ mặc định
+local currentSpeed = 16  -- Tốc độ mặc định của Roblox
 local maxSpeed = 300
 
--- Cập nhật tốc độ
-local function updateSpeed(value)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+-- Hàm cập nhật tốc độ
+local function updateSpeed(speed)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speed
     end
 end
 
--- Tạo thanh chỉnh tốc độ
-local speedSlider = AddSlider(TabVo, {
+-- **Tạo thanh trượt chỉnh tốc độ**
+AddSlider(TabVo, {
     Name = "Chỉnh Tốc Độ",
     Min = 16,
     Max = maxSpeed,
-    Default = speedValue,
+    Default = currentSpeed,
+    Increment = 1,
     Callback = function(value)
-        speedValue = value
-        updateSpeed(speedValue)
+        currentSpeed = value
+        updateSpeed(currentSpeed)
     end
 })
 
--- Nút đặt lại tốc độ về mặc định
-AddButton(TabVo, {
-    Name = "Đặt Lại Tốc Độ",
-    Callback = function()
-        speedValue = 16
-        updateSpeed(speedValue)
-        speedSlider:Set(16) -- Cập nhật thanh trượt
-    end
-})
-
--- Đảm bảo tốc độ không bị reset khi hồi sinh
+-- Đảm bảo tốc độ giữ nguyên khi nhân vật hồi sinh
 LocalPlayer.CharacterAdded:Connect(function(character)
-    wait(1) -- Đợi nhân vật tải xong
-    updateSpeed(speedValue)
+    wait(3) -- Chờ nhân vật load xong
+    updateSpeed(currentSpeed)
 end)
-
 
 
 
@@ -1442,4 +1437,4 @@ AddButton(Tab11o, {
         AntiCheatEnabled = not AntiCheatEnabled -- Đảo trạng thái bật/tắt
         print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
     end
-})         
+})      
