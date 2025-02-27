@@ -169,13 +169,14 @@ AddButton(Tab6o, {
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Tạo biến lưu danh sách player
+-- Biến cục bộ để tránh xung đột
+local selectedPlayer = nil
 local playerList = {}
 
--- Hàm cập nhật danh sách player
+-- Hàm cập nhật danh sách người chơi
 local function updatePlayerList()
-    playerList = {}
-    for _, player in pairs(Players:GetPlayers()) do
+    table.clear(playerList) -- Xóa danh sách cũ để tránh trùng lặp
+    for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             table.insert(playerList, player.Name)
         end
@@ -186,25 +187,16 @@ updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Biến lưu player đã chọn
-local SelectedPlayer = nil
-
--- Đảm bảo Tab7 tồn tại
-if not Tab7 then
-    Tab7 = AddTab("Teleport")
-end
-
--- Thêm danh sách thả xuống để chọn player
+-- Dropdown danh sách người chơi trong Tab7
 AddDropdown(Tab7, {
     Name = "Danh Sách Player",
     Options = playerList,
-    Default = 1,
     Callback = function(selected)
-        SelectedPlayer = Players:FindFirstChild(selected)
+        selectedPlayer = Players:FindFirstChild(selected)
     end
 })
 
--- Thêm nút cập nhật danh sách player
+-- Nút cập nhật danh sách người chơi trong Tab7
 AddButton(Tab7, {
     Name = "Cập Nhật Danh Sách",
     Callback = function()
@@ -212,12 +204,12 @@ AddButton(Tab7, {
     end
 })
 
--- Thêm nút dịch chuyển
+-- Nút dịch chuyển đến người chơi đã chọn trong Tab7
 AddButton(Tab7, {
-    Name = "Dịch Chuyển Đến Player",
+    Name = "Dịch Chuyển",
     Callback = function()
-        if SelectedPlayer and SelectedPlayer.Character and SelectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = SelectedPlayer.Character.HumanoidRootPart.CFrame
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
         end
     end
 })
