@@ -190,20 +190,20 @@ updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
--- Dropdown danh sách người chơi trong Tab7o
+-- Nút cập nhật danh sách người chơi trong Tab7o (Đưa lên đầu)
+AddButton(Tab7o, {
+    Name = "Cập Nhật Danh Sách",
+    Callback = function()
+        updatePlayerList()
+    end
+})
+
+-- Dropdown danh sách người chơi trong Tab7o (Giữ nguyên)
 playerDropdown = AddDropdown(Tab7o, {
     Name = "Danh Sách Player",
     Options = playerList,
     Callback = function(selected)
         selectedPlayer = Players:FindFirstChild(selected)
-    end
-})
-
--- Nút cập nhật danh sách người chơi trong Tab7o
-AddButton(Tab7o, {
-    Name = "Cập Nhật Danh Sách",
-    Callback = function()
-        updatePlayerList()
     end
 })
 
