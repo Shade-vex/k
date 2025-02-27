@@ -773,49 +773,35 @@ AddButton(TabVo, {
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local speedEnabled = false
+local defaultSpeed = 16
+local superSpeed = 300
 
 -- Đảm bảo TabVo tồn tại trước khi thêm UI
 if not TabVo then
     TabVo = AddTab("Speed Control")
 end
 
--- Biến lưu tốc độ hiện tại
-local currentSpeed = 16  -- Tốc độ mặc định
-local maxSpeed = 300
-
 -- Hàm cập nhật tốc độ
-local function updateSpeed(speed)
+local function updateSpeed()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = speed
+        LocalPlayer.Character.Humanoid.WalkSpeed = speedEnabled and superSpeed or defaultSpeed
     end
 end
 
--- **Tạo nút đặt lại tốc độ**
+-- Nút bật/tắt Super Speed
 AddButton(TabVo, {
-    Name = "Reset Speed",
+    Name = "Super Speed",
     Callback = function()
-        currentSpeed = 16
-        updateSpeed(currentSpeed)
+        speedEnabled = not speedEnabled
+        updateSpeed()
     end
 })
 
--- **Tạo thanh trượt chỉnh tốc độ**
-AddSlider(TabVo, {
-    Name = "Chỉnh Tốc Độ",
-    Min = 16,
-    Max = maxSpeed,
-    Default = currentSpeed,
-    Increment = 1,
-    Callback = function(value)
-        currentSpeed = value
-        updateSpeed(currentSpeed)
-    end
-})
-
--- **Giữ nguyên tốc độ khi hồi sinh**
-LocalPlayer.CharacterAdded:Connect(function(character)
+-- Giữ nguyên tốc độ khi hồi sinh
+LocalPlayer.CharacterAdded:Connect(function()
     wait(1) -- Chờ nhân vật load xong
-    updateSpeed(currentSpeed)
+    updateSpeed()
 end)
 
 
@@ -1446,4 +1432,4 @@ AddButton(Tab11o, {
         AntiCheatEnabled = not AntiCheatEnabled -- Đảo trạng thái bật/tắt
         print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
     end
-})      
+})        
