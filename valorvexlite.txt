@@ -740,36 +740,87 @@ AddButton(TabVo, {
 
 ------ săn bounty
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local hitboxEnabled = false  -- Biến để bật/tắt hitbox
+local hitboxSize = Vector3.new(15, 15, 15)  -- Kích thước hitbox x15
+local transparency = 0.5  -- Độ trong suốt của hitbox (0 là không trong suốt, 1 là vô hình)
 
-local hitboxEnabled = false -- Trạng thái bật/tắt hitbox
+-- Hàm chỉnh hitbox của người chơi khác
+local function setHitbox(player)
+    if player == game.Players.LocalPlayer then return end  -- Không chỉnh hitbox của bạn
 
-local function setHitboxSize(multiplier)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Character then
-            for _, part in pairs(player.Character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.Size = Vector3.new(2 * multiplier, 2 * multiplier, 2 * multiplier) -- X15 hitbox
-                    part.Transparency = 0.7 -- Làm hitbox mờ đi một chút
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = character.HumanoidRootPart
+        rootPart.Size = hitboxSize
+        rootPart.Transparency = transparency
+        rootPart.CanCollide = false
+    end
+end
+
+-- Hiển thị chữ "ValorVex Hitbox V1" bảy màu trong 3 giây
+local function showRainbowText()
+    local gui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+    local label = Instance.new("TextLabel", gui)
+
+    label.Size = UDim2.new(0.4, 0, 0.1, 0)  -- Kích thước chữ
+    label.Position = UDim2.new(0.3, 0, 0.4, 0)  -- Giữa màn hình
+    label.Text = "ValorVex Hitbox V1"
+    label.Font = Enum.Font.SourceSansBold
+    label.TextScaled = true
+    label.BackgroundTransparency = 1
+    label.TextStrokeTransparency = 0
+    label.TextColor3 = Color3.new(1, 0, 0)  -- Bắt đầu với màu đỏ
+
+    -- Hiệu ứng đổi màu bảy sắc cầu vồng
+    local colors = {
+        Color3.new(1, 0, 0),  -- Đỏ
+        Color3.new(1, 0.5, 0),  -- Cam
+        Color3.new(1, 1, 0),  -- Vàng
+        Color3.new(0, 1, 0),  -- Xanh lá
+        Color3.new(0, 1, 1),  -- Xanh dương
+        Color3.new(0, 0, 1),  -- Xanh đậm
+        Color3.new(0.5, 0, 1)  -- Tím
+    }
+
+    task.spawn(function()
+        for i = 1, 30 do  -- Chạy trong 3 giây (mỗi lần đổi màu 0.1 giây)
+            label.TextColor3 = colors[(i % #colors) + 1]
+            wait(0.1)
+        end
+        gui:Destroy()  -- Xóa chữ sau 3 giây
+    end)
+end
+
+-- Hàm bật/tắt hitbox
+local function toggleHitbox()
+    hitboxEnabled = not hitboxEnabled
+    if hitboxEnabled then
+        for _, player in pairs(game.Players:GetPlayers()) do
+            setHitbox(player)
+        end
+        game.Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                setHitbox(player)
+            end)
+        end)
+        showRainbowText()  -- Hiển thị chữ khi bật hitbox
+    else
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local character = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    local rootPart = character.HumanoidRootPart
+                    rootPart.Size = Vector3.new(2, 2, 1)  -- Kích thước mặc định
+                    rootPart.Transparency = 0  -- Không trong suốt
                 end
             end
         end
     end
 end
 
-local function toggleHitbox()
-    hitboxEnabled = not hitboxEnabled
-    if hitboxEnabled then
-        setHitboxSize(15) -- Bật hitbox x15
-    else
-        setHitboxSize(1) -- Trả về bình thường
-    end
-end
-
--- Tạo nút bật/tắt hitbox
+-- Nút bật/tắt hitbox
 AddButton(TabVo, {
-    Name = "Super Hitbox",
+    Name = "Super hitbox",
     Callback = function()
         toggleHitbox()
     end
