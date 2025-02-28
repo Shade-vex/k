@@ -746,6 +746,9 @@ local transparency = 0.5  -- Độ trong suốt của hitbox (0 là không trong
 
 -- Hàm chỉnh hitbox của người chơi khác
 local function setHitbox(player)
+    -- Kiểm tra không áp dụng hitbox cho chính mình
+    if player == game.Players.LocalPlayer then return end  
+
     local character = player.Character
     if character and character:FindFirstChild("HumanoidRootPart") then
         local rootPart = character.HumanoidRootPart
@@ -793,7 +796,7 @@ end
 local function toggleHitbox()
     hitboxEnabled = not hitboxEnabled
     if hitboxEnabled then
-        -- Áp dụng hitbox cho tất cả player hiện tại
+        -- Áp dụng hitbox cho tất cả player hiện tại (trừ LocalPlayer)
         for _, player in pairs(game.Players:GetPlayers()) do
             setHitbox(player)
         end
@@ -816,11 +819,13 @@ local function toggleHitbox()
     else
         -- Đặt lại hitbox cho tất cả player
         for _, player in pairs(game.Players:GetPlayers()) do
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local rootPart = character.HumanoidRootPart
-                rootPart.Size = Vector3.new(2, 2, 1)  -- Kích thước mặc định
-                rootPart.Transparency = 0  -- Không trong suốt
+            if player ~= game.Players.LocalPlayer then
+                local character = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    local rootPart = character.HumanoidRootPart
+                    rootPart.Size = Vector3.new(2, 2, 1)  -- Kích thước mặc định
+                    rootPart.Transparency = 0  -- Không trong suốt
+                end
             end
         end
     end
