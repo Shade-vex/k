@@ -741,7 +741,7 @@ AddButton(TabVo, {
 ------ săn bounty
 
 local hitboxEnabled = false  -- Biến để bật/tắt hitbox
-local hitboxSize = Vector3.new(40, 40, 40)  -- Kích thước hitbox x40
+local hitboxSize = Vector3.new(70, 70, 70)  -- Kích thước hitbox x70
 local transparency = 0.5  -- Độ trong suốt của hitbox (0 là không trong suốt, 1 là vô hình)
 
 -- Hàm chỉnh hitbox của người chơi khác
@@ -855,7 +855,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
 local speedEnabled = false
-local defaultSpeed = 26
+local defaultSpeed = 30
 local superSpeed = 300
 
 -- Đảm bảo TabVo tồn tại trước khi thêm UI
