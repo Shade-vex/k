@@ -740,10 +740,38 @@ AddButton(TabVo, {
 
 ------ săn bounty
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local hitboxEnabled = false -- Trạng thái bật/tắt hitbox
+
+local function setHitboxSize(multiplier)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            for _, part in pairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.Size = Vector3.new(2 * multiplier, 2 * multiplier, 2 * multiplier) -- X15 hitbox
+                    part.Transparency = 0.7 -- Làm hitbox mờ đi một chút
+                end
+            end
+        end
+    end
+end
+
+local function toggleHitbox()
+    hitboxEnabled = not hitboxEnabled
+    if hitboxEnabled then
+        setHitboxSize(15) -- Bật hitbox x15
+    else
+        setHitboxSize(1) -- Trả về bình thường
+    end
+end
+
+-- Tạo nút bật/tắt hitbox
 AddButton(TabVo, {
-    Name = "Auto Bounty",
+    Name = "Super Hitbox",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/s%C4%83n%20bao%20ty%20%C4%91%C3%AA.txt"))()
+        toggleHitbox()
     end
 })
 
@@ -759,14 +787,14 @@ AddButton(TabVo, {
     end
 })   
 
--------kill aura
+-------bounty
 
 AddButton(TabVo, {
-    Name = "Kill Aura",
+    Name = "Auto Bounty",
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/Crazy/main/Crazy"))() 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/s%C4%83n%20bao%20ty%20%C4%91%C3%AA.txt"))()
     end
-})   
+})
 
 
 ------speed
