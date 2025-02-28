@@ -1521,3 +1521,12 @@ AddButton(Tab11o, {
         print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
     end
 })        
+
+
+
+AddButton(Tab11o, {
+    Name = "???",
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/Shade-vex/refs/heads/main/th%C3%B4ng%20b%C3%A1o.txt"))() 
+    end
+})      
