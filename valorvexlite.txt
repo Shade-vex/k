@@ -743,6 +743,7 @@ AddButton(TabVo, {
 local hitboxEnabled = false  -- Biến để bật/tắt hitbox
 local hitboxSize = Vector3.new(70, 70, 70)  -- Kích thước hitbox x70
 local transparency = 0.5  -- Độ trong suốt của hitbox (0 là không trong suốt, 1 là vô hình)
+local hitboxLoopRunning = false  -- Biến kiểm soát vòng lặp kiểm tra hitbox
 
 -- Hàm chỉnh hitbox của người chơi khác
 local function setHitbox(player)
@@ -828,8 +829,16 @@ local function toggleHitbox()
         end)
 
         showRainbowText()  -- Hiển thị chữ khi bật hitbox
+
+        -- Bắt đầu vòng lặp kiểm tra hitbox mỗi giây
+        hitboxLoopRunning = true
+        while hitboxLoopRunning do
+            wait(1)  -- Kiểm tra mỗi giây
+            checkAndSetHitboxes()  -- Kiểm tra và set hitbox cho tất cả player
+        end
     else
-        -- Đặt lại hitbox cho tất cả player
+        -- Dừng vòng lặp và reset hitbox cho tất cả player
+        hitboxLoopRunning = false
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
                 local character = player.Character
@@ -850,12 +859,6 @@ AddButton(TabVo, {
         toggleHitbox()
     end
 })
-
--- Kiểm tra hitbox mỗi giây (đảm bảo không bỏ sót player mới)
-while true do
-    wait(1)  -- Kiểm tra mỗi giây
-    checkAndSetHitboxes()  -- Kiểm tra và set hitbox cho tất cả player
-end
 
 
 
