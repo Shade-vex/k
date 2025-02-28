@@ -758,6 +758,18 @@ local function setHitbox(player)
     end
 end
 
+-- Hàm kiểm tra và cập nhật hitbox cho tất cả người chơi trong game
+local function checkAndSetHitboxes()
+    if hitboxEnabled then
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character then
+                -- Kiểm tra và set hitbox cho player
+                setHitbox(player)
+            end
+        end
+    end
+end
+
 -- Hiển thị chữ "ValorVex Hitbox V1" bảy màu trong 3 giây
 local function showRainbowText()
     local gui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
@@ -797,11 +809,7 @@ local function toggleHitbox()
     hitboxEnabled = not hitboxEnabled
     if hitboxEnabled then
         -- Áp dụng hitbox cho tất cả player hiện tại (trừ LocalPlayer)
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player.Character then
-                setHitbox(player)
-            end
-        end
+        checkAndSetHitboxes()
 
         -- Kết nối sự kiện khi có player mới vào game và sau 3s sẽ thay đổi hitbox
         game.Players.PlayerAdded:Connect(function(player)
@@ -842,6 +850,12 @@ AddButton(TabVo, {
         toggleHitbox()
     end
 })
+
+-- Kiểm tra hitbox mỗi giây (đảm bảo không bỏ sót player mới)
+while true do
+    wait(1)  -- Kiểm tra mỗi giây
+    checkAndSetHitboxes()  -- Kiểm tra và set hitbox cho tất cả player
+end
 
 
 
