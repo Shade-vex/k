@@ -798,7 +798,9 @@ local function toggleHitbox()
     if hitboxEnabled then
         -- Áp dụng hitbox cho tất cả player hiện tại (trừ LocalPlayer)
         for _, player in pairs(game.Players:GetPlayers()) do
-            setHitbox(player)
+            if player.Character then
+                setHitbox(player)
+            end
         end
 
         -- Kết nối sự kiện khi có player mới vào game và sau 3s sẽ thay đổi hitbox
