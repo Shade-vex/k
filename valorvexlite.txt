@@ -801,9 +801,10 @@ local function toggleHitbox()
             setHitbox(player)
         end
 
-        -- Kết nối sự kiện khi có player mới vào game
+        -- Kết nối sự kiện khi có player mới vào game và sau 3s sẽ thay đổi hitbox
         game.Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function()
+                wait(3)  -- Chờ 3 giây để nhân vật load xong
                 setHitbox(player)
             end)
         end)
@@ -811,10 +812,11 @@ local function toggleHitbox()
         -- Kết nối sự kiện khi player hồi sinh
         game.Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function()
+                wait(3)  -- Chờ 3 giây để nhân vật load xong
                 setHitbox(player)
             end)
         end)
-        
+
         showRainbowText()  -- Hiển thị chữ khi bật hitbox
     else
         -- Đặt lại hitbox cho tất cả player
