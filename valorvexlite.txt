@@ -1879,3 +1879,62 @@ AddButton(Tab11o, {
        loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/Shade-vex/refs/heads/main/th%C3%B4ng%20b%C3%A1o.txt"))() 
     end
 })       
+
+
+
+
+
+-- Đảm bảo Tab11o tồn tại
+if not Tab11o then
+    Tab11o = AddTab("Hiển thị tọa độ")
+end
+
+-- Tạo Label hiển thị tọa độ
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+local CoordLabel = Instance.new("TextLabel")
+CoordLabel.Parent = ScreenGui
+CoordLabel.Size = UDim2.new(0, 200, 0, 50) 
+CoordLabel.Position = UDim2.new(0.8, 0, 0.05, 0) -- Gần chữ đỏ
+CoordLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Nền đỏ
+CoordLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Chữ trắng
+CoordLabel.TextScaled = true
+CoordLabel.Text = "Tọa độ: Đang tải..."
+CoordLabel.Visible = false -- Ban đầu ẩn
+
+-- Biến kiểm tra trạng thái
+local isCoordVisible = false
+
+-- Hàm cập nhật tọa độ
+local function updateCoords()
+    while true do
+        if isCoordVisible then
+            local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local pos = hrp.Position
+                CoordLabel.Text = string.format("Tọa độ: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+            end
+        end
+        wait(0.5) -- Cập nhật mỗi 0.5 giây
+    end
+end
+
+-- Nút bật/tắt tọa độ
+AddButton(Tab11o, {
+    Name = "Hiện tọa độ",
+    Callback = function()
+        isCoordVisible = not isCoordVisible
+        CoordLabel.Visible = isCoordVisible
+    end
+})
+
+-- Chạy cập nhật tọa độ
+task.spawn(updateCoords)
+
+
+
+
+
+
+
