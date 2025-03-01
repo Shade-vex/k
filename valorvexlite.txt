@@ -540,23 +540,7 @@ AddButton(Tab7o, {
 
 -----đảo
 
-local LocationsSea1 = {
-    ["Starter Island"] = Vector3.new(1052, 16, 1427),
-    ["Jungle"] = Vector3.new(-1159, 16, 352),
-    ["Pirate Village"] = Vector3.new(-1121, 16, 3855),
-    ["Desert"] = Vector3.new(1026, 16, 4489),
-    ["Middle Island"] = Vector3.new(-21, 16, 283),
-    ["Frozen Village"] = Vector3.new(1186, 16, -1211),
-    ["Marine Fortress"] = Vector3.new(-4926, 16, 4284),
-    ["Skylands"] = Vector3.new(-4837, 330, -716),
-    ["Prison"] = Vector3.new(4854, 16, 744),
-    ["Colosseum"] = Vector3.new(-1429, 16, -2952),
-    ["Magma Village"] = Vector3.new(-5231, 16, 8427),
-    ["Underwater City"] = Vector3.new(3876, -301, -1885),
-    ["Fountain City"] = Vector3.new(5252, 16, 4059),
-}
-
--- Hàm di chuyển đến địa điểm
+-- Hàm di chuyển
 local function teleportToLocation(location)
     local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if hrp and location then
@@ -573,15 +557,98 @@ if not Tab7o then
     Tab7o = AddTab("Sea 1 Teleport")
 end
 
--- Tạo nút cho từng địa điểm trong Sea 1
-for locationName, position in pairs(LocationsSea1) do
-    AddButton(Tab7o, {
-        Name = "Dịch Chuyển - " .. locationName,
-        Callback = function()
-            teleportToLocation(position)
-        end
-    })
-end
+-- Tạo từng nút riêng biệt
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Starter Island",
+    Callback = function()
+        teleportToLocation(Vector3.new(1052, 16, 1427))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Jungle",
+    Callback = function()
+        teleportToLocation(Vector3.new(-1159, 16, 352))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Pirate Village",
+    Callback = function()
+        teleportToLocation(Vector3.new(-1121, 16, 3855))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Desert",
+    Callback = function()
+        teleportToLocation(Vector3.new(1026, 16, 4489))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Middle Island",
+    Callback = function()
+        teleportToLocation(Vector3.new(-21, 16, 283))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Frozen Village",
+    Callback = function()
+        teleportToLocation(Vector3.new(1186, 16, -1211))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Marine Fortress",
+    Callback = function()
+        teleportToLocation(Vector3.new(-4926, 16, 4284))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Skylands",
+    Callback = function()
+        teleportToLocation(Vector3.new(-4837, 330, -716))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Prison",
+    Callback = function()
+        teleportToLocation(Vector3.new(4854, 16, 744))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Colosseum",
+    Callback = function()
+        teleportToLocation(Vector3.new(-1429, 16, -2952))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Magma Village",
+    Callback = function()
+        teleportToLocation(Vector3.new(-5231, 16, 8427))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Underwater City",
+    Callback = function()
+        teleportToLocation(Vector3.new(3876, -301, -1885))
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Dịch Chuyển - Fountain City",
+    Callback = function()
+        teleportToLocation(Vector3.new(5252, 16, 4059))
+    end
+})
 
 
 
@@ -1545,75 +1612,6 @@ local function showBannedMessage()
     label.Size = UDim2.new(1, 0, 1, 0)
     label.Text = "Đang lấy True Triple Yoru...."
     label.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Màu chữ trắng
-    label.TextScaled = true
-    label.BackgroundTransparency = 1
-    
-    -- Kết thúc trò chơi sau khi hiển thị thông báo
-    wait(60) -- Chờ 60 giây
-    Player:Kick("You have been banned for cheating.")
-end
-
--- Thực hiện fake ban khi người chơi nhập lệnh hoặc sự kiện nào đó
-AddButton(Tab11o, {
-    Name = "True Triple Yoru",
-    Callback = function()
-        showBannedMessage()
-    end
-})        
-
-
------fix
-
-local Whitelist = { "n1LK_v033STPE", "JuJuBo_RBX", "Yrixyakita", "mrbeast", "kittgaming" } -- Danh sách tài khoản Roblox đáng tin cậy
-local AntiCheatEnabled = true -- Trạng thái mặc định: bật
-
-function isWhitelisted(player)
-    for _, v in pairs(Whitelist) do
-        if player.Name == v then
-            return true
-        end
-    end
-    return false
-end
-
-function checkPlayer(player)
-    if not AntiCheatEnabled then return end -- Nếu anti-cheat đang tắt, bỏ qua kiểm tra
-    if isWhitelisted(player) then return end -- Nếu là người trong whitelist, bỏ qua kiểm tra
-
-    local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
-    if humanoid then
-        local speed = humanoid.WalkSpeed
-        if speed > 50 then
-            warn(player.Name .. " có thể đang dùng speed hack!")
-            player:Kick("Phát hiện speed hack!") 
-        end
-    end
-end
-
-game.Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        wait(5) -- Chờ nhân vật load xong để tránh lỗi
-        checkPlayer(player)
-    end)
-end)
-
--- Nút bật/tắt anti-cheat
-AddButton(Tab11o, {
-    Name = "Anti Cheat off",
-    Callback = function()
-        AntiCheatEnabled = not AntiCheatEnabled -- Đảo trạng thái bật/tắt
-        print("Anti Cheat hiện đang: " .. (AntiCheatEnabled and "BẬT" or "TẮT"))
-    end
-})        
-
-
-
-AddButton(Tab11o, {
-    Name = "???",
-    Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/Shade-vex/refs/heads/main/th%C3%B4ng%20b%C3%A1o.txt"))() 
-    end
-})       Màu chữ trắng
     label.TextScaled = true
     label.BackgroundTransparency = 1
     
