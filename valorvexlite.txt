@@ -603,7 +603,13 @@ end
 local Sea = GetCurrentSea()
 local SelectedLocation = nil
 
-AddDropdown(Tab7o, {
+-- Đảm bảo tab7 tồn tại
+if not Tab7 then
+    Tab7 = AddTab("Teleport")
+end
+
+-- Dropdown chọn địa điểm
+local locationDropdown = AddDropdown(Tab7, {
     Name = "Chọn địa điểm",
     Options = table.keys(Locations[Sea]),
     Callback = function(Value)
@@ -611,7 +617,8 @@ AddDropdown(Tab7o, {
     end
 })
 
-AddButton(Tab7o, {
+-- Nút bắt đầu bay
+AddButton(Tab7, {
     Name = "Bắt đầu bay",
     Callback = function()
         if SelectedLocation and Locations[Sea][SelectedLocation] then
