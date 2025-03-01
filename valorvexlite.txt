@@ -541,7 +541,7 @@ AddButton(Tab7o, {
 -----đảo
 
 local Locations = {
-    [1] = {
+    ["First Sea"] = {
         ["Starter Island"] = Vector3.new(1052, 16, 1427),
         ["Jungle"] = Vector3.new(-1159, 16, 352),
         ["Pirate Village"] = Vector3.new(-1121, 16, 3855),
@@ -556,7 +556,7 @@ local Locations = {
         ["Underwater City"] = Vector3.new(3876, -301, -1885),
         ["Fountain City"] = Vector3.new(5252, 16, 4059),
     },
-    [2] = {
+    ["Second Sea"] = {
         ["Kingdom of Rose"] = Vector3.new(-394, 16, 1792),
         ["Usoap's Island"] = Vector3.new(-5711, 16, 3539),
         ["Mansion"] = Vector3.new(-390, 318, 618),
@@ -571,7 +571,7 @@ local Locations = {
         ["Ice Castle"] = Vector3.new(6091, 16, -6116),
         ["Forgotten Island"] = Vector3.new(-3000, 16, -10100),
     },
-    [3] = {
+    ["Third Sea"] = {
         ["Port Town"] = Vector3.new(-297, 73, 5472),
         ["Hydra Island"] = Vector3.new(5228, 640, 3445),
         ["Great Tree"] = Vector3.new(2286, 25, -6522),
@@ -583,36 +583,23 @@ local Locations = {
     }
 }
 
-local function GetCurrentSea()
-    task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
-    local level = game.Players.LocalPlayer.Data.Level.Value
-    if level < 700 then
-        return 1
-    elseif level < 1500 then
-        return 2
-    else
-        return 3
-    end
-end
-
-local Sea = GetCurrentSea()
+local Sea = "Third Sea" -- Mặc định là Sea 3
 local SelectedLocation = nil
 
--- Đảm bảo Tab7o tồn tại
+-- Đảm bảo tab7o tồn tại
 if not Tab7o then
     Tab7o = AddTab("Teleport")
 end
 
--- Dropdown chọn địa điểm
-AddDropdown(Tab7o, {
+-- Hiển thị nút ngay lập tức
+local locationDropdown = AddDropdown(Tab7o, {
     Name = "Chọn địa điểm",
-    Options = table.keys(Locations[Sea]),
+    Options = {},
     Callback = function(Value)
         SelectedLocation = Value
     end
 })
 
--- Nút bắt đầu bay
 AddButton(Tab7o, {
     Name = "Bắt đầu bay",
     Callback = function()
@@ -631,6 +618,22 @@ AddButton(Tab7o, {
         end
     end
 })
+
+-- Chờ 5s trước khi cập nhật danh sách địa điểm
+task.wait(5)
+
+-- Xác định Sea dựa trên PlaceId
+local placeId = game.PlaceId
+if placeId == 2753915549 then
+    Sea = "First Sea"
+elseif placeId == 4442272183 then
+    Sea = "Second Sea"
+elseif placeId == 7449423635 then
+    Sea = "Third Sea"
+end
+
+-- Cập nhật danh sách địa điểm
+locationDropdown:SetOptions(table.keys(Locations[Sea]))
 
 
 
