@@ -386,6 +386,7 @@ AddButton(Tab6o, {
 
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 local placeId = {
@@ -394,13 +395,28 @@ local placeId = {
     ["Third Sea"] = 7449423635
 }
 
+-- Hàm lấy danh sách server ngẫu nhiên để đổi server sau khi dịch chuyển thành công
+local function switchServer()
+    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    
+    for _, server in pairs(servers.data) do
+        if server.playing < server.maxPlayers then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+            return
+        end
+    end
+end
+
 local function teleportToSea(seaId)
     if placeId[seaId] then
-        -- Đảm bảo dừng tất cả hoạt động trước khi dịch chuyển
-        task.spawn(function()
-            wait(1) -- Đợi 1 giây để tránh bị kéo lại
-            TeleportService:Teleport(placeId[seaId], LocalPlayer)
-        end)
+        -- Reset nhân vật trước khi teleport để tránh bị kéo lại
+        LocalPlayer.Character:BreakJoints() 
+        task.wait(2) -- Đợi 2 giây cho nhân vật reset hoàn toàn
+        TeleportService:Teleport(placeId[seaId], LocalPlayer)
+        
+        -- Đổi server sau khi vào Sea mới (chờ vài giây để game load xong)
+        task.wait(5)
+        switchServer()
     else
         warn("Không thể xác định SEA!")
     end
