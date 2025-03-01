@@ -536,119 +536,122 @@ AddButton(Tab7o, {
 
 
 
-   Section = AddSection(Tab7o, {"Sea1"})          
+   Section = AddSection(Tab7o, {"Dịch chuyển [chỉ hiện ở sea1]"})          
 
 -----đảo
 
--- Hàm di chuyển
-local function teleportToLocation(location)
-    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if hrp and location then
-        local tweenService = game:GetService("TweenService")
-        local tweenInfo = TweenInfo.new((hrp.Position - location).Magnitude / 300, Enum.EasingStyle.Linear)
-        local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(location)})
+-- Kiểm tra nếu đang ở Sea 1
+if game.PlaceId == 2753915549 then
+    -- Hàm di chuyển với độ cao tăng thêm 50
+    local function teleportToLocation(location)
+        local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and location then
+            local targetPos = location + Vector3.new(0, 50, 0) -- Bay cao hơn 50
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new((hrp.Position - targetPos).Magnitude / 300, Enum.EasingStyle.Linear)
+            local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
 
-        tween:Play()
+            tween:Play()
+        end
     end
+
+    -- Đảm bảo Tab7o tồn tại
+    if not Tab7o then
+        Tab7o = AddTab("Sea 1 Teleport")
+    end
+
+    -- Tạo từng nút riêng biệt
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Starter Island",
+        Callback = function()
+            teleportToLocation(Vector3.new(1052, 16, 1427))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Jungle",
+        Callback = function()
+            teleportToLocation(Vector3.new(-1159, 16, 352))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Pirate Village",
+        Callback = function()
+            teleportToLocation(Vector3.new(-1121, 16, 3855))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Desert",
+        Callback = function()
+            teleportToLocation(Vector3.new(1026, 16, 4489))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Middle Island",
+        Callback = function()
+            teleportToLocation(Vector3.new(-21, 16, 283))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Frozen Village",
+        Callback = function()
+            teleportToLocation(Vector3.new(1186, 16, -1211))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Marine Fortress",
+        Callback = function()
+            teleportToLocation(Vector3.new(-4926, 16, 4284))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Skylands",
+        Callback = function()
+            teleportToLocation(Vector3.new(-4837, 330, -716))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Prison",
+        Callback = function()
+            teleportToLocation(Vector3.new(4854, 16, 744))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Colosseum",
+        Callback = function()
+            teleportToLocation(Vector3.new(-1429, 16, -2952))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Magma Village",
+        Callback = function()
+            teleportToLocation(Vector3.new(-5231, 16, 8427))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Underwater City",
+        Callback = function()
+            teleportToLocation(Vector3.new(3876, -301, -1885))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Fountain City",
+        Callback = function()
+            teleportToLocation(Vector3.new(5252, 16, 4059))
+        end
+    })
 end
-
--- Đảm bảo Tab7o tồn tại
-if not Tab7o then
-    Tab7o = AddTab("Sea 1 Teleport")
-end
-
--- Tạo từng nút riêng biệt
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Starter Island",
-    Callback = function()
-        teleportToLocation(Vector3.new(1052, 16, 1427))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Jungle",
-    Callback = function()
-        teleportToLocation(Vector3.new(-1159, 16, 352))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Pirate Village",
-    Callback = function()
-        teleportToLocation(Vector3.new(-1121, 16, 3855))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Desert",
-    Callback = function()
-        teleportToLocation(Vector3.new(1026, 16, 4489))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Middle Island",
-    Callback = function()
-        teleportToLocation(Vector3.new(-21, 16, 283))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Frozen Village",
-    Callback = function()
-        teleportToLocation(Vector3.new(1186, 16, -1211))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Marine Fortress",
-    Callback = function()
-        teleportToLocation(Vector3.new(-4926, 16, 4284))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Skylands",
-    Callback = function()
-        teleportToLocation(Vector3.new(-4837, 330, -716))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Prison",
-    Callback = function()
-        teleportToLocation(Vector3.new(4854, 16, 744))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Colosseum",
-    Callback = function()
-        teleportToLocation(Vector3.new(-1429, 16, -2952))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Magma Village",
-    Callback = function()
-        teleportToLocation(Vector3.new(-5231, 16, 8427))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Underwater City",
-    Callback = function()
-        teleportToLocation(Vector3.new(3876, -301, -1885))
-    end
-})
-
-AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Fountain City",
-    Callback = function()
-        teleportToLocation(Vector3.new(5252, 16, 4059))
-    end
-})
 
 
 
