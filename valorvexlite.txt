@@ -542,11 +542,11 @@ AddButton(Tab7o, {
 
 -- Kiểm tra nếu đang ở Sea 1
 if game.PlaceId == 2753915549 then
-    -- Hàm di chuyển với độ cao tăng thêm 50
+    -- Hàm di chuyển với độ cao tăng thêm 65
     local function teleportToLocation(location)
         local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp and location then
-            local targetPos = location + Vector3.new(0, 50, 0) -- Bay cao hơn 50
+            local targetPos = location + Vector3.new(0, 65, 0) -- Bay cao hơn 65
             local tweenService = game:GetService("TweenService")
             local tweenInfo = TweenInfo.new((hrp.Position - targetPos).Magnitude / 300, Enum.EasingStyle.Linear)
             local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
@@ -657,11 +657,11 @@ end
 
 -- Kiểm tra nếu đang ở Sea 2
 if game.PlaceId == 4442272183 then
-    -- Hàm di chuyển với độ cao tăng thêm 50
+    -- Hàm di chuyển với độ cao tăng thêm 65
     local function teleportToLocation(location)
         local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp and location then
-            local targetPos = location + Vector3.new(0, 50, 0) -- Bay cao hơn 50
+            local targetPos = location + Vector3.new(0, 65, 0) -- Bay cao hơn 65
             local tweenService = game:GetService("TweenService")
             local tweenInfo = TweenInfo.new((hrp.Position - targetPos).Magnitude / 300, Enum.EasingStyle.Linear)
             local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
@@ -767,6 +767,87 @@ if game.PlaceId == 4442272183 then
         end
     })
 end   
+
+
+   Section = AddSection(Tab7o, {"Dịch chuyển [chỉ hiện ở sea3]"})          -- Kiểm tra nếu đang ở Sea 2
+
+-- Kiểm tra nếu đang ở Sea 3
+if game.PlaceId == 7449423635 then
+    -- Hàm di chuyển với độ cao tăng thêm 65
+    local function teleportToLocation(location)
+        local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and location then
+            local targetPos = location + Vector3.new(0, 65, 0) -- Bay cao hơn 65
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new((hrp.Position - targetPos).Magnitude / 300, Enum.EasingStyle.Linear)
+            local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+
+            tween:Play()
+        end
+    end
+
+    -- Đảm bảo Tab7o tồn tại
+    if not Tab7o then
+        Tab7o = AddTab("Sea 3 Teleport")
+    end
+
+    -- Tạo từng nút riêng biệt cho Sea 3
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Port Town",
+        Callback = function()
+            teleportToLocation(Vector3.new(-297, 73, 5472))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Hydra Island",
+        Callback = function()
+            teleportToLocation(Vector3.new(5228, 640, 3445))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Great Tree",
+        Callback = function()
+            teleportToLocation(Vector3.new(2286, 25, -6522))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Mansion",
+        Callback = function()
+            teleportToLocation(Vector3.new(-12548, 337, -7485))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Floating Turtle",
+        Callback = function()
+            teleportToLocation(Vector3.new(-11031, 630, -3211))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Castle on the Sea",
+        Callback = function()
+            teleportToLocation(Vector3.new(-5076, 314, -3150))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Haunted Castle",
+        Callback = function()
+            teleportToLocation(Vector3.new(-9507, 167, 5540))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Sea of Treats",
+        Callback = function()
+            teleportToLocation(Vector3.new(-2016, 16, -12027))
+        end
+    })
+end
 
 -----aimbot player
 
