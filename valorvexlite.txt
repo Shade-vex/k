@@ -653,7 +653,120 @@ if game.PlaceId == 2753915549 then
     })
 end
 
+   Section = AddSection(Tab7o, {"Dịch chuyển [chỉ hiện ở sea2]"})       
 
+-- Kiểm tra nếu đang ở Sea 2
+if game.PlaceId == 4442272183 then
+    -- Hàm di chuyển với độ cao tăng thêm 50
+    local function teleportToLocation(location)
+        local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and location then
+            local targetPos = location + Vector3.new(0, 50, 0) -- Bay cao hơn 50
+            local tweenService = game:GetService("TweenService")
+            local tweenInfo = TweenInfo.new((hrp.Position - targetPos).Magnitude / 300, Enum.EasingStyle.Linear)
+            local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+
+            tween:Play()
+        end
+    end
+
+    -- Đảm bảo Tab7o tồn tại
+    if not Tab7o then
+        Tab7o = AddTab("Sea 2 Teleport")
+    end
+
+    -- Tạo từng nút riêng biệt cho Sea 2
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Kingdom of Rose",
+        Callback = function()
+            teleportToLocation(Vector3.new(-394, 16, 1792))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Usoap's Island",
+        Callback = function()
+            teleportToLocation(Vector3.new(-5711, 16, 3539))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Mansion",
+        Callback = function()
+            teleportToLocation(Vector3.new(-390, 318, 618))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Green Zone",
+        Callback = function()
+            teleportToLocation(Vector3.new(-2372, 16, -2980))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Cafe",
+        Callback = function()
+            teleportToLocation(Vector3.new(-385, 75, 325))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Factory",
+        Callback = function()
+            teleportToLocation(Vector3.new(430, 23, -240))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Graveyard",
+        Callback = function()
+            teleportToLocation(Vector3.new(-5415, 16, -754))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Dark Arena",
+        Callback = function()
+            teleportToLocation(Vector3.new(1342, 16, -6823))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Snow Mountain",
+        Callback = function()
+            teleportToLocation(Vector3.new(5601, 46, -6519))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Hot and Cold",
+        Callback = function()
+            teleportToLocation(Vector3.new(-5912, 16, -4986))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Cursed Ship",
+        Callback = function()
+            teleportToLocation(Vector3.new(902, 124, 2862))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Ice Castle",
+        Callback = function()
+            teleportToLocation(Vector3.new(6091, 16, -6116))
+        end
+    })
+
+    AddButton(Tab7o, {
+        Name = "Dịch Chuyển - Forgotten Island",
+        Callback = function()
+            teleportToLocation(Vector3.new(-3000, 16, -10100))
+        end
+    })
+end   
 
 -----aimbot player
 
