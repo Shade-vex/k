@@ -540,8 +540,6 @@ AddButton(Tab7o, {
 
 -----đảo
 
-task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
-
 local Locations = {
     ["First Sea"] = {
         ["Starter Island"] = Vector3.new(1052, 16, 1427),
@@ -586,9 +584,10 @@ local Locations = {
 }
 
 local function GetCurrentSea()
+    task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
     local sea = "Third Sea" -- Mặc định là Sea 3
 
-    -- Kiểm tra ID bản đồ để xác định Sea
+    -- Kiểm tra tên bản đồ
     local placeId = game.PlaceId
     if placeId == 2753915549 then
         sea = "First Sea"
@@ -1667,4 +1666,6 @@ AddButton(Tab11o, {
     Callback = function()
        loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/Shade-vex/refs/heads/main/th%C3%B4ng%20b%C3%A1o.txt"))() 
     end
-})      
+})       
+      
+         
