@@ -540,6 +540,8 @@ AddButton(Tab7o, {
 
 -----đảo
 
+task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
+
 local Locations = {
     ["First Sea"] = {
         ["Starter Island"] = Vector3.new(1052, 16, 1427),
@@ -584,10 +586,9 @@ local Locations = {
 }
 
 local function GetCurrentSea()
-    task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
     local sea = "Third Sea" -- Mặc định là Sea 3
 
-    -- Kiểm tra tên bản đồ
+    -- Kiểm tra ID bản đồ để xác định Sea
     local placeId = game.PlaceId
     if placeId == 2753915549 then
         sea = "First Sea"
@@ -603,13 +604,13 @@ end
 local Sea = GetCurrentSea()
 local SelectedLocation = nil
 
--- Đảm bảo tab7o tồn tại
+-- Đảm bảo Tab7o tồn tại
 if not Tab7o then
     Tab7o = AddTab("Teleport")
 end
 
 -- Dropdown chọn địa điểm
-local locationDropdown = AddDropdown(Tab7, {
+local locationDropdown = AddDropdown(Tab7o, {
     Name = "Chọn địa điểm",
     Options = table.keys(Locations[Sea]),
     Callback = function(Value)
