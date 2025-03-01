@@ -533,12 +533,54 @@ AddButton(Tab7o, {
     end
 })
 
+
+
+
+   Section = AddSection(Tab7o, {"Dịch chuyển theo địa điểm"})          
+
 -----đảo
 
 local Locations = {
-    ["First Sea"] = {"Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island", "Frozen Village", "Marine Fortress", "Skylands", "Prison", "Colosseum", "Magma Village", "Underwater City", "Fountain City"},
-    ["Second Sea"] = {"Kingdom of Rose", "Usoap's Island", "Mansion", "Green Zone", "Cafe", "Factory", "Graveyard", "Dark Arena", "Snow Mountain", "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"},
-    ["Third Sea"] = {"Port Town", "Hydra Island", "Great Tree", "Mansion", "Floating Turtle", "Castle on the Sea", "Haunted Castle", "Sea of Treats"}
+    ["First Sea"] = {
+        ["Starter Island"] = Vector3.new(1052, 16, 1427),
+        ["Jungle"] = Vector3.new(-1159, 16, 352),
+        ["Pirate Village"] = Vector3.new(-1121, 16, 3855),
+        ["Desert"] = Vector3.new(1026, 16, 4489),
+        ["Middle Island"] = Vector3.new(-21, 16, 283),
+        ["Frozen Village"] = Vector3.new(1186, 16, -1211),
+        ["Marine Fortress"] = Vector3.new(-4926, 16, 4284),
+        ["Skylands"] = Vector3.new(-4837, 330, -716),
+        ["Prison"] = Vector3.new(4854, 16, 744),
+        ["Colosseum"] = Vector3.new(-1429, 16, -2952),
+        ["Magma Village"] = Vector3.new(-5231, 16, 8427),
+        ["Underwater City"] = Vector3.new(3876, -301, -1885),
+        ["Fountain City"] = Vector3.new(5252, 16, 4059),
+    },
+    ["Second Sea"] = {
+        ["Kingdom of Rose"] = Vector3.new(-394, 16, 1792),
+        ["Usoap's Island"] = Vector3.new(-5711, 16, 3539),
+        ["Mansion"] = Vector3.new(-390, 318, 618),
+        ["Green Zone"] = Vector3.new(-2372, 16, -2980),
+        ["Cafe"] = Vector3.new(-385, 75, 325),
+        ["Factory"] = Vector3.new(430, 23, -240),
+        ["Graveyard"] = Vector3.new(-5415, 16, -754),
+        ["Dark Arena"] = Vector3.new(1342, 16, -6823),
+        ["Snow Mountain"] = Vector3.new(5601, 46, -6519),
+        ["Hot and Cold"] = Vector3.new(-5912, 16, -4986),
+        ["Cursed Ship"] = Vector3.new(902, 124, 2862),
+        ["Ice Castle"] = Vector3.new(6091, 16, -6116),
+        ["Forgotten Island"] = Vector3.new(-3000, 16, -10100),
+    },
+    ["Third Sea"] = {
+        ["Port Town"] = Vector3.new(-297, 73, 5472),
+        ["Hydra Island"] = Vector3.new(5228, 640, 3445),
+        ["Great Tree"] = Vector3.new(2286, 25, -6522),
+        ["Mansion"] = Vector3.new(-12548, 337, -7485),
+        ["Floating Turtle"] = Vector3.new(-11031, 630, -3211),
+        ["Castle on the Sea"] = Vector3.new(-5076, 314, -3150),
+        ["Haunted Castle"] = Vector3.new(-9507, 167, 5540),
+        ["Sea of Treats"] = Vector3.new(-2016, 16, -12027),
+    }
 }
 
 local function GetCurrentSea()
@@ -563,7 +605,7 @@ local SelectedLocation = nil
 
 AddDropdown(Tab7o, {
     Name = "Chọn địa điểm",
-    Options = Locations[Sea],
+    Options = table.keys(Locations[Sea]),
     Callback = function(Value)
         SelectedLocation = Value
     end
@@ -572,13 +614,18 @@ AddDropdown(Tab7o, {
 AddButton(Tab7o, {
     Name = "Bắt đầu bay",
     Callback = function()
-        if SelectedLocation and workspace:FindFirstChild(SelectedLocation) then
-            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+        if SelectedLocation and Locations[Sea][SelectedLocation] then
+            local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
-                hrp.CFrame = workspace:FindFirstChild(SelectedLocation).CFrame
+                local targetPos = Locations[Sea][SelectedLocation]
+                local tweenService = game:GetService("TweenService")
+                local tweenInfo = TweenInfo.new((hrp.Position - targetPos).Magnitude / 300, Enum.EasingStyle.Linear)
+                local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+
+                tween:Play()
             end
         else
-            warn("Không tìm thấy địa điểm trong workspace!")
+            warn("Không tìm thấy địa điểm trong danh sách!")
         end
     end
 })
