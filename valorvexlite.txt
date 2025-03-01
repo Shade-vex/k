@@ -583,18 +583,28 @@ local Locations = {
     }
 }
 
-local Sea = "Third Sea" -- Mặc định là Sea 3
+local Sea = "Third Sea" -- Mặc định là Third Sea
 local SelectedLocation = nil
+
+-- Xác định Sea dựa trên PlaceId
+local placeId = game.PlaceId
+if placeId == 2753915549 then
+    Sea = "First Sea"
+elseif placeId == 4442272183 then
+    Sea = "Second Sea"
+elseif placeId == 7449423635 then
+    Sea = "Third Sea"
+end
 
 -- Đảm bảo tab7o tồn tại
 if not Tab7o then
     Tab7o = AddTab("Teleport")
 end
 
--- Tạo Dropdown ngay lập tức nhưng chưa có dữ liệu
+-- Tạo Dropdown ngay lập tức với danh sách địa điểm tương ứng
 local locationDropdown = AddDropdown(Tab7o, {
     Name = "Chọn địa điểm",
-    Options = {},
+    Options = table.keys(Locations[Sea]),
     Callback = function(Value)
         SelectedLocation = Value
     end
@@ -619,25 +629,6 @@ AddButton(Tab7o, {
         end
     end
 })
-
--- Xác định Sea dựa trên PlaceId sau 5s, tránh xung đột với code khác
-task.defer(function()
-    task.wait(5)
-
-    local placeId = game.PlaceId
-    if placeId == 2753915549 then
-        Sea = "First Sea"
-    elseif placeId == 4442272183 then
-        Sea = "Second Sea"
-    elseif placeId == 7449423635 then
-        Sea = "Third Sea"
-    end
-
-    -- Kiểm tra nếu dropdown đã tạo, cập nhật danh sách địa điểm
-    if locationDropdown then
-        locationDropdown:SetOptions(table.keys(Locations[Sea]))
-    end
-end)
 
 
 
