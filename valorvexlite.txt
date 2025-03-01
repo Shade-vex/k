@@ -384,37 +384,44 @@ AddButton(Tab6o, {
 
    Section = AddSection(Tab7o, {"Đến các sea"})          
 
-local TeleportService = game:GetService("TeleportService")
-local placeIds = {
-    ["First Sea"] = 2753915549,
-    ["Second Sea"] = 4442272183,
-    ["Third Sea"] = 7449423635
-}
+local function teleportToSea(seaId)
+    local placeId = {
+        ["First Sea"] = 2753915549,
+        ["Second Sea"] = 4442272183,
+        ["Third Sea"] = 7449423635
+    }
+
+    if placeId[seaId] then
+        game:GetService("TeleportService"):Teleport(placeId[seaId], game.Players.LocalPlayer)
+    else
+        warn("Không thể xác định SEA!")
+    end
+end
 
 -- Đảm bảo Tab7o tồn tại
 if not Tab7o then
     Tab7o = AddTab("Sea Teleport")
 end
 
--- Tạo 3 nút dịch chuyển đến từng Sea
+-- Tạo các nút dịch chuyển đến từng SEA
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Sea 1",
+    Name = "Dịch Chuyển - First Sea",
     Callback = function()
-        TeleportService:Teleport(placeIds["First Sea"], game.Players.LocalPlayer)
+        teleportToSea("First Sea")
     end
 })
 
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Sea 2",
+    Name = "Dịch Chuyển - Second Sea",
     Callback = function()
-        TeleportService:Teleport(placeIds["Second Sea"], game.Players.LocalPlayer)
+        teleportToSea("Second Sea")
     end
 })
 
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Sea 3",
+    Name = "Dịch Chuyển - Third Sea",
     Callback = function()
-        TeleportService:Teleport(placeIds["Third Sea"], game.Players.LocalPlayer)
+        teleportToSea("Third Sea")
     end
 })
 
