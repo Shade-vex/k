@@ -536,34 +536,23 @@ AddButton(Tab7o, {
 -----đảo
 
 local Locations = {
-    [1] = {"Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island", "Frozen Village", "Marine Fortress", "Skylands", "Prison", "Colosseum", "Magma Village", "Underwater City", "Fountain City"},
-    [2] = {"Kingdom of Rose", "Usoap's Island", "Mansion", "Green Zone", "Cafe", "Factory", "Graveyard", "Dark Arena", "Snow Mountain", "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"},
-    [3] = {"Port Town", "Hydra Island", "Great Tree", "Mansion", "Floating Turtle", "Castle on the Sea", "Haunted Castle", "Sea of Treats"}
+    ["First Sea"] = {"Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island", "Frozen Village", "Marine Fortress", "Skylands", "Prison", "Colosseum", "Magma Village", "Underwater City", "Fountain City"},
+    ["Second Sea"] = {"Kingdom of Rose", "Usoap's Island", "Mansion", "Green Zone", "Cafe", "Factory", "Graveyard", "Dark Arena", "Snow Mountain", "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"},
+    ["Third Sea"] = {"Port Town", "Hydra Island", "Great Tree", "Mansion", "Floating Turtle", "Castle on the Sea", "Haunted Castle", "Sea of Treats"}
 }
 
 local function GetCurrentSea()
     task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
-    local lowestLevel = math.huge
-    local sea = 3 -- Mặc định là Sea 3
+    local sea = "Third Sea" -- Mặc định là Sea 3
 
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player and player.Character then
-            local leaderstats = player:FindFirstChild("leaderstats")
-            if leaderstats then
-                local level = leaderstats:FindFirstChild("Level")
-                if level and level.Value < lowestLevel then
-                    lowestLevel = level.Value
-                end
-            end
-        end
-    end
-
-    if lowestLevel < 700 then
-        sea = 1
-    elseif lowestLevel < 1500 then
-        sea = 2
-    else
-        sea = 3
+    -- Kiểm tra tên bản đồ
+    local placeId = game.PlaceId
+    if placeId == 2753915549 then
+        sea = "First Sea"
+    elseif placeId == 4442272183 then
+        sea = "Second Sea"
+    elseif placeId == 7449423635 then
+        sea = "Third Sea"
     end
 
     return sea
