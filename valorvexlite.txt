@@ -540,7 +540,7 @@ AddButton(Tab7o, {
 
 -----đảo
 
-local LocationsFirstSea = {
+local LocationsSea1 = {
     ["Starter Island"] = Vector3.new(1052, 16, 1427),
     ["Jungle"] = Vector3.new(-1159, 16, 352),
     ["Pirate Village"] = Vector3.new(-1121, 16, 3855),
@@ -556,23 +556,29 @@ local LocationsFirstSea = {
     ["Fountain City"] = Vector3.new(5252, 16, 4059),
 }
 
--- Hàm bay đến tọa độ
-local function FlyToLocation(position)
+-- Hàm di chuyển đến địa điểm
+local function teleportToLocation(location)
     local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
+    if hrp and location then
         local tweenService = game:GetService("TweenService")
-        local tweenInfo = TweenInfo.new((hrp.Position - position).Magnitude / 300, Enum.EasingStyle.Linear)
-        local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(position)})
+        local tweenInfo = TweenInfo.new((hrp.Position - location).Magnitude / 300, Enum.EasingStyle.Linear)
+        local tween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(location)})
+
         tween:Play()
     end
 end
 
--- Tạo nút cho từng địa điểm trong First Sea
-for name, position in pairs(LocationsFirstSea) do
+-- Đảm bảo Tab7o tồn tại
+if not Tab7o then
+    Tab7o = AddTab("Sea 1 Teleport")
+end
+
+-- Tạo nút cho từng địa điểm trong Sea 1
+for locationName, position in pairs(LocationsSea1) do
     AddButton(Tab7o, {
-        Name = "Bay đến " .. name,
+        Name = "Dịch Chuyển - " .. locationName,
         Callback = function()
-            FlyToLocation(position)
+            teleportToLocation(position)
         end
     })
 end
