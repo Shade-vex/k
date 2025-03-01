@@ -769,7 +769,8 @@ if game.PlaceId == 4442272183 then
 end   
 
 
-   Section = AddSection(Tab7o, {"Dịch chuyển [chỉ hiện ở sea3]"})          -- Kiểm tra nếu đang ở Sea 2
+   Section = AddSection(Tab7o, {"Dịch chuyển [chỉ hiện ở sea3]"})      
+
 
 -- Kiểm tra nếu đang ở Sea 3
 if game.PlaceId == 7449423635 then
