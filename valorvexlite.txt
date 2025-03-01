@@ -755,7 +755,7 @@ if game.PlaceId == 4442272183 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Usoap's Island",
         Callback = function()
-            teleportToLocation(Vector3.new(-5711, 16, 3539))
+            teleportToLocation(Vector3.new(4775.1, 8.5, 2840.4))
         end
     })
 
@@ -818,7 +818,7 @@ if game.PlaceId == 4442272183 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Cursed Ship",
         Callback = function()
-            teleportToLocation(Vector3.new(902, 124, 2862))
+            teleportToLocation(Vector3.new(-6501.7, 83.4, -124.2))
         end
     })
 
