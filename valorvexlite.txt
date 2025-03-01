@@ -803,7 +803,7 @@ if game.PlaceId == 7449423635 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Hydra Island",
         Callback = function()
-            teleportToLocation(Vector3.new(5228, 640, 3445))
+            teleportToLocation(Vector3.new(5295.3, 392.8, 1005.6))
         end
     })
 
