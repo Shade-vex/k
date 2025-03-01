@@ -384,15 +384,23 @@ AddButton(Tab6o, {
 
    Section = AddSection(Tab7o, {"Đến các sea"})          
 
-local function teleportToSea(seaId)
-    local placeId = {
-        ["First Sea"] = 2753915549,
-        ["Second Sea"] = 4442272183,
-        ["Third Sea"] = 7449423635
-    }
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
+local placeId = {
+    ["First Sea"] = 2753915549,
+    ["Second Sea"] = 4442272183,
+    ["Third Sea"] = 7449423635
+}
+
+local function teleportToSea(seaId)
     if placeId[seaId] then
-        game:GetService("TeleportService"):Teleport(placeId[seaId], game.Players.LocalPlayer)
+        -- Đảm bảo dừng tất cả hoạt động trước khi dịch chuyển
+        task.spawn(function()
+            wait(1) -- Đợi 1 giây để tránh bị kéo lại
+            TeleportService:Teleport(placeId[seaId], LocalPlayer)
+        end)
     else
         warn("Không thể xác định SEA!")
     end
