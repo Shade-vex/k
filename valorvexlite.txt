@@ -535,28 +535,14 @@ AddButton(Tab7o, {
 
 -----đảo
 
-local teleportLocations = {
-    [1] = { -- Sea 1
-        {Name = "Marine Fortress", Position = Vector3.new(-5021, 85, 4326)},
-        {Name = "Pirate Village", Position = Vector3.new(-1120, 15, 3855)},
-        {Name = "Jungle", Position = Vector3.new(-1339, 11, 351)},
-        {Name = "Skylands", Position = Vector3.new(-4875, 717, -2625)}
-    },
-    [2] = { -- Sea 2
-        {Name = "Cafe", Position = Vector3.new(84, 73, 289)},
-        {Name = "Green Zone", Position = Vector3.new(-2374, 73, -3164)},
-        {Name = "Dark Arena", Position = Vector3.new(3804, 15, -7623)},
-        {Name = "Ice Castle", Position = Vector3.new(5403, 28, -6248)}
-    },
-    [3] = { -- Sea 3
-        {Name = "Castle on the Sea", Position = Vector3.new(-5071, 314, -3156)},
-        {Name = "Port Town", Position = Vector3.new(-287, 43, 5455)},
-        {Name = "Mansion", Position = Vector3.new(-12451, 374, -755)},
-        {Name = "Hydra Island", Position = Vector3.new(5228, 603, 345)}
-    }
+local Locations = {
+    [1] = {"Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island", "Frozen Village", "Marine Fortress", "Skylands", "Prison", "Colosseum", "Magma Village", "Underwater City", "Fountain City"},
+    [2] = {"Kingdom of Rose", "Usoap's Island", "Mansion", "Green Zone", "Cafe", "Factory", "Graveyard", "Dark Arena", "Snow Mountain", "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"},
+    [3] = {"Port Town", "Hydra Island", "Great Tree", "Mansion", "Floating Turtle", "Castle on the Sea", "Haunted Castle", "Sea of Treats"}
 }
 
-local function getCurrentSea()
+local function GetCurrentSea()
+    task.wait(5) -- Chờ 5 giây để tránh xung đột với các script khác
     local lowestLevel = math.huge
     local sea = 3 -- Mặc định là Sea 3
 
@@ -583,70 +569,27 @@ local function getCurrentSea()
     return sea
 end
 
-local function getSeaByMap()
-    local map = game:GetService("Workspace"):FindFirstChild("Map")
-    if map then
-        local mapName = map.Name:lower()
-        if string.find(mapName, "first") then
-            return 1
-        elseif string.find(mapName, "second") then
-            return 2
-        elseif string.find(mapName, "third") then
-            return 3
-        end
+local Sea = GetCurrentSea()
+local SelectedLocation = nil
+
+AddDropdown(Tab7o, {
+    Name = "Chọn địa điểm",
+    Options = Locations[Sea],
+    Callback = function(Value)
+        SelectedLocation = Value
     end
-    return getCurrentSea()
-end
+})
 
-local currentSea = getSeaByMap()
-
-local function teleportTo(location)
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(location)
-    end
-end
-
-local selectedLocation = nil
-
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/UI-Library/xyz/main.lua"))()
-local Window = library:CreateWindow("Teleport Hub")
-local MainTab = Window:CreateTab("Teleport")
-
-local Dropdown = MainTab:AddDropdown("Chọn địa điểm", {
-    Values = {},
-    Callback = function(value)
-        for _, loc in pairs(teleportLocations[currentSea]) do
-            if loc.Name == value then
-                selectedLocation = loc.Position
-                break
+AddButton(Tab7o, {
+    Name = "Bắt đầu bay",
+    Callback = function()
+        if SelectedLocation and workspace:FindFirstChild(SelectedLocation) then
+            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+            if hrp then
+                hrp.CFrame = workspace:FindFirstChild(SelectedLocation).CFrame
             end
-        end
-    end
-})
-
-for _, loc in pairs(teleportLocations[currentSea]) do
-    Dropdown:Add(loc.Name)
-end
-
-MainTab:AddButton({
-    Name = "Chọn Địa Điểm",
-    Callback = function()
-        if selectedLocation then
-            teleportTo(selectedLocation)
         else
-            print("Vui lòng chọn một địa điểm trước.")
-        end
-    end
-})
-
-MainTab:AddButton({
-    Name = "Dịch Chuyển",
-    Callback = function()
-        if selectedLocation then
-            teleportTo(selectedLocation)
-        else
-            print("Vui lòng chọn một địa điểm trước.")
+            warn("Không tìm thấy địa điểm trong workspace!")
         end
     end
 })
