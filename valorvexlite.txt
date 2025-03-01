@@ -533,6 +533,47 @@ AddButton(Tab7o, {
     end
 })
 
+-----đảo
+
+local Locations = {
+    [1] = {"Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island", "Frozen Village", "Marine Fortress", "Skylands", "Prison", "Colosseum", "Magma Village", "Underwater City", "Fountain City"},
+    [2] = {"Kingdom of Rose", "Usoap's Island", "Mansion", "Green Zone", "Cafe", "Factory", "Graveyard", "Dark Arena", "Snow Mountain", "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"},
+    [3] = {"Port Town", "Hydra Island", "Great Tree", "Mansion", "Floating Turtle", "Castle on the Sea", "Haunted Castle", "Sea of Treats"}
+}
+
+local function GetCurrentSea()
+    local level = game.Players.LocalPlayer.Data.Level.Value
+    if level < 700 then
+        return 1
+    elseif level < 1500 then
+        return 2
+    else
+        return 3
+    end
+end
+
+local Sea = GetCurrentSea()
+
+local SelectedLocation = nil
+
+local TabVo = {} -- Thay bằng tab menu thực tế của bạn
+
+AddDropdown(Tab7o, {
+    Name = "Chọn địa điểm",
+    Options = Locations[Sea],
+    Callback = function(Value)
+        SelectedLocation = Value
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Bay đến nơi đã chọn",
+    Callback = function()
+        if SelectedLocation then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace:FindFirstChild(SelectedLocation).CFrame
+        end
+    end
+})
 
 
 -----aimbot player
