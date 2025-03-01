@@ -535,42 +535,118 @@ AddButton(Tab7o, {
 
 -----đảo
 
-local Locations = {
-    [1] = {"Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island", "Frozen Village", "Marine Fortress", "Skylands", "Prison", "Colosseum", "Magma Village", "Underwater City", "Fountain City"},
-    [2] = {"Kingdom of Rose", "Usoap's Island", "Mansion", "Green Zone", "Cafe", "Factory", "Graveyard", "Dark Arena", "Snow Mountain", "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"},
-    [3] = {"Port Town", "Hydra Island", "Great Tree", "Mansion", "Floating Turtle", "Castle on the Sea", "Haunted Castle", "Sea of Treats"}
+local teleportLocations = {
+    [1] = { -- Sea 1
+        {Name = "Marine Fortress", Position = Vector3.new(-5021, 85, 4326)},
+        {Name = "Pirate Village", Position = Vector3.new(-1120, 15, 3855)},
+        {Name = "Jungle", Position = Vector3.new(-1339, 11, 351)},
+        {Name = "Skylands", Position = Vector3.new(-4875, 717, -2625)}
+    },
+    [2] = { -- Sea 2
+        {Name = "Cafe", Position = Vector3.new(84, 73, 289)},
+        {Name = "Green Zone", Position = Vector3.new(-2374, 73, -3164)},
+        {Name = "Dark Arena", Position = Vector3.new(3804, 15, -7623)},
+        {Name = "Ice Castle", Position = Vector3.new(5403, 28, -6248)}
+    },
+    [3] = { -- Sea 3
+        {Name = "Castle on the Sea", Position = Vector3.new(-5071, 314, -3156)},
+        {Name = "Port Town", Position = Vector3.new(-287, 43, 5455)},
+        {Name = "Mansion", Position = Vector3.new(-12451, 374, -755)},
+        {Name = "Hydra Island", Position = Vector3.new(5228, 603, 345)}
+    }
 }
 
-local function GetCurrentSea()
-    local level = game.Players.LocalPlayer.Data.Level.Value
-    if level < 700 then
-        return 1
-    elseif level < 1500 then
-        return 2
+local function getCurrentSea()
+    local lowestLevel = math.huge
+    local sea = 3 -- Mặc định là Sea 3
+
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player and player.Character then
+            local leaderstats = player:FindFirstChild("leaderstats")
+            if leaderstats then
+                local level = leaderstats:FindFirstChild("Level")
+                if level and level.Value < lowestLevel then
+                    lowestLevel = level.Value
+                end
+            end
+        end
+    end
+
+    if lowestLevel < 700 then
+        sea = 1
+    elseif lowestLevel < 1500 then
+        sea = 2
     else
-        return 3
+        sea = 3
+    end
+
+    return sea
+end
+
+local function getSeaByMap()
+    local map = game:GetService("Workspace"):FindFirstChild("Map")
+    if map then
+        local mapName = map.Name:lower()
+        if string.find(mapName, "first") then
+            return 1
+        elseif string.find(mapName, "second") then
+            return 2
+        elseif string.find(mapName, "third") then
+            return 3
+        end
+    end
+    return getCurrentSea()
+end
+
+local currentSea = getSeaByMap()
+
+local function teleportTo(location)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(location)
     end
 end
 
-local Sea = GetCurrentSea()
+local selectedLocation = nil
 
-local SelectedLocation = nil
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/UI-Library/xyz/main.lua"))()
+local Window = library:CreateWindow("Teleport Hub")
+local MainTab = Window:CreateTab("Teleport")
 
-local TabVo = {} -- Thay bằng tab menu thực tế của bạn
-
-AddDropdown(Tab7o, {
-    Name = "Chọn địa điểm",
-    Options = Locations[Sea],
-    Callback = function(Value)
-        SelectedLocation = Value
+local Dropdown = MainTab:AddDropdown("Chọn địa điểm", {
+    Values = {},
+    Callback = function(value)
+        for _, loc in pairs(teleportLocations[currentSea]) do
+            if loc.Name == value then
+                selectedLocation = loc.Position
+                break
+            end
+        end
     end
 })
 
-AddButton(Tab7o, {
-    Name = "Bay đến nơi đã chọn",
+for _, loc in pairs(teleportLocations[currentSea]) do
+    Dropdown:Add(loc.Name)
+end
+
+MainTab:AddButton({
+    Name = "Chọn Địa Điểm",
     Callback = function()
-        if SelectedLocation then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace:FindFirstChild(SelectedLocation).CFrame
+        if selectedLocation then
+            teleportTo(selectedLocation)
+        else
+            print("Vui lòng chọn một địa điểm trước.")
+        end
+    end
+})
+
+MainTab:AddButton({
+    Name = "Dịch Chuyển",
+    Callback = function()
+        if selectedLocation then
+            teleportTo(selectedLocation)
+        else
+            print("Vui lòng chọn một địa điểm trước.")
         end
     end
 })
