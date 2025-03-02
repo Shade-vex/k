@@ -580,7 +580,6 @@ AddButton(Tab6o, {
 
 local autoClickEnabled = false
 local UIS = game:GetService("UserInputService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 
 AddButton(Tab6o, {
     Name = "Auto click",
@@ -593,10 +592,10 @@ AddButton(Tab6o, {
                     local centerX = screenSize.X / 2
                     local centerY = screenSize.Y / 2
 
-                    -- Gửi sự kiện chạm vào giữa màn hình
-                    VirtualInputManager:SendTouchEvent(centerX, centerY, 0, true, game, 1)
+                    -- Mô phỏng chạm màn hình bằng TouchStarted và TouchEnded
+                    UIS.InputBegan:Fire({UserInputType = Enum.UserInputType.Touch, Position = Vector2.new(centerX, centerY)})
                     wait(0.1) -- Điều chỉnh tốc độ tap
-                    VirtualInputManager:SendTouchEvent(centerX, centerY, 0, false, game, 1)
+                    UIS.InputEnded:Fire({UserInputType = Enum.UserInputType.Touch, Position = Vector2.new(centerX, centerY)})
                 end
             end)
         end
