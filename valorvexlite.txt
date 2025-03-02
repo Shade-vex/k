@@ -486,8 +486,6 @@ AddButton(Tab6o, {
                         ["Soul Fruit"] = "Soul-Soul",
                         ["Dragon Fruit"] = "Dragon-Dragon",
                         ["Leopard Fruit"] = "Leopard-Leopard"
-                        ["Gas Fruit"] = "Gas-Gas"
-                        ["Yeti Fruit"] = "Yeti-Yeti"
                     }
                     
                     for fruitName, storeName in pairs(fruitList) do
@@ -2389,4 +2387,4 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)        
+task.spawn(updateCoords)
