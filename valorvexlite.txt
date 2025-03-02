@@ -1672,42 +1672,44 @@ AddButton(
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local root = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+local hrp = character:FindFirstChild("HumanoidRootPart")
 
 local waterWalkEnabled = false
-local runService = game:GetService("RunService")
+local RunService = game:GetService("RunService")
+
+-- Hàm kiểm tra nhân vật có dưới nước không
+local function isInWater()
+    return hrp and hrp.Position.Y < -1 -- Điều chỉnh nếu cần
+end
 
 local function enableWaterWalk()
     waterWalkEnabled = not waterWalkEnabled
-
+    
     if waterWalkEnabled then
-        while waterWalkEnabled do
-            if character and root and humanoid then
-                local position = root.Position
-
-                -- Nếu nhân vật đang ở dưới nước, đẩy lên và giữ trạng thái đi bộ
-                if position.Y < 1 then
-                    root.Velocity = Vector3.new(0, 25, 0) -- Đẩy nhân vật lên
-                    humanoid:ChangeState(Enum.HumanoidStateType.Running) -- Giữ trạng thái đi bộ
+        spawn(function()
+            while waterWalkEnabled do
+                if isInWater() then
+                    -- Đưa nhân vật lên mặt nước
+                    hrp.Velocity = Vector3.new(hrp.Velocity.X, 5, hrp.Velocity.Z)
+                    hrp.CFrame = CFrame.new(hrp.Position.X, 3, hrp.Position.Z)
+                    humanoid.WalkSpeed = 16 -- Giữ tốc độ đi bộ
+                    humanoid.JumpPower = 50 -- Nhảy bình thường
                 end
+                RunService.RenderStepped:Wait()
             end
-            runService.RenderStepped:Wait()
-        end
+        end)
     end
 end
 
--- Đợi game tải xong để tránh lỗi xung đột
-repeat task.wait() until game:IsLoaded()
-
--- Đảm bảo Tab11o tồn tại và tạo nút nếu chưa có
+-- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
 if not Tab11o then
     Tab11o = AddTab("Misc")
 end
 
 -- Nút bật/tắt đi trên nước
 AddButton(Tab11o, {
-    Name = "Đi Trên Nước",
+    Name = "Đi trên nước",
     Callback = function()
         enableWaterWalk()
     end
