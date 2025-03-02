@@ -1302,6 +1302,8 @@ end
 
 -----stats
 
+   Section = AddSection(Tab8o, {"Số chỉ số được nâng"})          
+
 -- Biến lưu chế độ hiện tại (100 hoặc 1000)
 _G.Auto_Stats_Mode = 0  -- 0: Tắt, 100: Auto 100, 1000: Auto 1000
 
@@ -1328,6 +1330,9 @@ AddButton(Tab8o, {
         end
     end
 })
+
+   Section = AddSection(Tab8o, {"Chọn chỉ số"})          
+
 
 -- Nút Auto Melee
 AddButton(Tab8o, {
@@ -1363,7 +1368,7 @@ AddButton(Tab8o, {
 
 -- Nút Auto Demon Fruit
 AddButton(Tab8o, {
-    Name = "Auto Demon Fruit",
+    Name = "Auto Fruit",
     Callback = function()
         _G.Auto_Stats_Devil_Fruit = not _G.Auto_Stats_Devil_Fruit
     end
