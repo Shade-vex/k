@@ -70,7 +70,24 @@ AddButton(Tab1o, {
     end
 })
 
+------farm quái
 
+local farmEnabled = false
+
+AddButton(Tab2o, {
+    Name = "Farm lvl",
+    Callback = function()
+        farmEnabled = not farmEnabled -- Đảo trạng thái bật/tắt
+        if farmEnabled then
+            print("Đã bật farm level")
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/x-hub-beta/refs/heads/main/farm%20lvl%20.txt"))()
+        else
+            print("Đã tắt farm level")
+            -- Dừng script bằng cách vô hiệu hóa nó
+            _G.AutoLevel = false
+        end
+    end
+})
 
 ------farm boss
 
