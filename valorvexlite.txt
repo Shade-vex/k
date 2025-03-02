@@ -579,8 +579,19 @@ AddButton(Tab6o, {
 -----click
 
 local autoClickEnabled = false
-local UIS = game:GetService("UserInputService")
 
+-- Tạo GUI Nút Click
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local ClickButton = Instance.new("TextButton")
+ClickButton.Parent = ScreenGui
+ClickButton.Size = UDim2.new(0, 100, 0, 50)
+ClickButton.Position = UDim2.new(0.5, -50, 0.5, -25) -- Ở giữa màn hình
+ClickButton.Text = "Auto Click"
+ClickButton.Visible = false -- Ẩn nút, chỉ dùng để click
+
+-- Nút bật/tắt Auto Click
 AddButton(Tab6o, {
     Name = "Auto click",
     Callback = function()
@@ -588,14 +599,9 @@ AddButton(Tab6o, {
         if autoClickEnabled then
             task.spawn(function()
                 while autoClickEnabled do
-                    local screenSize = UIS:GetScreenSize()
-                    local centerX = screenSize.X / 2
-                    local centerY = screenSize.Y / 2
-
-                    -- Mô phỏng chạm màn hình bằng TouchStarted và TouchEnded
-                    UIS.InputBegan:Fire({UserInputType = Enum.UserInputType.Touch, Position = Vector2.new(centerX, centerY)})
-                    wait(0.1) -- Điều chỉnh tốc độ tap
-                    UIS.InputEnded:Fire({UserInputType = Enum.UserInputType.Touch, Position = Vector2.new(centerX, centerY)})
+                    -- Kích hoạt sự kiện Activated của nút
+                    ClickButton:Fire() -- Hoặc ClickButton.MouseButton1Click:Fire()
+                    wait(0.1) -- Điều chỉnh tốc độ click
                 end
             end)
         end
