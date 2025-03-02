@@ -576,8 +576,23 @@ AddButton(Tab6o, {
     end
 })
 
+-----click
 
+local autoClickEnabled = false
 
+AddButton(Tab6o, {
+    Name = "Auto click",
+    Callback = function()
+        autoClickEnabled = not autoClickEnabled
+        if autoClickEnabled then
+            while autoClickEnabled do
+                -- Gửi sự kiện click chuột (thay thế bằng code phù hợp nếu cần)
+                mouse1click()
+                wait(0.1) -- Điều chỉnh tốc độ click
+            end
+        end
+    end
+})
 
 
    Section = AddSection(Tab7o, {"Đến các sea"})          
