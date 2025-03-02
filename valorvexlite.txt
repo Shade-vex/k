@@ -465,15 +465,14 @@ AddButton(Tab6o, {
    Section = AddSection(Tab6o, {"Đi raid"})          
 
 local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = char:WaitForChild("HumanoidRootPart")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local runService = game:GetService("RunService")
-local replicatedStorage = game:GetService("ReplicatedStorage")
+local autoClicking = false
+local active = false
+local speed = 300 -- Tốc độ bay
 
-local active = false -- Trạng thái bật/tắt Auto Farm
-local autoClick = false -- Trạng thái bật/tắt Auto Click
-
--- 🏹 Tìm quái gần nhất trong phạm vi 5000m
+-- Tìm quái gần nhất trong phạm vi 5000m
 local function findNearestEnemy()
     local nearestEnemy = nil
     local minDistance = 5000
@@ -490,7 +489,14 @@ local function findNearestEnemy()
     return nearestEnemy
 end
 
--- ⚔️ Tăng hitbox quái lên x10 lần
+-- **Dịch chuyển quái đến giữa nhân vật**
+local function teleportEnemyToPlayer(enemy)
+    if enemy and enemy:FindFirstChild("HumanoidRootPart") then
+        enemy.HumanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.new(0, 0, -3) -- Đưa quái đến trước mặt nhân vật
+    end
+end
+
+-- **Tăng hitbox quái lên x10 lần**
 local function increaseHitbox(enemy)
     if enemy and enemy:FindFirstChild("HumanoidRootPart") then
         enemy.HumanoidRootPart.Size = Vector3.new(50, 50, 50) -- Tăng hitbox x10
@@ -499,27 +505,27 @@ local function increaseHitbox(enemy)
     end
 end
 
--- 🔥 Auto Click liên tục với tốc độ 0.01s
+-- **Auto Click mỗi 0.1s**
 local function startAutoClick()
-    autoClick = true
+    autoClicking = true
     spawn(function()
-        while autoClick do
+        while autoClicking do
             pcall(function()
                 local tool = player.Character:FindFirstChildOfClass("Tool")
                 if tool and tool:FindFirstChild("RemoteEvent") then
                     tool.RemoteEvent:FireServer()
                 end
             end)
-            wait(0.01) -- Tốc độ đánh 0.01s
+            wait(0.1) -- **Giảm tốc độ đánh xuống 0.1s**
         end
     end)
 end
 
 local function stopAutoClick()
-    autoClick = false
+    autoClicking = false
 end
 
--- 🛸 Bay liên tục trên đầu quái
+-- **Bay đến quái với tốc độ 300**
 local function startHunting()
     active = true
     startAutoClick()
@@ -532,6 +538,7 @@ local function startHunting()
                 while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and active do
                     pcall(function()
                         humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0) -- Giữ độ cao 15m trên đầu quái
+                        teleportEnemyToPlayer(enemy) -- **Dịch chuyển quái đến giữa nhân vật**
                     end)
                     wait(0.05) -- Duy trì trạng thái bay
                 end
@@ -543,19 +550,19 @@ local function startHunting()
     end)
 end
 
--- ⛔ Dừng Auto Farm
+-- **Dừng Auto Farm**
 local function stopHunting()
     active = false
     stopAutoClick()
 end
 
--- 🎮 Tạo nút bật/tắt trong menu
+-- **Tạo nút bật/tắt trong menu**
 if not Tab6o then
     Tab6o = AddTab("Auto Farm")
 end
 
 AddButton(Tab6o, {
-    Name = "Auto raid",
+    Name = "Auto Raid",
     Callback = function()
         if active then
             stopHunting()
