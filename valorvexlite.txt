@@ -469,10 +469,11 @@ local char = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = char:WaitForChild("HumanoidRootPart")
 local runService = game:GetService("RunService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
-local active = false -- Biến kiểm soát script
+
+local active = false -- Biến kiểm soát Auto Farm
 local autoClick = false -- Biến kiểm soát Auto Click
 
--- Hàm tìm quái trong phạm vi 5000m
+-- 🏹 Tìm quái gần nhất trong phạm vi 5000m
 local function findNearestEnemy()
     local nearestEnemy = nil
     local minDistance = 5000
@@ -489,15 +490,16 @@ local function findNearestEnemy()
     return nearestEnemy
 end
 
--- Hàm tăng hitbox quái lên 10 lần
+-- ⚔️ Tăng hitbox quái lên x10 lần
 local function increaseHitbox(enemy)
     if enemy and enemy:FindFirstChild("HumanoidRootPart") then
-        enemy.HumanoidRootPart.Size = enemy.HumanoidRootPart.Size * 10
+        enemy.HumanoidRootPart.Size = Vector3.new(50, 50, 50) -- Định kích thước hitbox lớn hơn
+        enemy.HumanoidRootPart.Transparency = 0.5 -- Làm hitbox trong suốt một chút
         enemy.HumanoidRootPart.CanCollide = false
     end
 end
 
--- Hàm Auto Click đánh quái
+-- 🔥 Auto Click liên tục với tốc độ 0.01s
 local function startAutoClick()
     autoClick = true
     spawn(function()
@@ -515,40 +517,41 @@ local function stopAutoClick()
     autoClick = false
 end
 
--- Hàm bay lên đầu quái và đánh
+-- 🛸 Bay liên tục trên đầu quái
 local function startHunting()
     active = true
+    startAutoClick()
+
     spawn(function()
         while active do
             local enemy = findNearestEnemy()
             if enemy then
                 increaseHitbox(enemy)
                 while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and active do
-                    humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- Bay lên đầu quái
-                    wait(0.1)
+                    humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0) -- Giữ độ cao 15m trên đầu quái
+                    wait(0.05) -- Duy trì trạng thái bay
                 end
             else
-                active = false -- Không có quái thì dừng lại
+                active = false -- Nếu không có quái nào thì dừng
             end
             wait(0.5)
         end
     end)
-    startAutoClick()
 end
 
--- Hàm dừng script
+-- ⛔ Dừng Auto Farm
 local function stopHunting()
     active = false
     stopAutoClick()
 end
 
--- Tạo nút bật/tắt trong menu
+-- 🎮 Tạo nút bật/tắt trong menu
 if not Tab6o then
     Tab6o = AddTab("Auto Farm")
 end
 
 AddButton(Tab6o, {
-    Name = "Auto đánh quái",
+    Name = "Auto Raid",
     Callback = function()
         if active then
             stopHunting()
