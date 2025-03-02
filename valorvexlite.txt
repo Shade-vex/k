@@ -611,20 +611,13 @@ AddButton(Tab6o, {
 
 local Chips = {"Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"}
 
--- Sử dụng AddButton để tạo Dropdown cho Select Chip
-AddButton(Tab6o, {
-    Name = "Select Chip",
-    Callback = function()
-        local DropdownRaid = Tab6o:AddDropdown("DropdownRaid", {
-            Title = "Select Chip",
-            Values = Chips,
-            Multi = false,
-            Default = 1,
-        })
-        DropdownRaid:SetValue("...")
-        DropdownRaid:OnChanged(function(Value)
-            SelectChip = Value
-        end)
+-- Sử dụng AddDropdown để tạo Dropdown cho Select Chip
+AddDropdown(Tab6o, {
+    Name = "Select Chip",  -- Tên của Dropdown
+    List = Chips,  -- Danh sách các lựa chọn cho Dropdown
+    Callback = function(selectedOption)
+        print("Bạn đã chọn chip: " .. selectedOption)
+        SelectChip = selectedOption  -- Lưu lựa chọn vào biến SelectChip
     end
 })
 
