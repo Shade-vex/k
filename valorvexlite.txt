@@ -425,14 +425,16 @@ AddButton(Tab6o, {
 
 local player = game.Players.LocalPlayer
 local replicatedStorage = game:GetService("ReplicatedStorage")
-local remotes = replicatedStorage:FindFirstChild("Remotes") -- Kiểm tra đúng nơi chứa RemoteEvents
+local remotes = replicatedStorage:FindFirstChild("Remotes")
 local autoStoreEnabled = false
 
+-- Hàm lưu trái vào kho
 local function storeFruit()
     for _, item in pairs(player.Backpack:GetChildren()) do
         if item:IsA("Tool") and string.find(item.Name, "Fruit") then
-            if remotes and remotes:FindFirstChild("StoreFruit") then
-                remotes.StoreFruit:InvokeServer(item)
+            local args = {item} 
+            if remotes and remotes:FindFirstChild("CommF_") then
+                remotes.CommF_:InvokeServer("StoreFruit", unpack(args))
                 print("Đã lưu trái: " .. item.Name)
             else
                 print("Không tìm thấy Remote lưu trái!")
@@ -441,17 +443,18 @@ local function storeFruit()
     end
 end
 
+-- Bật/tắt lưu trái tự động
 local function toggleAutoStore()
     autoStoreEnabled = not autoStoreEnabled
     print("Tự động lưu trái: " .. tostring(autoStoreEnabled))
 
     while autoStoreEnabled do
         storeFruit()
-        wait(5) -- Kiểm tra mỗi 5 giây
+        wait(3) -- Kiểm tra và lưu mỗi 3 giây
     end
 end
 
--- Tạo nút bật/tắt lưu trái
+-- Tạo nút bật/tắt
 AddButton(Tab6o, {
     Name = "Tự động lưu trái",
     Callback = function()
