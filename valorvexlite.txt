@@ -783,7 +783,7 @@ if game.PlaceId == 4442272183 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Factory",
         Callback = function()
-            teleportToLocation(Vector3.new(430, 23, -240))
+            teleportToLocation(Vector3.new(427.7, 210.3, -420.2))
         end
     })
 
@@ -797,14 +797,14 @@ if game.PlaceId == 4442272183 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Dark Arena",
         Callback = function()
-            teleportToLocation(Vector3.new(1342, 16, -6823))
+            teleportToLocation(Vector3.new(3797, 14.9, -3487.1))
         end
     })
 
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Snow Mountain",
         Callback = function()
-            teleportToLocation(Vector3.new(5601, 46, -6519))
+            teleportToLocation(Vector3.new(483.2, 401.6, -5388.8))
         end
     })
 
@@ -825,7 +825,7 @@ if game.PlaceId == 4442272183 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Ice Castle",
         Callback = function()
-            teleportToLocation(Vector3.new(6091, 16, -6116))
+            teleportToLocation(Vector3.new(5666.5, 28.6, -6338.9))
         end
     })
 
