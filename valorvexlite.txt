@@ -2648,7 +2648,7 @@ local plr = game.Players.LocalPlayer
 local CbFw = getupvalues(require(plr.PlayerScripts.CombatFramework))
 local CbFw2 = CbFw[2]
 
-local AutoAttack = false -- Biến để kiểm soát trạng thái bật/tắt
+local AutoAttack = false -- Biến để kiểm soát bật/tắt
 
 function GetCurrentBlade() 
     local p13 = CbFw2.activeController
@@ -2712,15 +2712,20 @@ function AttackNoCD()
     end
 end
 
--- Thêm nút bật/tắt
-AddButton(Tab11o, {
-    Name = "Auto Attack",
-    Callback = function()
-        AutoAttack = not AutoAttack
-    end
-})
+-- Đảm bảo Tab8o tồn tại trước khi tạo nút
+if Tab8o then
+    AddButton(Tab11o, {
+        Name = "Auto Attack",
+        Callback = function()
+            AutoAttack = not AutoAttack
+            print("Auto Attack:", AutoAttack and "ON" or "OFF") -- Debug kiểm tra trạng thái
+        end
+    })
+else
+    warn("Tab11o không tồn tại!")
+end
 
--- Vòng lặp chạy AttackNoCD khi AutoAttack được bật
+-- Vòng lặp kiểm tra AutoAttack
 spawn(function()
     while wait() do
         if AutoAttack then
