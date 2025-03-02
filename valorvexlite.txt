@@ -390,6 +390,142 @@ AddButton(Tab5o, {
 })
 
 
+---Đánh law
+
+local Mastery = Tabs.Raid:AddSection("Law Raid")
+
+-- Thêm nút Auto Kill Law
+AddButton(Tab5o, {
+    Name = "Auto Kill Law",
+    Callback = function()
+        Auto_Law = not Auto_Law
+        print("Auto Kill Law:", Auto_Law and "ON" or "OFF") -- Debug trạng thái
+    end
+})
+
+-- Vòng lặp kiểm tra Microchip và Order
+spawn(function()
+    while wait() do
+        if Auto_Law then
+            if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
+            and not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") 
+            and not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
+            and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
+                wait(0.3)
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward","Microchip","1")
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward","Microchip","2")
+            end
+        end
+    end
+end)
+
+-- Vòng lặp Auto Kill Law
+spawn(function()
+    while wait(0.4) do
+        if Auto_Law then
+            if not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
+            and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
+                if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
+                or game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") then
+                    fireclickdetector(game:GetService("Workspace").Map.CircleIsland.RaidSummon.Button.Main.ClickDetector)
+                end
+            end
+
+            if game:GetService("ReplicatedStorage"):FindFirstChild("Order") 
+            or game:GetService("Workspace").Enemies:FindFirstChild("Order") then
+                if game:GetService("Workspace").Enemies:FindFirstChild("Order") then
+                    for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if v.Name == "Order" then
+                            repeat wait(_G.Fast_Delay)
+                                AttackNoCD()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX,posY,posZ))
+                                v.HumanoidRootPart.CanCollide = false
+                                v.HumanoidRootPart.Size = Vector3.new(120, 120, 120)
+                            until not v.Parent or v.Humanoid.Health <= 0 or not Auto_Law
+                        end
+                    end
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
+                    Tween(CFrame.new(-6217.2021484375, 28.047645568848, -5053.1357421875))
+                end
+            end
+        end
+    end
+end)
+
+
+
+----sea3
+
+local AutoElite = Tabs.Main:AddSection("Elite Hunter Farm")
+
+-- Nút Auto Elite Hunter
+AddButton(Tab5o, {
+    Name = "Auto Elite Hunter",
+    Callback = function()
+        _G.AutoElite = not _G.AutoElite
+        print("Auto Elite Hunter:", _G.AutoElite and "ON" or "OFF") -- Debug trạng thái
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoElite then
+            pcall(function()
+                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+                    if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Diablo") or 
+                       string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Deandre") or 
+                       string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Urban") then
+                        
+                        if game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or 
+                           game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or 
+                           game:GetService("Workspace").Enemies:FindFirstChild("Urban") then
+                            
+                            for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                                if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                                    if v.Name == "Diablo" or v.Name == "Deandre" or v.Name == "Urban" then
+                                        repeat wait(_G.Fast_Delay)
+                                            AttackNoCD()
+                                            EquipTool(SelectWeapon)
+                                            AutoHaki()
+                                            Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                            v.HumanoidRootPart.Size = Vector3.new(1, 1, 1)
+                                        until _G.AutoElite == false or v.Humanoid.Health <= 0 or not v.Parent
+                                    end
+                                end
+                            end
+                        else
+                            if BypassTP then
+                                if game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") then
+                                    BTP(game:GetService("ReplicatedStorage"):FindFirstChild("Diablo").HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") then
+                                    BTP(game:GetService("ReplicatedStorage"):FindFirstChild("Deandre").HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Urban") then
+                                    BTP(game:GetService("ReplicatedStorage"):FindFirstChild("Urban").HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                end
+                            else
+                                if game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") then
+                                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Diablo").HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") then
+                                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Deandre").HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Urban") then
+                                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Urban").HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+                                end
+                            end
+                        end
+                    end
+                else
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter")
+                end
+            end)
+        end
+        _G.BringMob = true
+    end
+end)
+
+
+
    Section = AddSection(Tab6o, {"Trái ác quỷ"})          
 
 -----Trái và raid
@@ -2641,88 +2777,3 @@ AddButton(Tab11o, {
 task.spawn(updateCoords)    
 
 
-   Section = AddSection(Tab11o, {"Cài đặt"})            
-
-
-local plr = game.Players.LocalPlayer
-local CbFw = getupvalues(require(plr.PlayerScripts.CombatFramework))
-local CbFw2 = CbFw[2]
-
-local AutoAttack = false -- Mặc định tắt
-
-function GetCurrentBlade() 
-    local p13 = CbFw2.activeController
-    local ret = p13.blades[1]
-    if not ret then return end
-    while ret.Parent ~= plr.Character do 
-        ret = ret.Parent 
-    end
-    return ret
-end
-
-function AttackNoCD()
-    if not AutoAttack then return end -- Nếu tắt thì dừng hẳn
-
-    local AC = CbFw2.activeController
-    for i = 1, 1 do 
-        local bladehit = require(game.ReplicatedStorage.CombatFramework.RigLib).getBladeHits(
-            plr.Character,
-            {plr.Character.HumanoidRootPart},
-            60
-        )
-        local targets = {}
-        local hash = {}
-        for k, v in pairs(bladehit) do
-            if v.Parent:FindFirstChild("HumanoidRootPart") and not hash[v.Parent] then
-                table.insert(targets, v.Parent.HumanoidRootPart)
-                hash[v.Parent] = true
-            end
-        end
-        bladehit = targets
-        if #bladehit > 0 then
-            local u8 = debug.getupvalue(AC.attack, 5)
-            local u9 = debug.getupvalue(AC.attack, 6)
-            local u7 = debug.getupvalue(AC.attack, 4)
-            local u10 = debug.getupvalue(AC.attack, 7)
-            local u12 = (u8 * 798405 + u7 * 727595) % u9
-            local u13 = u7 * 798405
-            (function()
-                u12 = (u12 * u9 + u13) % 1099511627776
-                u8 = math.floor(u12 / u9)
-                u7 = u12 - u8 * u9
-            end)()
-            u10 = u10 + 1
-            debug.setupvalue(AC.attack, 5, u8)
-            debug.setupvalue(AC.attack, 6, u9)
-            debug.setupvalue(AC.attack, 4, u7)
-            debug.setupvalue(AC.attack, 7, u10)
-            pcall(function()
-                if plr.Character:FindFirstChildOfClass("Tool") and AC.blades and AC.blades[1] then
-                    AC.animator.anims.basic[1]:Play(0.01, 0.01, 0.01)
-                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("weaponChange", tostring(GetCurrentBlade()))
-                    game.ReplicatedStorage.Remotes.Validator:FireServer(math.floor(u12 / 1099511627776 * 16777215), u10)
-                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", bladehit, i, "")
-                end
-            end)
-        end
-    end
-end
-
--- Đảm bảo menu không bị lỗi, tạo nút trực tiếp
-AddButton(Tab11o, {
-    Name = "Auto Attack (ON/OFF)",
-    Callback = function()
-        AutoAttack = not AutoAttack
-        print("Auto Attack:", AutoAttack and "ON" or "OFF") -- Debug trạng thái
-    end
-})
-
--- Vòng lặp Auto Attack tối ưu
-task.spawn(function()
-    while true do
-        if AutoAttack then
-            AttackNoCD()
-        end
-        wait(0.1) -- Giảm lag, tối ưu vòng lặp
-    end
-end)
