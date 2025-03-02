@@ -489,13 +489,6 @@ local function findNearestEnemy()
     return nearestEnemy
 end
 
--- **Dịch chuyển quái đến giữa nhân vật**
-local function teleportEnemyToPlayer(enemy)
-    if enemy and enemy:FindFirstChild("HumanoidRootPart") then
-        enemy.HumanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.new(0, 0, -3) -- Đưa quái đến trước mặt nhân vật
-    end
-end
-
 -- **Tăng hitbox quái lên x10 lần**
 local function increaseHitbox(enemy)
     if enemy and enemy:FindFirstChild("HumanoidRootPart") then
@@ -516,7 +509,7 @@ local function startAutoClick()
                     tool.RemoteEvent:FireServer()
                 end
             end)
-            wait(0.1) -- **Giảm tốc độ đánh xuống 0.1s**
+            wait(0.1) -- **Tốc độ đánh 0.1s**
         end
     end)
 end
@@ -525,7 +518,7 @@ local function stopAutoClick()
     autoClicking = false
 end
 
--- **Bay đến quái với tốc độ 300**
+-- **Bay vào giữa quái với tốc độ 300**
 local function startHunting()
     active = true
     startAutoClick()
@@ -537,8 +530,7 @@ local function startHunting()
                 increaseHitbox(enemy)
                 while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and active do
                     pcall(function()
-                        humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0) -- Giữ độ cao 15m trên đầu quái
-                        teleportEnemyToPlayer(enemy) -- **Dịch chuyển quái đến giữa nhân vật**
+                        humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame -- **Bay vào giữa cơ thể quái**
                     end)
                     wait(0.05) -- Duy trì trạng thái bay
                 end
@@ -2186,4 +2178,4 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)
+task.spawn(updateCoords)        
