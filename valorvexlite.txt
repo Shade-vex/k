@@ -1302,31 +1302,11 @@ end
 
 -----stats
 
-local SettingTweenSpeed = Tabs.Setting:AddSection("Setting Tween Speed")
-
--- Nút để tự động chỉnh tốc độ thành 100
-AddButton(Tab8o, {
-    Name = "Set Tween Speed to 100",
-    Callback = function()
-        ChangeSpeed = 100
-        print("Tween Speed set to 100")
-    end
-})
-
--- Nút để tự động chỉnh tốc độ thành 1000
-AddButton(Tab8o, {
-    Name = "Set Tween Speed to 1000",
-    Callback = function()
-        ChangeSpeed = 1000
-        print("Tween Speed set to 1000")
-    end
-})
-
--- Các toggle khác cho Stats
+-- Tạo các nút trên Tab8o và đảm bảo chúng hiển thị đúng
 AddButton(Tab8o, {
     Name = "Auto Melee",
     Callback = function()
-        local ToggleMelee = Tabs.Stats:AddToggle("ToggleMelee", {Title = "Auto Melee", Default = false })
+        local ToggleMelee = Tab8o:AddToggle("ToggleMelee", {Title = "Auto Melee", Default = false })
         ToggleMelee:OnChanged(function(Value)
             _G.Auto_Stats_Melee = Value
         end)
@@ -1336,7 +1316,7 @@ AddButton(Tab8o, {
 AddButton(Tab8o, {
     Name = "Auto Defense",
     Callback = function()
-        local ToggleDe = Tabs.Stats:AddToggle("ToggleDe", {Title = "Auto Defense", Default = false })
+        local ToggleDe = Tab8o:AddToggle("ToggleDe", {Title = "Auto Defense", Default = false })
         ToggleDe:OnChanged(function(Value)
             _G.Auto_Stats_Defense = Value
         end)
@@ -1346,7 +1326,7 @@ AddButton(Tab8o, {
 AddButton(Tab8o, {
     Name = "Auto Sword",
     Callback = function()
-        local ToggleSword = Tabs.Stats:AddToggle("ToggleSword", {Title = "Auto Sword", Default = false })
+        local ToggleSword = Tab8o:AddToggle("ToggleSword", {Title = "Auto Sword", Default = false })
         ToggleSword:OnChanged(function(Value)
             _G.Auto_Stats_Sword = Value
         end)
@@ -1356,7 +1336,7 @@ AddButton(Tab8o, {
 AddButton(Tab8o, {
     Name = "Auto Gun",
     Callback = function()
-        local ToggleGun = Tabs.Stats:AddToggle("ToggleGun", {Title = "Auto Gun", Default = false })
+        local ToggleGun = Tab8o:AddToggle("ToggleGun", {Title = "Auto Gun", Default = false })
         ToggleGun:OnChanged(function(Value)
             _G.Auto_Stats_Gun = Value
         end)
@@ -1366,16 +1346,16 @@ AddButton(Tab8o, {
 AddButton(Tab8o, {
     Name = "Auto Demon Fruit",
     Callback = function()
-        local ToggleFruit = Tabs.Stats:AddToggle("ToggleFruit", {Title = "Auto Demon Fruit", Default = false })
+        local ToggleFruit = Tab8o:AddToggle("ToggleFruit", {Title = "Auto Demon Fruit", Default = false })
         ToggleFruit:OnChanged(function(Value)
             _G.Auto_Stats_Devil_Fruit = Value
         end)
     end
 })
 
--- Code chạy tự động cho các chức năng như Auto Buy, Auto Start Raid, v.v...
+-- Vòng lặp với tạm dừng 5s để tránh tắc nghẽn
 spawn(function()
-    while wait() do
+    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
         if _G.Auto_Stats_Devil_Fruit then
             local args = {
                 [1] = "AddPoint",
@@ -1388,7 +1368,7 @@ spawn(function()
 end)
 
 spawn(function()
-    while wait() do
+    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
         if _G.Auto_Stats_Gun then
             local args = {
                 [1] = "AddPoint",
@@ -1401,7 +1381,7 @@ spawn(function()
 end)
 
 spawn(function()
-    while wait() do
+    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
         if _G.Auto_Stats_Sword then
             local args = {
                 [1] = "AddPoint",
@@ -1414,7 +1394,7 @@ spawn(function()
 end)
 
 spawn(function()
-    while wait() do
+    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
         if _G.Auto_Stats_Defense then
             local args = {
                 [1] = "AddPoint",
@@ -1427,7 +1407,7 @@ spawn(function()
 end)
 
 spawn(function()
-    while wait() do
+    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
         if _G.Auto_Stats_Melee then
             local args = {
                 [1] = "AddPoint",
