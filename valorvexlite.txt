@@ -1670,55 +1670,54 @@ AddButton(
 
 -----dibo
 
--- Phiên bản 1: Đi trên nước
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local waterWalkEnabled1 = false -- Biến riêng cho Water Walk phiên bản 1
-local RunService = game:GetService("RunService")
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
 
-local function enableWaterWalk1()
-    waterWalkEnabled1 = not waterWalkEnabled1
+local waterWalkEnabled = false
+local runService = game:GetService("RunService")
 
-    if waterWalkEnabled1 then
-        spawn(function()
-            while waterWalkEnabled1 do
-                if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
-                    local root = character.HumanoidRootPart
-                    local humanoid = character.Humanoid
+local function enableWaterWalk()
+    waterWalkEnabled = not waterWalkEnabled
 
-                    -- Nếu nhân vật dưới nước, nâng lên trên bề mặt và giữ tốc độ đi bộ
-                    if root.Position.Y < 1 then
-                        -- Điều chỉnh Velocity để tránh bị lơ lửng
-                        root.Velocity = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
-                        
-                        -- Đảm bảo nhân vật không bị chìm dưới nước
-                        humanoid.WalkSpeed = 16 -- Giữ tốc độ đi bộ bình thường
-                        humanoid.JumpPower = 50 -- Cấp phép nhảy nếu cần thiết
-                    else
-                        -- Nếu không ở dưới nước, đặt lại tốc độ đi bộ
-                        humanoid.WalkSpeed = 16
-                    end
+    if waterWalkEnabled then
+        while waterWalkEnabled do
+            if character and root and humanoid then
+                local position = root.Position
 
-                    -- Giữ khả năng nhảy, chạy, và không bị tắt các trạng thái
-                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+                -- Nếu nhân vật dưới nước, đẩy lên mặt nước
+                if position.Y < 1 then
+                    root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z) -- Đẩy lên
                 end
-                RunService.RenderStepped:Wait()
+
+                -- Giữ nhân vật trên mặt nước (độ cao 3 để tránh chìm)
+                root.CFrame = CFrame.new(position.X, 3, position.Z)
+
+                -- Giữ tốc độ chạy, nhảy bình thường
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
             end
-        end)
+            runService.RenderStepped:Wait()
+        end
     end
 end
 
--- Đảm bảo Tab11o tồn tại và thêm nút vào giao diện
+-- Đợi game tải xong để tránh lỗi xung đột
+repeat task.wait() until game:IsLoaded()
+
+-- Đảm bảo Tab11o tồn tại và tạo nút nếu chưa có
 if not Tab11o then
     Tab11o = AddTab("Misc")
 end
 
--- Tạo nút bật/tắt đi trên nước
+-- Nút bật/tắt đi trên nước
 AddButton(Tab11o, {
-    Name = "Đi trên nước",
+    Name = "Đi Trên Nước",
     Callback = function()
-        enableWaterWalk1()
+        enableWaterWalk()
     end
 })
 
@@ -2000,10 +1999,3 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)
-
-
-
-
-
-
-
