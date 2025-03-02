@@ -440,42 +440,64 @@ AddButton(Tab6o, {
 
 ----lưu đồ
 
-local player = game.Players.LocalPlayer
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local remotes = replicatedStorage:FindFirstChild("Remotes")
-local autoStoreEnabled = false
-
--- Hàm lưu trái vào kho
-local function storeFruit()
-    for _, item in pairs(player.Backpack:GetChildren()) do
-        if item:IsA("Tool") and string.find(item.Name, "Fruit") then
-            local args = {item} 
-            if remotes and remotes:FindFirstChild("CommF_") then
-                remotes.CommF_:InvokeServer("StoreFruit", unpack(args))
-                print("Đã lưu trái: " .. item.Name)
-            else
-                print("Không tìm thấy Remote lưu trái!")
-            end
-        end
-    end
-end
-
--- Bật/tắt lưu trái tự động
-local function toggleAutoStore()
-    autoStoreEnabled = not autoStoreEnabled
-    print("Tự động lưu trái: " .. tostring(autoStoreEnabled))
-
-    while autoStoreEnabled do
-        storeFruit()
-        wait(3) -- Kiểm tra và lưu mỗi 3 giây
-    end
-end
-
--- Tạo nút bật/tắt
 AddButton(Tab6o, {
-    Name = "Tự động lưu trái",
-    Callback = function()
-        toggleAutoStore()
+    Name = "Auto Store Fruit",
+    Callback = function() 
+        spawn(function()
+            while task.wait(0.3) do
+                pcall(function()
+                    local player = game:GetService("Players").LocalPlayer
+                    local backpack = player.Backpack
+                    local character = player.Character
+                    local replicatedStorage = game:GetService("ReplicatedStorage")
+                    
+                    local fruitList = {
+                        ["Bomb Fruit"] = "Bomb-Bomb",
+                        ["Spike Fruit"] = "Spike-Spike",
+                        ["Chop Fruit"] = "Chop-Chop",
+                        ["Spring Fruit"] = "Spring-Spring",
+                        ["Kilo Fruit"] = "Rocket-Rocket",
+                        ["Smoke Fruit"] = "Smoke-Smoke",
+                        ["Spin Fruit"] = "Spin-Spin",
+                        ["Flame Fruit"] = "Flame-Flame",
+                        ["Bird: Falcon Fruit"] = "Bird-Bird: Falcon",
+                        ["Ice Fruit"] = "Ice-Ice",
+                        ["Sand Fruit"] = "Sand-Sand",
+                        ["Dark Fruit"] = "Dark-Dark",
+                        ["Revive Fruit"] = "Ghost-Ghost",
+                        ["Diamond Fruit"] = "Diamond-Diamond",
+                        ["Light Fruit"] = "Light-Light",
+                        ["Love Fruit"] = "Love-Love",
+                        ["Rubber Fruit"] = "Rubber-Rubber",
+                        ["Barrier Fruit"] = "Barrier-Barrier",
+                        ["Magma Fruit"] = "Magma-Magma",
+                        ["Portal Fruit"] = "Door-Door",
+                        ["Quake Fruit"] = "Quake-Quake",
+                        ["Human-Human: Buddha Fruit"] = "Human-Human: Buddha",
+                        ["Spider Fruit"] = "Spider-Spider",
+                        ["Bird: Phoenix Fruit"] = "Bird-Bird: Phoenix",
+                        ["Rumble Fruit"] = "Rumble-Rumble",
+                        ["Paw Fruit"] = "Pain-Pain",
+                        ["Gravity Fruit"] = "Gravity-Gravity",
+                        ["Dough Fruit"] = "Dough-Dough",
+                        ["Shadow Fruit"] = "Shadow-Shadow",
+                        ["Venom Fruit"] = "Venom-Venom",
+                        ["Control Fruit"] = "Control-Control",
+                        ["Soul Fruit"] = "Soul-Soul",
+                        ["Dragon Fruit"] = "Dragon-Dragon",
+                        ["Leopard Fruit"] = "Leopard-Leopard"
+                        ["Gas Fruit"] = "Gas-Gas"
+                        ["Yeti Fruit"] = "Yeti-Yeti"
+                    }
+                    
+                    for fruitName, storeName in pairs(fruitList) do
+                        if character:FindFirstChild(fruitName) or backpack:FindFirstChild(fruitName) then
+                            replicatedStorage.Remotes.CommF_:InvokeServer("StoreFruit", storeName, backpack:FindFirstChild(fruitName))
+                        end
+                    end
+                end)
+            end
+        end)
     end
 })
 
@@ -1836,6 +1858,8 @@ AddButton(Tab9o, {
 
 -----shop
 
+   Section = AddSection(Tab10o, {"Các haki"})          
+
 AddButton(Tab10o, {
     Name = "Geppo",
     Callback = function() 
@@ -1864,7 +1888,7 @@ AddButton(Tab10o, {
     end
 })
 
-local Mastery = AddSection(Tab10o, "Fighting Styles")
+   Section = AddSection(Tab10o, {"Các môn võ"})          
 
 AddButton(Tab10o, {
     Name = "Black Leg",
@@ -1938,7 +1962,7 @@ AddButton(Tab10o, {
     end
 })
 
-local Mastery = AddSection(Tab10o, "Misc Items")
+   Section = AddSection(Tab10o, {"Tộc và chỉ số"})          
 
 AddButton(Tab10o, {
     Name = "Refund Stats",
