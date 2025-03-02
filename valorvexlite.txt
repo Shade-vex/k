@@ -400,29 +400,30 @@ AddButton(Tab5o, {
     Callback = function()
         Auto_Law = not Auto_Law
         print("Auto Kill Law:", Auto_Law and "ON" or "OFF") -- Debug trạng thái
+
+        if Auto_Law then
+            StartAutoKillLaw()
+        end
     end
 })
 
--- Vòng lặp kiểm tra Microchip và Order
-spawn(function()
-    while wait() do
-        if Auto_Law then
+function StartAutoKillLaw()
+    spawn(function()
+        while Auto_Law do
             if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
             and not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") 
             and not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
             and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
                 wait(0.3)
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward","Microchip","1")
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward","Microchip","2")
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "1")
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "2")
             end
+            wait(5) -- Chờ 5s để tránh spam
         end
-    end
-end)
+    end)
 
--- Vòng lặp Auto Kill Law
-spawn(function()
-    while wait(0.4) do
-        if Auto_Law then
+    spawn(function()
+        while Auto_Law do
             if not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
             and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
                 if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
@@ -440,19 +441,20 @@ spawn(function()
                                 AttackNoCD()
                                 AutoHaki()
                                 EquipTool(SelectWeapon)
-                                Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX,posY,posZ))
+                                Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
                                 v.HumanoidRootPart.CanCollide = false
                                 v.HumanoidRootPart.Size = Vector3.new(120, 120, 120)
                             until not v.Parent or v.Humanoid.Health <= 0 or not Auto_Law
                         end
                     end
                 elseif game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
-                    Tween(CFrame.new(-6217.2021484375, 28.047645568848, -5053.1357421875))
+                    Tween(CFrame.new(-6217.202, 28.048, -5053.136))
                 end
             end
+            wait(5) -- Chờ 5s để tránh spam
         end
-    end
-end)
+    end)
+end
 
 
 
