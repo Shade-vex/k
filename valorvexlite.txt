@@ -390,71 +390,6 @@ AddButton(Tab5o, {
 })
 
 
----Đánh law
-
-local Mastery = Tabs.Raid:AddSection("Law Raid")
-
--- Thêm nút Auto Kill Law
-AddButton(Tab5o, {
-    Name = "Auto Kill Law",
-    Callback = function()
-        Auto_Law = not Auto_Law
-        print("Auto Kill Law:", Auto_Law and "ON" or "OFF") -- Debug trạng thái
-
-        if Auto_Law then
-            StartAutoKillLaw()
-        end
-    end
-})
-
-function StartAutoKillLaw()
-    spawn(function()
-        while Auto_Law do
-            if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
-            and not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") 
-            and not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
-            and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
-                wait(0.3)
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "1")
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "2")
-            end
-            wait(5) -- Chờ 5s để tránh spam
-        end
-    end)
-
-    spawn(function()
-        while Auto_Law do
-            if not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
-            and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
-                if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
-                or game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") then
-                    fireclickdetector(game:GetService("Workspace").Map.CircleIsland.RaidSummon.Button.Main.ClickDetector)
-                end
-            end
-
-            if game:GetService("ReplicatedStorage"):FindFirstChild("Order") 
-            or game:GetService("Workspace").Enemies:FindFirstChild("Order") then
-                if game:GetService("Workspace").Enemies:FindFirstChild("Order") then
-                    for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if v.Name == "Order" then
-                            repeat wait(_G.Fast_Delay)
-                                AttackNoCD()
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-                                Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
-                                v.HumanoidRootPart.CanCollide = false
-                                v.HumanoidRootPart.Size = Vector3.new(120, 120, 120)
-                            until not v.Parent or v.Humanoid.Health <= 0 or not Auto_Law
-                        end
-                    end
-                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
-                    Tween(CFrame.new(-6217.202, 28.048, -5053.136))
-                end
-            end
-            wait(5) -- Chờ 5s để tránh spam
-        end
-    end)
-end
 
 
 
@@ -2777,5 +2712,3 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)    
-
-
