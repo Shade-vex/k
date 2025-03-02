@@ -3,12 +3,12 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "Valor Vex ",
+         Title = "Valor Vex V0.1",
          Animation = "Đang tải script...|100%|"
          },
         Key = {
         KeySystem = fasle,
-        Title = "Valor Vex",
+        Title = "Valor Vex V0.1",
         Description = "đăng kí cho Shade-Vex đi",
         KeyLink = "https://discord.gg/DmN8sE7Y",
         Keys = {"Premium_Key_29833z920j8"},
@@ -71,6 +71,82 @@ AddButton(Tab1o, {
 })
 
 ------farm quái
+
+   Section = AddSection(Tab2o, {"Cài đặt"})        
+
+local SettingFarm = Tabs.Setting:AddSection("Setting Farming")
+
+AddButton(Tab11o, {
+    Name = "Fast Attack",
+    Callback = function() 
+        _G.FastAttackFaiFao = not _G.FastAttackFaiFao
+    end
+})
+
+spawn(function()
+	while wait(.5) do
+		pcall(function()
+			if _G.FastAttackFaiFao then
+				repeat wait(_G.Fast_Delay)
+					AttackNoCD()
+				until not _G.FastAttackFaiFao
+			end
+		end)
+	end
+end)
+
+local Camera = require(game.ReplicatedStorage.Util.CameraShaker)
+Camera:Stop()
+
+AddButton(Tab11o, {
+    Name = "Bring Mob",
+    Callback = function() 
+        _G.BringMob = not _G.BringMob
+    end
+})
+
+task.spawn(function()
+    while task.wait() do
+        if _G.BringMob then
+            pcall(function()
+                for i, v in pairs(game.Workspace.Enemies:GetChildren()) do
+                    if not string.find(v.Name, "Boss") and v.Name == MonFarm and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 350 then
+                        if InMyNetWork(v.HumanoidRootPart) then
+                            v.HumanoidRootPart.CFrame = FarmPos
+                            v.HumanoidRootPart.CanCollide = false
+                            v.HumanoidRootPart.Size = Vector3.new(1,1,1)
+                            if v.Humanoid:FindFirstChild("Animator") then
+                                v.Humanoid.Animator:Destroy()
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do wait()
+        if setscriptable then
+            setscriptable(game.Players.LocalPlayer, "SimulationRadius", true)
+        end
+        if sethiddenproperty then
+            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+        end
+    end
+end)
+
+function InMyNetWork(object)
+    if isnetworkowner then
+        return isnetworkowner(object)
+    else
+        return (object.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 300
+    end
+end
+
+
+
 
 local farmEnabled = false
 
@@ -159,6 +235,27 @@ AddButton(Tab2o, {
         farmBoss()
     end
 })
+
+
+   Section = AddSection(Tab2o, {"Bone farm"})          
+
+AddButton(Tab2o, {
+    Name = "Random Bone",
+    Callback = function()
+        _G.AutoRandomBone = not _G.AutoRandomBone
+        
+        spawn(function()
+            while _G.AutoRandomBone do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Bones", "Buy", 1, 1)
+                end)
+                wait(0.1) -- Giảm tốc độ spam lệnh để tránh lag
+            end
+        end)
+    end
+})
+
+
 
 
    Section = AddSection(Tab2o, {"Code nhà làm"})          
@@ -499,6 +596,30 @@ AddButton(Tab6o, {
     end
 })
 
+   Section = AddSection(Tab6o, {"Mưa Trái Fake"})          
+
+AddButton(Tab6o, {
+    Name = "Rain Fruit",
+    Callback = function() 
+        for i, v in pairs(game:GetObjects("rbxassetid://15970729030")[1]:GetChildren()) do
+            v.Parent = game.Workspace.Map
+            v:MoveTo(game.Players.LocalPlayer.Character.PrimaryPart.Position + Vector3.new(math.random(-50, 50), 100, math.random(-50, 50)))
+            if v.Fruit:FindFirstChild("AnimationController") then
+                v.Fruit:FindFirstChild("AnimationController"):LoadAnimation(v.Fruit:FindFirstChild("Idle")):Play()
+            end
+            v.Handle.Touched:Connect(function(otherPart)
+                if otherPart.Parent == game.Players.LocalPlayer.Character then
+                    v.Parent = game.Players.LocalPlayer.Backpack
+                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                end
+            end)
+        end
+    end
+})
+
+
+
+
    Section = AddSection(Tab6o, {"Đi raid"})          
 
 local player = game.Players.LocalPlayer
@@ -648,68 +769,24 @@ AddButton(Tab6o, {
 
    Section = AddSection(Tab7o, {"Đến các sea"})          
 
-local TeleportService = game:GetService("TeleportService")
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
-
-local placeId = {
-    ["First Sea"] = 2753915549,
-    ["Second Sea"] = 4442272183,
-    ["Third Sea"] = 7449423635
-}
-
--- Hàm lấy danh sách server ngẫu nhiên để đổi server sau khi dịch chuyển thành công
-local function switchServer()
-    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
-    
-    for _, server in pairs(servers.data) do
-        if server.playing < server.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
-            return
-        end
-    end
-end
-
-local function teleportToSea(seaId)
-    if placeId[seaId] then
-        -- Reset nhân vật trước khi teleport để tránh bị kéo lại
-        LocalPlayer.Character:BreakJoints() 
-        task.wait(2) -- Đợi 2 giây cho nhân vật reset hoàn toàn
-        TeleportService:Teleport(placeId[seaId], LocalPlayer)
-        
-        -- Đổi server sau khi vào Sea mới (chờ vài giây để game load xong)
-        task.wait(5)
-        switchServer()
-    else
-        warn("Không thể xác định SEA!")
-    end
-end
-
--- Đảm bảo Tab7o tồn tại
-if not Tab7o then
-    Tab7o = AddTab("Sea Teleport")
-end
-
--- Tạo các nút dịch chuyển đến từng SEA
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển - First Sea",
+    Name = "First Sea",
     Callback = function()
-        teleportToSea("First Sea")
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
     end
 })
 
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Second Sea",
+    Name = "Second Sea",
     Callback = function()
-        teleportToSea("Second Sea")
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa")
     end
 })
 
 AddButton(Tab7o, {
-    Name = "Dịch Chuyển - Third Sea",
+    Name = "Third Sea",
     Callback = function()
-        teleportToSea("Third Sea")
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou")
     end
 })
 
@@ -1980,7 +2057,7 @@ AddButton(Tab10o, {
 
 
 
-
+   Section = AddSection(Tab11o, {"Chức năng của hub"})          
 
 
 -----khac
@@ -2328,14 +2405,29 @@ AddButton(Tab11o, {
     end
 })        
 
-
+   Section = AddSection(Tab11o, {"Khác"})          
 
 AddButton(Tab11o, {
-    Name = "???",
+    Name = "Devil Shop",
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/Shade-vex/refs/heads/main/th%C3%B4ng%20b%C3%A1o.txt"))() 
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("GetFruits")
+        game:GetService("Players").LocalPlayer.PlayerGui.Main.FruitShop.Visible = true
     end
-})       
+})
+
+AddButton(Tab11o, {
+    Name = "Color Haki",
+    Callback = function()
+        game.Players.LocalPlayer.PlayerGui.Main.Colors.Visible = true
+    end
+})
+
+AddButton(Tab11o, {
+    Name = "Open Awakening",
+    Callback = function()
+        game:GetService("Players").LocalPlayer.PlayerGui.Main.AwakeningToggler.Visible = true
+    end
+})
 
 
 
