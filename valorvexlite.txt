@@ -424,15 +424,19 @@ AddButton(Tab6o, {
 ----lưu đồ
 
 local player = game.Players.LocalPlayer
-local backpack = player.Backpack
-local inventory = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes") -- Chỉnh đúng nơi lưu kho
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local remotes = replicatedStorage:FindFirstChild("Remotes") -- Kiểm tra đúng nơi chứa RemoteEvents
 local autoStoreEnabled = false
 
 local function storeFruit()
-    for _, item in pairs(player.Character:GetChildren()) do
-        if item:IsA("Tool") and item:FindFirstChild("Fruit") then
-            inventory:FindFirstChild("StoreFruit"):InvokeServer(item)
-            print("Đã lưu trái: " .. item.Name)
+    for _, item in pairs(player.Backpack:GetChildren()) do
+        if item:IsA("Tool") and string.find(item.Name, "Fruit") then
+            if remotes and remotes:FindFirstChild("StoreFruit") then
+                remotes.StoreFruit:InvokeServer(item)
+                print("Đã lưu trái: " .. item.Name)
+            else
+                print("Không tìm thấy Remote lưu trái!")
+            end
         end
     end
 end
