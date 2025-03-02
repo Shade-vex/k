@@ -661,7 +661,7 @@ if game.PlaceId == 2753915549 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Middle Island",
         Callback = function()
-            teleportToLocation(Vector3.new(-21, 16, 283))
+            teleportToLocation(Vector3.new(-646.6, 8.1, 1576.6))
         end
     })
 
@@ -682,7 +682,7 @@ if game.PlaceId == 2753915549 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Skylands",
         Callback = function()
-            teleportToLocation(Vector3.new(-4837, 330, -716))
+            teleportToLocation(Vector3.new(-4934.1, 717.9, -2628.2))
         end
     })
 
@@ -710,7 +710,7 @@ if game.PlaceId == 2753915549 then
     AddButton(Tab7o, {
         Name = "Dịch Chuyển - Underwater City",
         Callback = function()
-            teleportToLocation(Vector3.new(3876, -301, -1885))
+            teleportToLocation(Vector3.new(4047.4, 61.5, -1842.6))
         end
     })
 
