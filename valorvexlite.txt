@@ -382,6 +382,48 @@ AddButton(Tab6o, {
 })
 
 
+----radom
+
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Hàm để random trái ác quỷ một lần
+local function randomFruitOnce()
+    local args = {
+        [1] = "Cousin", -- NPC Random trái ác quỷ
+        [2] = "Buy" -- Hành động mua random
+    }
+    
+    -- Gửi yêu cầu đến hệ thống
+    local success, result = pcall(function()
+        return replicatedStorage.Remotes.CommF_:InvokeServer(unpack(args))
+    end)
+
+    if success then
+        print("Đã random thành công!")
+    else
+        warn("Lỗi khi random trái ác quỷ:", result)
+    end
+end
+
+-- Đảm bảo Tab6o tồn tại
+if not Tab6o then
+    Tab6o = AddTab("Random Fruit")
+end
+
+-- Nút Random Trái Ác Quỷ một lần
+AddButton(Tab6o, {
+    Name = "Random Fruit",
+    Callback = function()
+        randomFruitOnce()
+    end
+})
+
+
+
+
+
+
    Section = AddSection(Tab7o, {"Đến các sea"})          
 
 local TeleportService = game:GetService("TeleportService")
