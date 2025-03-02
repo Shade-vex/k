@@ -470,15 +470,15 @@ local humanoidRootPart = char:WaitForChild("HumanoidRootPart")
 local runService = game:GetService("RunService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
-local active = false -- Biến kiểm soát Auto Farm
-local autoClick = false -- Biến kiểm soát Auto Click
+local active = false -- Trạng thái bật/tắt Auto Farm
+local autoClick = false -- Trạng thái bật/tắt Auto Click
 
 -- 🏹 Tìm quái gần nhất trong phạm vi 5000m
 local function findNearestEnemy()
     local nearestEnemy = nil
     local minDistance = 5000
 
-    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
         if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
             local distance = (enemy.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
             if distance < minDistance then
@@ -493,7 +493,7 @@ end
 -- ⚔️ Tăng hitbox quái lên x10 lần
 local function increaseHitbox(enemy)
     if enemy and enemy:FindFirstChild("HumanoidRootPart") then
-        enemy.HumanoidRootPart.Size = Vector3.new(50, 50, 50) -- Định kích thước hitbox lớn hơn
+        enemy.HumanoidRootPart.Size = Vector3.new(50, 50, 50) -- Tăng hitbox x10
         enemy.HumanoidRootPart.Transparency = 0.5 -- Làm hitbox trong suốt một chút
         enemy.HumanoidRootPart.CanCollide = false
     end
@@ -504,10 +504,12 @@ local function startAutoClick()
     autoClick = true
     spawn(function()
         while autoClick do
-            local tool = player.Character:FindFirstChildOfClass("Tool")
-            if tool then
-                tool:Activate()
-            end
+            pcall(function()
+                local tool = player.Character:FindFirstChildOfClass("Tool")
+                if tool and tool:FindFirstChild("RemoteEvent") then
+                    tool.RemoteEvent:FireServer()
+                end
+            end)
             wait(0.01) -- Tốc độ đánh 0.01s
         end
     end)
@@ -528,7 +530,9 @@ local function startHunting()
             if enemy then
                 increaseHitbox(enemy)
                 while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and active do
-                    humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0) -- Giữ độ cao 15m trên đầu quái
+                    pcall(function()
+                        humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0) -- Giữ độ cao 15m trên đầu quái
+                    end)
                     wait(0.05) -- Duy trì trạng thái bay
                 end
             else
@@ -551,7 +555,7 @@ if not Tab6o then
 end
 
 AddButton(Tab6o, {
-    Name = "Auto Raid",
+    Name = "Auto raid",
     Callback = function()
         if active then
             stopHunting()
