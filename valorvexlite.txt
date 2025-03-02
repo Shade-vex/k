@@ -1302,119 +1302,97 @@ end
 
 -----stats
 
--- Tạo các nút trên Tab8o và đảm bảo chúng hiển thị đúng
+-- Biến lưu chế độ hiện tại (100 hoặc 1000)
+_G.Auto_Stats_Mode = 0  -- 0: Tắt, 100: Auto 100, 1000: Auto 1000
+
+-- Nút Auto 100
+AddButton(Tab8o, {
+    Name = "Auto 100 điểm",
+    Callback = function()
+        if _G.Auto_Stats_Mode ~= 100 then
+            _G.Auto_Stats_Mode = 100
+        else
+            _G.Auto_Stats_Mode = 0  -- Nếu đang bật thì tắt
+        end
+    end
+})
+
+-- Nút Auto 1000
+AddButton(Tab8o, {
+    Name = "Auto 1000 điểm",
+    Callback = function()
+        if _G.Auto_Stats_Mode ~= 1000 then
+            _G.Auto_Stats_Mode = 1000
+        else
+            _G.Auto_Stats_Mode = 0  -- Nếu đang bật thì tắt
+        end
+    end
+})
+
+-- Nút Auto Melee
 AddButton(Tab8o, {
     Name = "Auto Melee",
     Callback = function()
-        local ToggleMelee = Tab8o:AddToggle("ToggleMelee", {Title = "Auto Melee", Default = false })
-        ToggleMelee:OnChanged(function(Value)
-            _G.Auto_Stats_Melee = Value
-        end)
+        _G.Auto_Stats_Melee = not _G.Auto_Stats_Melee
     end
 })
 
+-- Nút Auto Defense
 AddButton(Tab8o, {
     Name = "Auto Defense",
     Callback = function()
-        local ToggleDe = Tab8o:AddToggle("ToggleDe", {Title = "Auto Defense", Default = false })
-        ToggleDe:OnChanged(function(Value)
-            _G.Auto_Stats_Defense = Value
-        end)
+        _G.Auto_Stats_Defense = not _G.Auto_Stats_Defense
     end
 })
 
+-- Nút Auto Sword
 AddButton(Tab8o, {
     Name = "Auto Sword",
     Callback = function()
-        local ToggleSword = Tab8o:AddToggle("ToggleSword", {Title = "Auto Sword", Default = false })
-        ToggleSword:OnChanged(function(Value)
-            _G.Auto_Stats_Sword = Value
-        end)
+        _G.Auto_Stats_Sword = not _G.Auto_Stats_Sword
     end
 })
 
+-- Nút Auto Gun
 AddButton(Tab8o, {
     Name = "Auto Gun",
     Callback = function()
-        local ToggleGun = Tab8o:AddToggle("ToggleGun", {Title = "Auto Gun", Default = false })
-        ToggleGun:OnChanged(function(Value)
-            _G.Auto_Stats_Gun = Value
-        end)
+        _G.Auto_Stats_Gun = not _G.Auto_Stats_Gun
     end
 })
 
+-- Nút Auto Demon Fruit
 AddButton(Tab8o, {
     Name = "Auto Demon Fruit",
     Callback = function()
-        local ToggleFruit = Tab8o:AddToggle("ToggleFruit", {Title = "Auto Demon Fruit", Default = false })
-        ToggleFruit:OnChanged(function(Value)
-            _G.Auto_Stats_Devil_Fruit = Value
-        end)
+        _G.Auto_Stats_Devil_Fruit = not _G.Auto_Stats_Devil_Fruit
     end
 })
 
--- Vòng lặp với tạm dừng 5s để tránh tắc nghẽn
+-- Vòng lặp nâng chỉ số tự động
 spawn(function()
-    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
-        if _G.Auto_Stats_Devil_Fruit then
-            local args = {
-                [1] = "AddPoint",
-                [2] = "Demon Fruit",
-                [3] = 3
-            }
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-        end
-    end
-end)
+    while wait(1) do  -- Cứ mỗi giây chạy một lần
+        if _G.Auto_Stats_Mode > 0 then  -- Chỉ chạy nếu bật Auto 100 hoặc Auto 1000
+            local points = _G.Auto_Stats_Mode  -- Lấy giá trị 100 hoặc 1000
 
-spawn(function()
-    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
-        if _G.Auto_Stats_Gun then
-            local args = {
-                [1] = "AddPoint",
-                [2] = "Gun",
-                [3] = 3
+            local stats = {
+                {Name = "Melee", Toggle = _G.Auto_Stats_Melee},
+                {Name = "Defense", Toggle = _G.Auto_Stats_Defense},
+                {Name = "Sword", Toggle = _G.Auto_Stats_Sword},
+                {Name = "Gun", Toggle = _G.Auto_Stats_Gun},
+                {Name = "Demon Fruit", Toggle = _G.Auto_Stats_Devil_Fruit}
             }
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-        end
-    end
-end)
 
-spawn(function()
-    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
-        if _G.Auto_Stats_Sword then
-            local args = {
-                [1] = "AddPoint",
-                [2] = "Sword",
-                [3] = 3
-            }
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-        end
-    end
-end)
-
-spawn(function()
-    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
-        if _G.Auto_Stats_Defense then
-            local args = {
-                [1] = "AddPoint",
-                [2] = "Defense",
-                [3] = 3
-            }
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-        end
-    end
-end)
-
-spawn(function()
-    while wait(5) do  -- Đặt tạm dừng 5 giây ở đây
-        if _G.Auto_Stats_Melee then
-            local args = {
-                [1] = "AddPoint",
-                [2] = "Melee",
-                [3] = 3
-            }
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+            for _, stat in ipairs(stats) do
+                if stat.Toggle then
+                    local args = {
+                        [1] = "AddPoint",
+                        [2] = stat.Name,
+                        [3] = points
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                end
+            end
         end
     end
 end)
