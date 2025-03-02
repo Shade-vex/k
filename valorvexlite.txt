@@ -579,17 +579,26 @@ AddButton(Tab6o, {
 -----click
 
 local autoClickEnabled = false
+local UIS = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 AddButton(Tab6o, {
     Name = "Auto click",
     Callback = function()
         autoClickEnabled = not autoClickEnabled
         if autoClickEnabled then
-            while autoClickEnabled do
-                -- Gửi sự kiện click chuột (thay thế bằng code phù hợp nếu cần)
-                mouse1click()
-                wait(0.1) -- Điều chỉnh tốc độ click
-            end
+            task.spawn(function()
+                while autoClickEnabled do
+                    local screenSize = UIS:GetScreenSize()
+                    local centerX = screenSize.X / 2
+                    local centerY = screenSize.Y / 2
+
+                    -- Gửi sự kiện chạm vào giữa màn hình
+                    VirtualInputManager:SendTouchEvent(centerX, centerY, 0, true, game, 1)
+                    wait(0.1) -- Điều chỉnh tốc độ tap
+                    VirtualInputManager:SendTouchEvent(centerX, centerY, 0, false, game, 1)
+                end
+            end)
         end
     end
 })
