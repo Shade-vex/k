@@ -1686,19 +1686,11 @@ local function enableWaterWalk()
             if character and root and humanoid then
                 local position = root.Position
 
-                -- Nếu nhân vật dưới nước, đẩy lên mặt nước
+                -- Nếu nhân vật đang ở dưới nước, đẩy lên và giữ trạng thái đi bộ
                 if position.Y < 1 then
-                    root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z) -- Đẩy lên
+                    root.Velocity = Vector3.new(0, 25, 0) -- Đẩy nhân vật lên
+                    humanoid:ChangeState(Enum.HumanoidStateType.Running) -- Giữ trạng thái đi bộ
                 end
-
-                -- Giữ nhân vật trên mặt nước (độ cao 3 để tránh chìm)
-                root.CFrame = CFrame.new(position.X, 3, position.Z)
-
-                -- Giữ tốc độ chạy, nhảy bình thường
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
-                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-                humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
             end
             runService.RenderStepped:Wait()
         end
@@ -1983,6 +1975,22 @@ local function updateCoords()
                 local pos = hrp.Position
                 CoordLabel.Text = string.format("Tọa độ: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
             end
+        end
+        wait(0.5) -- Cập nhật mỗi 0.5 giây
+    end
+end
+
+-- Nút bật/tắt tọa độ
+AddButton(Tab11o, {
+    Name = "Hiện tọa độ",
+    Callback = function()
+        isCoordVisible = not isCoordVisible
+        CoordLabel.Visible = isCoordVisible
+    end
+})
+
+-- Chạy cập nhật tọa độ
+task.spawn(updateCoords)nd
         end
         wait(0.5) -- Cập nhật mỗi 0.5 giây
     end
