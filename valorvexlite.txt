@@ -2708,35 +2708,21 @@ function AttackNoCD()
     end
 end
 
--- Đảm bảo Tab11o tồn tại trước khi tạo nút
-spawn(function()
-    while not Tab11o do wait() end -- Chờ đến khi Tab11o tồn tại
-    AddButton(Tab11o, {
-        Name = "Auto Attack (ON/OFF)",
-        Callback = function()
-            AutoAttack = not AutoAttack
-            print("Auto Attack:", AutoAttack and "ON" or "OFF") -- Debug trạng thái
-        end
-    })
-end)
+-- Đảm bảo menu không bị lỗi, tạo nút trực tiếp
+AddButton(Tab11o, {
+    Name = "Auto Attack (ON/OFF)",
+    Callback = function()
+        AutoAttack = not AutoAttack
+        print("Auto Attack:", AutoAttack and "ON" or "OFF") -- Debug trạng thái
+    end
+})
 
--- Vòng lặp Auto Attack (chạy khi bật)
-spawn(function()
-    while wait() do
+-- Vòng lặp Auto Attack tối ưu
+task.spawn(function()
+    while true do
         if AutoAttack then
             AttackNoCD()
         end
-    end
-end)k
-spawn(function()
-    while wait() do
-        if AutoAttack then
-            AttackNoCD()
-        end
+        wait(0.1) -- Giảm lag, tối ưu vòng lặp
     end
 end)
-
-
-
-
-
