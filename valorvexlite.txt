@@ -373,55 +373,7 @@ AddButton(TabJo, {
     end
 })
 
-local ToggleHumanandghoul = AddToggle(TabJo, "ToggleHumanandghoul", { Name = "Auto [ Human / Ghoul ] Trial", Default = false })
-ToggleHumanandghoul:OnChanged(function(Value)
-    KillAura = Value
-end)
-Options.ToggleHumanandghoul:SetValue(false)
 
-local ToggleAutotrial = AddToggle(TabJo, "ToggleAutotrial", { Name = "Auto Trial", Default = false })
-ToggleAutotrial:OnChanged(function(Value)
-    _G.AutoQuestRace = Value
-end)
-Options.ToggleAutotrial:SetValue(false)
-
-spawn(function()
-    pcall(function()
-        while wait() do
-            if _G.AutoQuestRace then
-                local race = game:GetService("Players").LocalPlayer.Data.Race.Value
-                if race == "Human" or race == "Ghoul" then
-                    for _, v in pairs(game.Workspace.Enemies:GetDescendants()) do
-                        if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                            pcall(function()
-                                repeat
-                                    wait(0.1)
-                                    v.Humanoid.Health = 0
-                                    v.HumanoidRootPart.CanCollide = false
-                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                                until not _G.AutoQuestRace or not v.Parent or v.Humanoid.Health <= 0
-                            end)
-                        end
-                    end
-                elseif race == "Skypiea" then
-                    for _, v in pairs(game:GetService("Workspace").Map.SkyTrial.Model:GetDescendants()) do
-                        if v.Name == "snowisland_Cylinder.081" then
-                            Tween(v.CFrame)
-                        end
-                    end
-                elseif race == "Cyborg" then
-                    Tween(CFrame.new(28654, 14898.7832, -30))
-                elseif race == "Mink" then
-                    for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
-                        if v.Name == "StartPoint" then
-                            Tween(v.CFrame * CFrame.new(0, 10, 0))
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end)
     
 
 
