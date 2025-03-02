@@ -72,78 +72,9 @@ AddButton(Tab1o, {
 
 ------farm quái
 
-   Section = AddSection(Tab2o, {"Cài đặt"})        
+   Section = AddSection(Tab2o, {"Farm (error)"})        
 
-local SettingFarm = Tabs.Setting:AddSection("Setting Farming")
 
-AddButton(Tab11o, {
-    Name = "Fast Attack",
-    Callback = function() 
-        _G.FastAttackFaiFao = not _G.FastAttackFaiFao
-    end
-})
-
-spawn(function()
-	while wait(.5) do
-		pcall(function()
-			if _G.FastAttackFaiFao then
-				repeat wait(_G.Fast_Delay)
-					AttackNoCD()
-				until not _G.FastAttackFaiFao
-			end
-		end)
-	end
-end)
-
-local Camera = require(game.ReplicatedStorage.Util.CameraShaker)
-Camera:Stop()
-
-AddButton(Tab11o, {
-    Name = "Bring Mob",
-    Callback = function() 
-        _G.BringMob = not _G.BringMob
-    end
-})
-
-task.spawn(function()
-    while task.wait() do
-        if _G.BringMob then
-            pcall(function()
-                for i, v in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if not string.find(v.Name, "Boss") and v.Name == MonFarm and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 350 then
-                        if InMyNetWork(v.HumanoidRootPart) then
-                            v.HumanoidRootPart.CFrame = FarmPos
-                            v.HumanoidRootPart.CanCollide = false
-                            v.HumanoidRootPart.Size = Vector3.new(1,1,1)
-                            if v.Humanoid:FindFirstChild("Animator") then
-                                v.Humanoid.Animator:Destroy()
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-task.spawn(function()
-    while true do wait()
-        if setscriptable then
-            setscriptable(game.Players.LocalPlayer, "SimulationRadius", true)
-        end
-        if sethiddenproperty then
-            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-        end
-    end
-end)
-
-function InMyNetWork(object)
-    if isnetworkowner then
-        return isnetworkowner(object)
-    else
-        return (object.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 300
-    end
-end
 
 
 
@@ -2479,4 +2410,4 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)
+task.spawn(updateCoords)      
