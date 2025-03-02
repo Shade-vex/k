@@ -1990,20 +1990,4 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)nd
-        end
-        wait(0.5) -- Cập nhật mỗi 0.5 giây
-    end
-end
-
--- Nút bật/tắt tọa độ
-AddButton(Tab11o, {
-    Name = "Hiện tọa độ",
-    Callback = function()
-        isCoordVisible = not isCoordVisible
-        CoordLabel.Visible = isCoordVisible
-    end
-})
-
--- Chạy cập nhật tọa độ
 task.spawn(updateCoords)
