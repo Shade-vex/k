@@ -423,48 +423,33 @@ AddButton(Tab6o, {
 
 ----lưu đồ
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = game.Players.LocalPlayer
+local backpack = player.Backpack
+local inventory = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes") -- Chỉnh đúng nơi lưu kho
+local autoStoreEnabled = false
 
-local player = Players.LocalPlayer
-local Backpack = player.Backpack
-local autoStoreFruits = false -- Trạng thái bật/tắt auto lưu trái
-
--- Hàm lưu trái cây vào kho đồ
-local function storeFruit(fruit)
-    if fruit and fruit:IsA("Tool") then
-        local args = {
-            [1] = fruit
-        }
-        -- Kích hoạt RemoteEvent lưu trái
-        ReplicatedStorage:FindFirstChild("RemoteEvent"):FireServer(unpack(args))
-    end
-end
-
--- Hàm kiểm tra và lưu trái cây
-local function checkAndStoreFruits()
-    while autoStoreFruits do
-        for _, item in ipairs(Backpack:GetChildren()) do
-            if item:IsA("Tool") and item.ToolTip == "Blox Fruit" then
-                storeFruit(item)
-            end
+local function storeFruit()
+    for _, item in pairs(player.Character:GetChildren()) do
+        if item:IsA("Tool") and item:FindFirstChild("Fruit") then
+            inventory:FindFirstChild("StoreFruit"):InvokeServer(item)
+            print("Đã lưu trái: " .. item.Name)
         end
-        wait(3) -- Kiểm tra mỗi 3 giây để tránh quá tải
     end
 end
 
--- Hàm bật/tắt auto lưu trái
 local function toggleAutoStore()
-    autoStoreFruits = not autoStoreFruits
+    autoStoreEnabled = not autoStoreEnabled
+    print("Tự động lưu trái: " .. tostring(autoStoreEnabled))
 
-    if autoStoreFruits then
-        checkAndStoreFruits()
+    while autoStoreEnabled do
+        storeFruit()
+        wait(5) -- Kiểm tra mỗi 5 giây
     end
 end
 
--- Nút bật/tắt Auto Lưu Trái
+-- Tạo nút bật/tắt lưu trái
 AddButton(Tab6o, {
-    Name = "Auto Lưu Trái",
+    Name = "Tự động lưu trái",
     Callback = function()
         toggleAutoStore()
     end
@@ -2082,7 +2067,3 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)
-
-
-
-                     
