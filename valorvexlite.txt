@@ -506,8 +506,12 @@ local function startAutoClick()
         while autoClicking do
             pcall(function()
                 local tool = player.Character:FindFirstChildOfClass("Tool")
-                if tool and tool:FindFirstChild("RemoteEvent") then
-                    tool.RemoteEvent:FireServer()
+                if tool and (tool.ToolTip:find("Melee") or tool.ToolTip:find("Sword") or tool.ToolTip:find("Gun") or tool.ToolTip:find("Fruit")) then
+                    if tool:FindFirstChild("RemoteEvent") then
+                        tool.RemoteEvent:FireServer()
+                    elseif tool:FindFirstChild("RemoteFunction") then
+                        tool.RemoteFunction:InvokeServer()
+                    end
                 else
                     local vim = game:GetService("VirtualInputManager")
                     vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
