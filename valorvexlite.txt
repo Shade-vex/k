@@ -469,6 +469,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local runService = game:GetService("RunService")
 local tweenService = game:GetService("TweenService")
+local userInputService = game:GetService("UserInputService")
 local autoClicking = false
 local active = false
 local speed = 300 -- Tốc độ bay
@@ -499,23 +500,22 @@ local function increaseHitbox(enemy)
     end
 end
 
--- **Mô phỏng Auto Click hỗ trợ**
+-- **Auto Click (Hoạt động chắc chắn)**
 local function startAutoClick()
     autoClicking = true
     spawn(function()
         while autoClicking do
             pcall(function()
                 local tool = player.Character:FindFirstChildOfClass("Tool")
-                if tool and (tool.ToolTip:find("Melee") or tool.ToolTip:find("Sword") or tool.ToolTip:find("Gun") or tool.ToolTip:find("Fruit")) then
-                    if tool:FindFirstChild("RemoteEvent") then
-                        tool.RemoteEvent:FireServer()
-                    elseif tool:FindFirstChild("RemoteFunction") then
-                        tool.RemoteFunction:InvokeServer()
-                    end
+                if tool and tool:FindFirstChild("RemoteEvent") then
+                    tool.RemoteEvent:FireServer()
+                elseif tool and tool:FindFirstChild("RemoteFunction") then
+                    tool.RemoteFunction:InvokeServer()
                 else
-                    local vim = game:GetService("VirtualInputManager")
-                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                    -- **Mô phỏng nhấn chuột cho chắc chắn**
+                    userInputService.InputBegan:Fire({UserInputType = Enum.UserInputType.MouseButton1, KeyCode = Enum.KeyCode.ButtonR2}, false)
+                    wait(0.1)
+                    userInputService.InputEnded:Fire({UserInputType = Enum.UserInputType.MouseButton1, KeyCode = Enum.KeyCode.ButtonR2}, false)
                 end
             end)
             wait(0.1) -- **Tốc độ đánh 0.1s**
