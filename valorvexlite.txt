@@ -426,36 +426,39 @@ AddButton(Tab6o, {
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local LocalPlayer = Players.LocalPlayer
-local Backpack = LocalPlayer.Backpack
-local autoStoreFruits = false -- Biến bật/tắt vòng lặp lưu trái
+local player = Players.LocalPlayer
+local Backpack = player.Backpack
+local autoStoreFruits = false -- Trạng thái bật/tắt auto lưu trái
 
--- Hàm lưu trái vào kho đồ
+-- Hàm lưu trái cây vào kho đồ
 local function storeFruit(fruit)
-    if fruit and ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("StoreFruit") then
-        ReplicatedStorage.Remotes.StoreFruit:InvokeServer(fruit.Name)
+    if fruit and fruit:IsA("Tool") then
+        local args = {
+            [1] = fruit
+        }
+        -- Kích hoạt RemoteEvent lưu trái
+        ReplicatedStorage:FindFirstChild("RemoteEvent"):FireServer(unpack(args))
     end
 end
 
--- Hàm tự động lưu tất cả trái
-local function autoStore()
+-- Hàm kiểm tra và lưu trái cây
+local function checkAndStoreFruits()
     while autoStoreFruits do
-        for _, item in pairs(Backpack:GetChildren()) do
+        for _, item in ipairs(Backpack:GetChildren()) do
             if item:IsA("Tool") and item.ToolTip == "Blox Fruit" then
                 storeFruit(item)
-                wait(0.5) -- Chờ một chút để tránh lỗi spam lệnh
             end
         end
-        wait(1) -- Kiểm tra mỗi giây
+        wait(3) -- Kiểm tra mỗi 3 giây để tránh quá tải
     end
 end
 
--- Hàm bật/tắt tự động lưu trái
+-- Hàm bật/tắt auto lưu trái
 local function toggleAutoStore()
     autoStoreFruits = not autoStoreFruits
 
     if autoStoreFruits then
-        autoStore()
+        checkAndStoreFruits()
     end
 end
 
@@ -2079,3 +2082,7 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)
+
+
+
+                     
