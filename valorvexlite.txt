@@ -468,11 +468,12 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local runService = game:GetService("RunService")
+local tweenService = game:GetService("TweenService")
 local autoClicking = false
 local active = false
 local speed = 300 -- Tốc độ bay
 
--- Tìm quái gần nhất trong phạm vi 5000m
+-- **Tìm quái gần nhất trong phạm vi 5000m**
 local function findNearestEnemy()
     local nearestEnemy = nil
     local minDistance = 5000
@@ -489,16 +490,16 @@ local function findNearestEnemy()
     return nearestEnemy
 end
 
--- **Tăng hitbox quái lên x10 lần**
+-- **Tăng hitbox quái ×10 lần**
 local function increaseHitbox(enemy)
     if enemy and enemy:FindFirstChild("HumanoidRootPart") then
         enemy.HumanoidRootPart.Size = Vector3.new(50, 50, 50) -- Tăng hitbox x10
-        enemy.HumanoidRootPart.Transparency = 0.5 -- Làm hitbox trong suốt một chút
+        enemy.HumanoidRootPart.Transparency = 0.5
         enemy.HumanoidRootPart.CanCollide = false
     end
 end
 
--- **Auto Click mỗi 0.1s**
+-- **Mô phỏng Auto Click hỗ trợ**
 local function startAutoClick()
     autoClicking = true
     spawn(function()
@@ -507,6 +508,10 @@ local function startAutoClick()
                 local tool = player.Character:FindFirstChildOfClass("Tool")
                 if tool and tool:FindFirstChild("RemoteEvent") then
                     tool.RemoteEvent:FireServer()
+                else
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
                 end
             end)
             wait(0.1) -- **Tốc độ đánh 0.1s**
@@ -518,7 +523,7 @@ local function stopAutoClick()
     autoClicking = false
 end
 
--- **Bay vào giữa quái với tốc độ 300**
+-- **Bay đến giữa quái với tốc độ 300**
 local function startHunting()
     active = true
     startAutoClick()
@@ -530,12 +535,15 @@ local function startHunting()
                 increaseHitbox(enemy)
                 while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and active do
                     pcall(function()
-                        humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame -- **Bay vào giữa cơ thể quái**
+                        local targetPos = enemy.HumanoidRootPart.Position
+                        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPos).Magnitude / speed, Enum.EasingStyle.Linear)
+                        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+                        tween:Play()
                     end)
-                    wait(0.05) -- Duy trì trạng thái bay
+                    wait(0.05)
                 end
             else
-                active = false -- Nếu không có quái nào thì dừng
+                active = false -- Dừng khi không có quái nào
             end
             wait(0.5)
         end
