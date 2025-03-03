@@ -1952,16 +1952,15 @@ AddButton(TabVo, {
 
 
 local player = game.Players.LocalPlayer
-local hitboxShrunk = false -- Biến kiểm soát trạng thái
+local hitboxShrunk = false -- Trạng thái bật/tắt
 
-local function setHitboxSize(shrink)
+local function shrinkHitbox(shrink)
     local character = player.Character
     if character then
         for _, part in pairs(character:GetChildren()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                 if shrink then
-                    part.Size = part.Size / 100 Thu nhỏ hitbox 100 lần
-                    part.Massless = true -- Giữ nguyên cảm giác di chuyển
+                    part.Size = part.Size / 100 -- Thu nhỏ hitbox 100 lần
                 else
                     part.Size = part.Size * 100 -- Khôi phục kích thước ban đầu
                 end
@@ -1970,23 +1969,47 @@ local function setHitboxSize(shrink)
     end
 end
 
--- Hàm xử lý khi nhân vật hồi sinh
+local function showNotification()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer:FindFirstChild("PlayerGui") or game.CoreGui
+
+    local textLabel = Instance.new("TextLabel", screenGui)
+    textLabel.Size = UDim2.new(0, 400, 0, 50)
+    textLabel.Position = UDim2.new(0.5, -200, 0.1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = "VALOR VEX -100 HITBOX"
+    textLabel.TextSize = 25
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextStrokeTransparency = 0.1
+
+    spawn(function()
+        for i = 1, 30 do
+            textLabel.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1) -- Chuyển màu bảy sắc
+            wait(0.1)
+        end
+        screenGui:Destroy()
+    end)
+end
+
 local function onCharacterAdded(character)
-    repeat task.wait() until character:FindFirstChild("HumanoidRootPart") -- Chờ nhân vật tải hoàn toàn
+    wait(1) -- Đợi nhân vật tải xong để tránh lỗi
     if hitboxShrunk then
-        setHitboxSize(true) -- Tự động thu nhỏ lại sau khi hồi sinh
+        shrinkHitbox(true)
+        showNotification()
     end
 end
 
--- Lắng nghe sự kiện hồi sinh nhân vật
 player.CharacterAdded:Connect(onCharacterAdded)
 
--- Nút bật/tắt thu nhỏ hitbox
+-- **Nút bật/tắt trong menu**
 AddButton(TabVo, {
     Name = "Hitbox Bản Thân -100",
     Callback = function()
         hitboxShrunk = not hitboxShrunk
-        setHitboxSize(hitboxShrunk)
+        shrinkHitbox(hitboxShrunk)
+        if hitboxShrunk then
+            showNotification()
+        end
     end
 })
 
