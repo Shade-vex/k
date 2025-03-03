@@ -1,0 +1,23 @@
+_G.AutoMysticIsland = false
+
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+spawn(function()
+    pcall(function()
+        while wait() do
+            if _G.AutoMysticIsland then
+                local mirageIsland = game:GetService("Workspace").Map:FindFirstChild("MysticIsland")
+                if mirageIsland then
+                    local targetPos = Vector3.new(mirageIsland.Center.Position.X, 70, mirageIsland.Center.Position.Z)
+                    local distance = (humanoidRootPart.Position - targetPos).Magnitude
+                    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+                    local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+                    tween:Play()
+                end
+            end
+        end
+    end)
+end)
