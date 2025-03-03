@@ -1934,6 +1934,54 @@ end)
 
 
 
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+AddButton(TabVo, {
+    Name = "Tốc Độ Khá Chậm",
+    Callback = function()
+        humanoid.WalkSpeed = 16
+    end
+})
+
+
+
+
+
+
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hitboxShrunk = false -- Biến kiểm soát trạng thái
+
+local function setHitboxSize(shrink)
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            if shrink then
+                part.Size = part.Size / 100 -- Thu nhỏ hitbox 100 lần
+            else
+                part.Size = part.Size * 100 -- Khôi phục kích thước ban đầu
+            end
+        end
+    end
+end
+
+-- Nút bật/tắt thu nhỏ hitbox
+AddButton(TabVo, {
+    Name = "Thu nhỏ hitbox của mình",
+    Callback = function()
+        hitboxShrunk = not hitboxShrunk
+        setHitboxSize(hitboxShrunk)
+    end
+})
+
+
+
+
+
+
+
 -----esp player
 
 local espEnabled = false -- Trạng thái bật/tắt ESP
