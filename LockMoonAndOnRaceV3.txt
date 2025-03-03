@@ -1,0 +1,25 @@
+_G.AutoLockMoon = false
+
+spawn(function()
+    while wait() do
+        pcall(function()
+            if _G.AutoLockMoon then
+                local moonDir = game.Lighting:GetMoonDirection()
+                local lookAtPos = game.Workspace.CurrentCamera.CFrame.p + moonDir * 100
+                game.Workspace.CurrentCamera.CFrame = CFrame.lookAt(game.Workspace.CurrentCamera.CFrame.p, lookAtPos)
+            end
+        end)
+    end
+end)
+
+spawn(function()
+    while wait() do
+        pcall(function()
+            if _G.AutoLockMoon then
+                game:GetService("VirtualInputManager"):SendKeyEvent(true, "T", false, game)
+                wait(0.1)
+                game:GetService("VirtualInputManager"):SendKeyEvent(false, "T", false, game)
+            end
+        end)
+    end
+end)
