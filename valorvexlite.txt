@@ -506,17 +506,19 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/head
 
 ---kiếm huyền thọai
 
-_G.BuyLengendSword = false
-
-AddButton(Tab5o, {
-    Name = "Mua Kiếm Huyền Thoại",
-    Callback = function()
-        _G.BuyLengendSword = not _G.BuyLengendSword
-        if _G.BuyLengendSword then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/legendarysworddealer.txt"))()
+if Second_Sea then
+    -- Thêm nút vào menu
+    AddButton(Tab5o, {
+        Name = "Mua Kiếm Huyền Thoại",
+        Callback = function()
+            local args = {
+                [1] = "LegendarySwordDealer",
+                [2] = "2"
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
         end
-    end
-})
+    })
+end
 
 
 
