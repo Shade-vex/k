@@ -1,0 +1,45 @@
+_G.AutoElite = false
+
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local function findEliteBoss()
+    for _, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+        if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+            if v.Name == "Diablo" or v.Name == "Deandre" or v.Name == "Urban" then
+                return v
+            end
+        end
+    end
+    return nil
+end
+
+local function moveToTarget(targetCFrame)
+    local distance = (humanoidRootPart.Position - targetCFrame.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame + Vector3.new(0, 50, 0)}) -- Bay cao hơn 50 để tránh va chạm
+    tween:Play()
+end
+
+local function huntEliteBoss()
+    if not _G.AutoElite then return end
+
+    local eliteBoss = findEliteBoss()
+
+    if eliteBoss then
+        moveToTarget(eliteBoss.HumanoidRootPart.CFrame)
+    else
+        -- Nếu boss chưa xuất hiện, kiểm tra trong ReplicatedStorage
+        local storedBoss = game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") or
+                           game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") or
+                           game:GetService("ReplicatedStorage"):FindFirstChild("Urban")
+        if storedBoss then
+            moveToTarget(storedBoss.HumanoidRootPart.CFrame)
+        else
+            -- Không tìm thấy boss, nhận nhiệm vụ Elite Hunter
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter")
+        end
+    end
+end

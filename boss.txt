@@ -1,35 +1,39 @@
-local Items = Tabs.Main:AddSection("Items Farm")
-
 if Third_Sea then
-    spawn(function()
-        while wait() do
-            if AutoHallowSycthe then
-                pcall(function()
-                    if game:GetService("Workspace").Enemies:FindFirstChild("Soul Reaper") then
-                        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if string.find(v.Name , "Soul Reaper") then
-                                repeat wait(_G.Fast_Delay)
-                                    AttackNoCD()
-                                    AutoHaki()
-                                    EquipTool(SelectWeapon)
-                                    v.HumanoidRootPart.Size = Vector3.new(50,50,50)
-                                    Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX,posY,posZ))
-                                    v.HumanoidRootPart.Transparency = 1
-                                    sethiddenproperty(game.Players.LocalPlayer,"SimulationRadius",math.huge)
-                                until v.Humanoid.Health <= 0 or AutoHallowSycthe == false
-                            end
-                        end
-                    elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Hallow Essence") or game:GetService("Players").LocalPlayer.Character:FindFirstChild("Hallow Essence") then
-                        repeat Tween(CFrame.new(-8932.322265625, 146.83154296875, 6062.55078125)) wait() until (CFrame.new(-8932.322265625, 146.83154296875, 6062.55078125).Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 8                        
-                        EquipTool("Hallow Essence")
-                    else
-                        if game:GetService("ReplicatedStorage"):FindFirstChild("Soul Reaper") then
-                            Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Soul Reaper").HumanoidRootPart.CFrame * CFrame.new(2,20,2))
-                        else
-                        end
-                    end
-                end)
+    function HuntSoulReaper()
+        if not AutoHallowSycthe then return end
+
+        pcall(function()
+            local TweenService = game:GetService("TweenService")
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+            -- Kiểm tra nếu boss Soul Reaper tồn tại
+            local soulReaper = game:GetService("Workspace").Enemies:FindFirstChild("Soul Reaper")
+            if soulReaper and soulReaper:FindFirstChild("HumanoidRootPart") then
+                local targetPos = soulReaper.HumanoidRootPart.Position
+                local distance = (humanoidRootPart.Position - targetPos).Magnitude
+                local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+                local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+
+                tween:Play()
             end
-        end
-    end)
+
+            -- Kiểm tra nếu có Hallow Essence
+            local hallowEssence = game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Hallow Essence") 
+                or game:GetService("Players").LocalPlayer.Character:FindFirstChild("Hallow Essence")
+
+            if hallowEssence then
+                local targetPos = Vector3.new(-8932, 146, 6062)
+                local distance = (humanoidRootPart.Position - targetPos).Magnitude
+                local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+                local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+
+                tween:Play()
+            end
+        end)
+    end
+
+    -- Gọi hàm một lần khi bật
+    HuntSoulReaper()
 end
