@@ -2177,9 +2177,9 @@ AddButton(Tab9o, {
 
 -----esp trái v2
 
-local espFruitEnabled = false -- Trạng thái bật/tắt ESP
-local fruitLabelVI = nil -- Biến lưu UI thông báo cho Tiếng Việt
-local fruitLabelEN = nil -- Biến lưu UI thông báo cho Tiếng Anh
+local espFruitEnabled = false
+local fruitLabelVI = nil
+local fruitLabelEN = nil
 
 -- Hàm phát hiện ngôn ngữ của game
 local function getGameLanguage()
@@ -2191,92 +2191,107 @@ local function getGameLanguage()
     end
 end
 
+-- Hàm tìm trái cây trong nhiều thư mục khác nhau
+local function findClosestFruit()
+    local localPlayer = game.Players.LocalPlayer
+    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return nil, math.huge end
+
+    local closestFruit = nil
+    local closestDistance = math.huge
+    local humanoidRootPart = localPlayer.Character.HumanoidRootPart
+
+    local function checkFolder(folder)
+        for _, fruit in pairs(folder:GetChildren()) do
+            if (fruit:IsA("Tool") or fruit:IsA("Model") or fruit:IsA("Part")) and fruit:FindFirstChild("Handle") then
+                local distance = (humanoidRootPart.Position - fruit.Handle.Position).Magnitude
+                if distance < closestDistance then
+                    closestFruit = fruit
+                    closestDistance = distance
+                end
+            end
+        end
+    end
+
+    -- Kiểm tra trong các thư mục có thể chứa trái cây
+    checkFolder(game.Workspace)
+    if game.Workspace:FindFirstChild("Fruits") then
+        checkFolder(game.Workspace.Fruits)
+    end
+    if game.ReplicatedStorage:FindFirstChild("Fruits") then
+        checkFolder(game.ReplicatedStorage.Fruits)
+    end
+
+    return closestFruit, closestDistance
+end
+
+-- Cập nhật UI hiển thị khoảng cách đến trái cây gần nhất
 local function updateFruitESP()
     if not espFruitEnabled then return end
 
-    local localPlayer = game.Players.LocalPlayer  
-    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return end  
-
-    local closestFruit = nil  
-    local closestDistance = math.huge  
-
-    for _, fruit in pairs(game.Workspace:GetChildren()) do  
-        if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then  
-            local distance = (localPlayer.Character.HumanoidRootPart.Position - fruit.Handle.Position).Magnitude  
-            if distance < closestDistance then  
-                closestFruit = fruit  
-                closestDistance = distance  
-            end  
-        end  
-    end  
+    local closestFruit, closestDistance = findClosestFruit()
 
     -- Xác định ngôn ngữ hiển thị
     local lang = getGameLanguage()
 
-    if closestFruit then  
+    if closestFruit then
         if lang == "vi" and fruitLabelVI then
-            fruitLabelVI.Text = string.format("Đã phát hiện trái cây: Cách đây %dm", math.floor(closestDistance))  
-            fruitLabelEN.Text = "" -- Ẩn thông báo tiếng Anh
+            fruitLabelVI.Text = string.format("Đã phát hiện trái cây: Cách đây %dm", math.floor(closestDistance))
+            fruitLabelEN.Text = ""
         elseif lang == "en" and fruitLabelEN then
-            fruitLabelEN.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(closestDistance))  
-            fruitLabelVI.Text = "" -- Ẩn thông báo tiếng Việt
+            fruitLabelEN.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(closestDistance))
+            fruitLabelVI.Text = ""
         end
-    else  
+    else
         if fruitLabelVI then fruitLabelVI.Text = "" end
         if fruitLabelEN then fruitLabelEN.Text = "" end
     end
 end
 
+-- Hàm bật/tắt ESP trái cây
 local function toggleFruitESP()
     espFruitEnabled = not espFruitEnabled
 
-    if espFruitEnabled then  
-        if not fruitLabelVI or not fruitLabelEN then  
-            local gui = Instance.new("ScreenGui")  
-            gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui  
+    if espFruitEnabled then
+        if not fruitLabelVI or not fruitLabelEN then
+            local gui = Instance.new("ScreenGui")
+            gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui
 
-            -- Tạo TextLabel cho Tiếng Việt
-            fruitLabelVI = Instance.new("TextLabel")  
-            fruitLabelVI.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.56, 0) 
-            fruitLabelVI.BackgroundTransparency = 1  
-            fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)  
-            fruitLabelVI.TextStrokeTransparency = 0 
-            fruitLabelVI.TextStrokeColor3 = Color3.new(0, 0, 0) 
-            fruitLabelVI.TextScaled = false  
-            fruitLabelVI.TextSize = 30  
-            fruitLabelVI.Font = Enum.Font.SourceSansBold  
-            fruitLabelVI.Text = "" 
-            fruitLabelVI.TextXAlignment = Enum.TextXAlignment.Center 
-            fruitLabelVI.TextYAlignment = Enum.TextYAlignment.Center 
-            fruitLabelVI.Parent = gui  
+            -- Tiếng Việt
+            fruitLabelVI = Instance.new("TextLabel")
+            fruitLabelVI.Size = UDim2.new(0, 500, 0, 50)
+            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.56, 0)
+            fruitLabelVI.BackgroundTransparency = 1
+            fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)
+            fruitLabelVI.TextStrokeTransparency = 0
+            fruitLabelVI.TextStrokeColor3 = Color3.new(0, 0, 0)
+            fruitLabelVI.TextSize = 30
+            fruitLabelVI.Font = Enum.Font.SourceSansBold
+            fruitLabelVI.Text = ""
+            fruitLabelVI.Parent = gui
 
-            -- Tạo TextLabel cho Tiếng Anh
-            fruitLabelEN = Instance.new("TextLabel")  
-            fruitLabelEN.Size = UDim2.new(0, 500, 0, 50) 
-            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.56, 0) 
-            fruitLabelEN.BackgroundTransparency = 1  
-            fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)  
-            fruitLabelEN.TextStrokeTransparency = 0 
-            fruitLabelEN.TextStrokeColor3 = Color3.new(0, 0, 0) 
-            fruitLabelEN.TextScaled = false  
-            fruitLabelEN.TextSize = 30  
-            fruitLabelEN.Font = Enum.Font.SourceSansBold  
-            fruitLabelEN.Text = "" 
-            fruitLabelEN.TextXAlignment = Enum.TextXAlignment.Center 
-            fruitLabelEN.TextYAlignment = Enum.TextYAlignment.Center 
-            fruitLabelEN.Parent = gui  
-        end  
+            -- Tiếng Anh
+            fruitLabelEN = Instance.new("TextLabel")
+            fruitLabelEN.Size = UDim2.new(0, 500, 0, 50)
+            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.56, 0)
+            fruitLabelEN.BackgroundTransparency = 1
+            fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)
+            fruitLabelEN.TextStrokeTransparency = 0
+            fruitLabelEN.TextStrokeColor3 = Color3.new(0, 0, 0)
+            fruitLabelEN.TextSize = 30
+            fruitLabelEN.Font = Enum.Font.SourceSansBold
+            fruitLabelEN.Text = ""
+            fruitLabelEN.Parent = gui
+        end
 
-        spawn(function()  
-            while espFruitEnabled do  
-                updateFruitESP()  
-                wait(0.5)  
+        spawn(function()
+            while espFruitEnabled do
+                updateFruitESP()
+                wait(0.5)
             end
             if fruitLabelVI then fruitLabelVI.Text = "" end
             if fruitLabelEN then fruitLabelEN.Text = "" end
-        end)  
-    else  
+        end)
+    else
         if fruitLabelVI then fruitLabelVI.Text = "" end
         if fruitLabelEN then fruitLabelEN.Text = "" end
     end
@@ -2289,7 +2304,7 @@ end
 
 -- Tạo nút bật/tắt ESP trái cây
 AddButton(Tab9o, {
-    Name = "Fruit Notifier V2",
+    Name = "Fruit Notifier V3",
     Callback = function()
         toggleFruitESP()
     end
