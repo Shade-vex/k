@@ -390,6 +390,29 @@ AddButton(Tab5o, {
 })
 
 
+----elite hunter
+
+if not _G.AutoElite then
+    _G.AutoElite = false
+end
+
+local function toggleEliteHunting()
+    _G.AutoElite = not _G.AutoElite
+
+    if _G.AutoElite then
+        print("🔹 Đã bật Auto Săn Elite")
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/Shade-vex/refs/heads/main/s%C4%83n%20elite.txt"))()
+    else
+        print("🔸 Đã tắt Auto Săn Elite")
+    end
+end
+
+AddButton(Tab5o, {
+    Name = "Bật/Tắt Săn Elite",
+    Callback = function()
+        toggleEliteHunting()
+    end
+})
 
 
    Section = AddSection(Tab6o, {"Trái ác quỷ"})          
