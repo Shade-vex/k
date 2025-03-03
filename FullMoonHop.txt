@@ -1,0 +1,27 @@
+if First_Sea or Second_Sea then
+    print("Chỉ hoạt động ở Third Sea!")
+end
+
+if Third_Sea then
+    _G.AutoFindMoon = false
+
+    spawn(function()
+        while wait() do
+            if _G.AutoFindMoon then
+                if game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149052" or
+                   game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149431" then
+                    wait(2.0)
+                elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709143733" then
+                    Hop()
+                    print("Không phải Full Moon! Đang chuyển server...")
+                elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709150401" or
+                       game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149680" then
+                    Hop()
+                    print("Chuyển server để tìm Full Moon...")
+                else
+                    Hop()
+                end
+            end
+        end
+    end)
+end
