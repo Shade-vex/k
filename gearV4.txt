@@ -1,0 +1,27 @@
+_G.TweenToGear = false
+
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+spawn(function()
+    pcall(function()
+        while wait() do
+            if _G.TweenToGear then
+                if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then
+                    for _, v in pairs(game:GetService("Workspace").Map.MysticIsland:GetChildren()) do 
+                        if v:IsA("MeshPart") and v.Material == Enum.Material.Neon then  
+                            local targetPos = Vector3.new(v.Position.X, v.Position.Y + 10, v.Position.Z)
+                            local distance = (humanoidRootPart.Position - targetPos).Magnitude
+                            local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+                            local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+                            tween:Play()
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end)
