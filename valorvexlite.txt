@@ -35,7 +35,7 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
      local Tab2o = MakeTab({Name = "Farm"})
      local Tab3o = MakeTab({Name = "Biển"})
      local Tab4o = MakeTab({Name = "Đảo"})
-     local TabJo = MakeTab({Name = "Tộc"})
+     local TabJo = MakeTab({Name = "Tộc V4"})
      local Tab5o = MakeTab({Name = "Vật phẩm"})
      local Tab6o = MakeTab({Name = "Trái và đột kích"})
      local Tab7o = MakeTab({Name = "Dịch chuyển"})
@@ -56,18 +56,18 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 AddButton(Tab1o, {
     Name = "Discord",
     Callback = function()
-        local url = "https://discord.gg/pd2pJVd3" -- Thay your_invite_code bằng mã invite thật
-        if syn and syn.request then
-            syn.request({Url = url, Method = "GET"}) -- Dành cho Synapse X
-        elseif request then
-            request({Url = url, Method = "GET"}) -- Dành cho một số executor khác
-        elseif (getgenv and getgenv().request) then
-            getgenv().request({Url = url, Method = "GET"})
-        elseif (KRNL_LOADED) then
-            KRNL_LOADED({Url = url, Method = "GET"})
-        else
-            print("Không thể mở link trực tiếp, vui lòng mở thủ công: " .. url)
-        end
+        local url = "https://discord.gg/dgASGNpW" -- Thay link Discord của bạn vào đây
+
+        -- Mở link trên trình duyệt bằng setclipboard
+        setclipboard(url)
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Mở Discord",
+            Text = "Link đã được sao chép vào clipboard! Hãy dán vào trình duyệt.",
+            Duration = 5
+        })
+
+        -- Kick người chơi khỏi game
+        game.Players.LocalPlayer:Kick("Tham gia Discord để tiếp tục sử dụng menu!")
     end
 })
 
@@ -80,19 +80,12 @@ AddButton(Tab1o, {
 
 
 
-local farmEnabled = false
-
 AddButton(Tab2o, {
-    Name = "Farm lvl",
+    Name = "Farm Level",
     Callback = function()
-        farmEnabled = not farmEnabled -- Đảo trạng thái bật/tắt
-        if farmEnabled then
-            print("Đã bật farm level")
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/x-hub-beta/refs/heads/main/farm%20lvl%20.txt"))()
-        else
-            print("Đã tắt farm level")
-            -- Dừng script bằng cách vô hiệu hóa nó
-            _G.AutoLevel = false
+        _G.AutoLevel = not _G.AutoLevel
+        if _G.AutoLevel then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/valorvexfarmlvl.txt"))()
         end
     end
 })
@@ -324,8 +317,18 @@ AddButton(Tab2o, {
     end
 })
 
-   Section = AddSection(TabJo, {"Lấy tộc V4"})          
+   Section = AddSection(TabJo, {"Lấy tộc V4"})    
 
+AddButton(TabJo, {
+    Name = "Tìm Full Moon",
+    Callback = function()
+        _G.AutoFindMoon = not _G.AutoFindMoon
+        if _G.AutoFindMoon then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/FullMoonHop.txt"))()
+        end
+    end
+})
+      
 AddButton(TabJo, {
     Name = "Timple Of Time",
     Callback = function()
@@ -376,6 +379,72 @@ AddButton(TabJo, {
 
     
 
+----Đảo bí ẩn
+
+_G.AutoMysticIsland = false
+
+AddButton(Tab4o, {
+    Name = "Mirage Island",
+    Callback = function()
+        _G.AutoMysticIsland = not _G.AutoMysticIsland
+        if _G.AutoMysticIsland then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/Mirage%20island.txt"))()
+        end
+    end
+})
+
+
+AddButton(Tab4o, {
+    Name = "Lock Moon",
+    Callback = function()
+        _G.AutoLockMoon = not _G.AutoLockMoon
+        if _G.AutoLockMoon then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/LockMoonAndOnRaceV3.txt"))()
+        end
+    end
+})
+
+
+_G.TweenToGear = false
+
+AddButton(Tab4o, {
+    Name = "Tìm Gear V4",
+    Callback = function()
+        _G.TweenToGear = not _G.TweenToGear
+        if _G.TweenToGear then
+            startFindingGear()
+        end
+    end
+})
+
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+function startFindingGear()
+    spawn(function()
+        while _G.TweenToGear do
+            pcall(function()
+                if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then
+                    for _, v in pairs(game:GetService("Workspace").Map.MysticIsland:GetChildren()) do 
+                        if v:IsA("MeshPart") and v.Material == Enum.Material.Neon then  
+                            local targetPos = Vector3.new(v.Position.X, v.Position.Y + 10, v.Position.Z)
+                            local distance = (humanoidRootPart.Position - targetPos).Magnitude
+                            local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+                            local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+                            tween:Play()
+                            break
+                        end
+                    end
+                end
+            end)
+            wait(5) -- Đợi 5 giây trước khi kiểm tra tiếp để tránh làm lag game
+        end
+    end)
+end
+
+
 
 
 
@@ -408,11 +477,48 @@ local function toggleEliteHunting()
 end
 
 AddButton(Tab5o, {
-    Name = "Bật/Tắt Săn Elite",
+    Name = "Săn Elite",
     Callback = function()
         toggleEliteHunting()
     end
 })
+
+
+-----hallow 
+
+local AutoBossEnabled = false
+
+local function toggleAutoBoss()
+    AutoBossEnabled = not AutoBossEnabled
+    Options.ToggleHallow:SetValue(AutoBossEnabled)
+end
+
+AddButton(Tab5o, {
+    Name = "Auto Hallow",
+    Callback = function()
+        toggleAutoBoss()
+    end
+})
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/boss.txt"))()
+
+
+
+---kiếm huyền thọai
+
+_G.BuyLengendSword = false
+
+AddButton(Tab5o, {
+    Name = "Mua Kiếm Huyền Thoại",
+    Callback = function()
+        _G.BuyLengendSword = not _G.BuyLengendSword
+        if _G.BuyLengendSword then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/legendarysworddealer.txt"))()
+        end
+    end
+})
+
+
 
 
    Section = AddSection(Tab6o, {"Trái ác quỷ"})          
@@ -2663,4 +2769,4 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)    
+task.spawn(updateCoords)          
