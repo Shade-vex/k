@@ -1941,7 +1941,7 @@ local humanoid = character:WaitForChild("Humanoid")
 AddButton(TabVo, {
     Name = "Tốc Độ Khá Chậm",
     Callback = function()
-        humanoid.WalkSpeed = 16
+        humanoid.WalkSpeed = 8
     end
 })
 
@@ -2856,4 +2856,4 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)          
+task.spawn(updateCoords)           
