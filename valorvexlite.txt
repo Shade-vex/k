@@ -2997,13 +2997,35 @@ task.spawn(updateCoords)
 ---auto click
 
 
--- Biến kiểm soát trạng thái
+-- Biến kiểm soát
 local autoClickEnabled = false
-local originalHitboxRange = 1 -- Tầm đánh gốc
-local extendedHitboxRange = 50 -- Tăng tầm đánh lên 50m
+local attackRange = 50 -- Tăng tầm đánh lên 50m
 
--- Hàm tăng tầm đánh
-local function setAttackRange(expand)
+-- Hàm Auto Click
+local function startAutoClick()
+    autoClickEnabled = not autoClickEnabled
+
+    if autoClickEnabled then
+        print("🔹 Auto Click: BẬT")
+
+        spawn(function()
+            while autoClickEnabled do
+                pcall(function()
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0) -- Nhấp chuột
+                    wait(0.1)
+                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                end)
+                wait(0.1)
+            end
+        end)
+    else
+        print("🔹 Auto Click: TẮT")
+    end
+end
+
+-- Hàm Tăng Tầm Đánh
+local function extendHitbox()
     local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
     local combatData = getupvalues(combatFramework)[2]
 
@@ -3011,46 +3033,23 @@ local function setAttackRange(expand)
         local controller = combatData.activeController
         if controller then
             local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
-            if expand then
-                rigLib.getBladeHits = function(_, targets, range)
-                    return rigLib.getBladeHits(_, targets, extendedHitboxRange)
-                end
-            else
-                rigLib.getBladeHits = function(_, targets, range)
-                    return rigLib.getBladeHits(_, targets, originalHitboxRange)
-                end
+            rigLib.getBladeHits = function(_, targets, range)
+                return rigLib.getBladeHits(_, targets, attackRange) -- Tăng tầm đánh lên 50m
             end
         end
     end
 end
 
--- Hàm Auto Click
-local function startAutoClick()
-    autoClickEnabled = not autoClickEnabled
-
-    if autoClickEnabled then
-        setAttackRange(true) -- Tăng tầm đánh lên 50m
-
-        spawn(function()
-            while autoClickEnabled do
-                pcall(function()
-                    local vim = game:GetService("VirtualInputManager")
-                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                    wait(0.1) -- Tốc độ 0.1s
-                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-                end)
-                wait(0.1)
-            end
-        end)
-    else
-        setAttackRange(false) -- Khôi phục tầm đánh gốc
-    end
+-- Kết hợp Auto Click + Tăng Tầm Đánh
+local function toggleAutoAttack()
+    startAutoClick() -- Bật Auto Click
+    extendHitbox() -- Tăng tầm đánh
 end
 
 -- Thêm nút bật/tắt vào menu
 AddButton(Tab11o, {
     Name = "⚔️ Auto Click + Tăng Tầm Đánh 50m",
     Callback = function()
-        startAutoClick()
+        toggleAutoAttack()
     end
-})                                       
+})
