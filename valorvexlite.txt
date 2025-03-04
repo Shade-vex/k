@@ -84,14 +84,15 @@ end
 local attackLoopRunning = false
 local SelectedSpeed = "Fast Attack (Nhanh)"
 local SelectedWeapon = "Melee (Cận chiến)"
+_G.Fast_Delay = 0.15 -- Mặc định Fast Attack
 
 -- Danh sách tốc độ đánh
 local listFastAttack = { "Normal Attack (Chậm)", "Fast Attack (Nhanh)", "Super Fast Attack (Siêu nhanh)" }
 
 -- Dropdown chọn tốc độ đánh
 AddDropdown(Tab2o, {
-    Name = "🔹 Chọn tốc độ đánh",
-    Options = listFastAttack, -- Dùng "Options" thay vì "Values"
+    Name = "🔹Chọn tốc độ đánh",
+    Options = listFastAttack,
     Callback = function(Value)
         SelectedSpeed = Value
         if Value == "Fast Attack (Nhanh)" then
@@ -110,7 +111,7 @@ local listWeapons = { "Melee (Cận chiến)", "Sword (Kiếm)", "Blox Fruit (Tr
 -- Dropdown chọn vũ khí
 AddDropdown(Tab2o, {
     Name = "🔹Chọn loại vũ khí",
-    Options = listWeapons, -- Dùng "Options" thay vì "Values"
+    Options = listWeapons,
     Callback = function(Value)
         SelectedWeapon = Value
     end
@@ -127,25 +128,96 @@ AddButton(Tab2o, {
     end
 })
 
--- Hàm tìm vũ khí và bắt đầu vòng lặp
-function StartLoop()
-    if attackLoopRunning and SelectedSpeed and SelectedWeapon then
-        task.spawn(function()
-            wait(5) -- Đợi 5 giây để tránh xung đột
-            while attackLoopRunning do
+-- Hàm tìm vũ khí
+function FindWeapon()
+    local Backpack = game.Players.LocalPlayer.Backpack
+    for _, v in pairs(Backpack:GetChildren()) do
+        if v.ToolTip and string.find(v.ToolTip, string.match(SelectedWeapon, "%((.-)%)")) then
+            return v.Name
+        end
+    end
+    return nil
+end
+
+-- **Tích hợp AttackNoCD()**
+local plr = game.Players.LocalPlayer
+local CbFw = getupvalues(require(plr.PlayerScripts.CombatFramework))
+local CbFw2 = CbFw[2]
+
+function GetCurrentBlade() 
+    local p13 = CbFw2.activeController
+    local ret = p13.blades[1]
+    if not ret then return end
+    while ret.Parent ~= game.Players.LocalPlayer.Character do ret = ret.Parent end
+    return ret
+end
+
+function AttackNoCD()
+    if attackLoopRunning then
+        local AC = CbFw2.activeController
+        for i = 1, 1 do 
+            local bladehit = require(game.ReplicatedStorage.CombatFramework.RigLib).getBladeHits(
+                plr.Character,
+                {plr.Character.HumanoidRootPart},
+                60
+            )
+            local targets = {}
+            for _, v in pairs(bladehit) do
+                if v.Parent:FindFirstChild("HumanoidRootPart") then
+                    table.insert(targets, v.Parent.HumanoidRootPart)
+                end
+            end
+
+            if #targets > 0 then
+                local u8 = debug.getupvalue(AC.attack, 5)
+                local u9 = debug.getupvalue(AC.attack, 6)
+                local u7 = debug.getupvalue(AC.attack, 4)
+                local u10 = debug.getupvalue(AC.attack, 7)
+                local u12 = (u8 * 798405 + u7 * 727595) % u9
+                local u13 = u7 * 798405
+                (function()
+                    u12 = (u12 * u9 + u13) % 1099511627776
+                    u8 = math.floor(u12 / u9)
+                    u7 = u12 - u8 * u9
+                end)()
+                u10 = u10 + 1
+                debug.setupvalue(AC.attack, 5, u8)
+                debug.setupvalue(AC.attack, 6, u9)
+                debug.setupvalue(AC.attack, 4, u7)
+                debug.setupvalue(AC.attack, 7, u10)
+                
                 pcall(function()
-                    local Backpack = game.Players.LocalPlayer.Backpack
-                    for i, v in pairs(Backpack:GetChildren()) do
-                        if v.ToolTip and string.find(v.ToolTip, string.match(SelectedWeapon, "%((.-)%)")) then
-                            SelectWeapon = v.Name
-                            break
-                        end
+                    if plr.Character:FindFirstChildOfClass("Tool") then
+                        AC.animator.anims.basic[1]:Play(0.01,0.01,0.01)
+                        game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("weaponChange", tostring(GetCurrentBlade()))
+                        game.ReplicatedStorage.Remotes.Validator:FireServer(math.floor(u12 / 1099511627776 * 16777215), u10)
+                        game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", targets, i, "")
                     end
                 end)
-                wait(_G.Fast_Delay)
             end
-        end)
+        end
     end
+end
+
+-- Bật vòng lặp tấn công
+function StartLoop()
+    if attackLoopRunning then return end -- Tránh trùng vòng lặp
+    attackLoopRunning = true
+    wait(5) -- Đợi 5 giây để tránh xung đột với các script khác
+    task.spawn(function()
+        while attackLoopRunning do
+            local weapon = FindWeapon()
+            if weapon then
+                AttackNoCD()
+            end
+            wait(_G.Fast_Delay)
+        end
+    end)
+end
+
+-- Tắt vòng lặp tấn công
+function StopLoop()
+    attackLoopRunning = false
 end
 
 
