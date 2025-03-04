@@ -932,203 +932,114 @@ AddButton(Tab6o, {
 
 
 
+----- đi raid
 
    Section = AddSection(Tab6o, {"Phần Raid Trái v2"})          
 
-local Chips = {"Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"}
+local ChipList = {
+    {name = "Flame (Lửa)", id = "Flame"},
+    {name = "Ice (Băng)", id = "Ice"},
+    {name = "Quake (Chấn Động)", id = "Quake"},
+    {name = "Light (Ánh Sáng)", id = "Light"},
+    {name = "Dark (Bóng Tối)", id = "Dark"},
+    {name = "Spider (Nhện)", id = "Spider"},
+    {name = "Rumble (Sấm Sét)", id = "Rumble"},
+    {name = "Magma (Magma)", id = "Magma"},
+    {name = "Buddha (Phật)", id = "Buddha"},
+    {name = "Sand (Cát)", id = "Sand"},
+    {name = "Phoenix (Phượng Hoàng)", id = "Phoenix"},
+    {name = "Dough (Bột)", id = "Dough"}
+}
 
--- Sử dụng AddDropdown để tạo Dropdown cho Select Chip
+local SelectChip = nil -- Lưu lựa chọn chip
+
+-- Dropdown chọn chip
 AddDropdown(Tab6o, {
-    Name = "Select Chip",  -- Tên của Dropdown
-    List = Chips,  -- Danh sách các lựa chọn cho Dropdown
-    Callback = function(selectedOption)
-        print("Bạn đã chọn chip: " .. selectedOption)
-        SelectChip = selectedOption  -- Lưu lựa chọn vào biến SelectChip
+    Name = "🔹 Chọn Chip Raid",
+    Options = {unpack((function()
+        local names = {}
+        for _, chip in pairs(ChipList) do table.insert(names, chip.name) end
+        return names
+    end)())},
+    Callback = function(Value)
+        for _, chip in pairs(ChipList) do
+            if chip.name == Value then
+                SelectChip = chip.id -- Lưu ID chip được chọn
+                print("Bạn đã chọn chip: " .. SelectChip)
+                break
+            end
+        end
     end
 })
 
--- Toggle "Buy Chip"
+-- **Nút Mua Chip**
 AddButton(Tab6o, {
-    Name = "Buy Chip",
+    Name = "💰 Mua Chip Raid",
     Callback = function()
-        local ToggleBuy = Tab6o:AddToggle("ToggleBuy", {Title = "Buy Chip", Default = false})
-        ToggleBuy:OnChanged(function(Value)
-            _G.Auto_Buy_Chips_Dungeon = Value
-        end)
+        if SelectChip then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("RaidsNpc", "Select", SelectChip)
+        else
+            print("⚠️ Hãy chọn chip trước khi mua!")
+        end
     end
 })
 
--- Toggle "Start Raid"
+-- **Nút Bắt Đầu Raid**
 AddButton(Tab6o, {
-    Name = "Start Raid",
+    Name = "🚀 Bắt Đầu Raid",
     Callback = function()
-        local ToggleStart = Tab6o:AddToggle("ToggleStart", {Title = "Start Raid", Default = false})
-        ToggleStart:OnChanged(function(Value)
-            _G.Auto_StartRaid = Value
-        end)
+        _G.Auto_StartRaid = not _G.Auto_StartRaid
     end
 })
 
--- Toggle "Kill Aura"
+-- **Nút Kill Aura**
 AddButton(Tab6o, {
-    Name = "Kill Aura",
+    Name = "⚔️ Kill Aura",
     Callback = function()
-        local ToggleKillAura = Tab6o:AddToggle("ToggleKillAura", {Title = "Kill Aura", Default = false})
-        ToggleKillAura:OnChanged(function(Value)
-            KillAura = Value
-        end)
+        KillAura = not KillAura
     end
 })
 
--- Toggle "Next Island"
+-- **Nút Tự Động Sang Đảo Kế Tiếp**
 AddButton(Tab6o, {
-    Name = "Next Island",
+    Name = "🏝️ Sang Đảo Kế Tiếp",
     Callback = function()
-        local ToggleNextIsland = Tab6o:AddToggle("ToggleNextIsland", {Title = "Next Island", Default = false})
-        ToggleNextIsland:OnChanged(function(Value)
-            AutoNextIsland = Value
-        end)
+        AutoNextIsland = not AutoNextIsland
     end
 })
 
--- Toggle "Auto Awake"
+-- **Nút Auto Awake**
 AddButton(Tab6o, {
-    Name = "Auto Awake",
+    Name = "🌟 Auto Thức Tỉnh",
     Callback = function()
-        local ToggleAwake = Tab6o:AddToggle("ToggleAwake", {Title = "Auto Awake", Default = false})
-        ToggleAwake:OnChanged(function(Value)
-            AutoAwakenAbilities = Value
-        end)
+        AutoAwakenAbilities = not AutoAwakenAbilities
     end
 })
 
--- Toggle "Get Fruit Low Bely"
+-- **Nút Nhận Trái Cây (Low Beli)**
 AddButton(Tab6o, {
-    Name = "Get Fruit Low Bely",
+    Name = "🍏 Nhận Trái Cây (Low Beli)",
     Callback = function()
-        local ToggleGetFruit = Tab6o:AddToggle("ToggleGetFruit", {Title = "Get Fruit Low Bely", Default = false})
-        ToggleGetFruit:OnChanged(function(Value)
-            _G.Autofruit = Value
-        end)
+        _G.Autofruit = not _G.Autofruit
     end
 })
 
--- Button Raid Lab cho Second và Third Sea
+-- **Nút Raid Lab (Second/Third Sea)**
 if Second_Sea then
     AddButton(Tab6o, {
-        Name = "Raid Lab",
+        Name = "🏛️ Raid Lab",
         Callback = function()
             Tween2(CFrame.new(-6438.73535, 250.645355, -4501.50684))
         end
     })
 elseif Third_Sea then
     AddButton(Tab6o, {
-        Name = "Raid Lab",
+        Name = "🏛️ Raid Lab",
         Callback = function()
             Tween2(CFrame.new(-5017.40869, 314.844055, -2823.0127))
         end
     })
 end
-
--- Code chạy tự động cho các chức năng như Auto Buy, Auto Start Raid, v.v...
-spawn(function()
-    while wait() do
-        if _G.Auto_Buy_Chips_Dungeon then
-            pcall(function()
-                local args = {
-                    [1] = "RaidsNpc",
-                    [2] = "Select",
-                    [3] = SelectChip  -- Chọn chip vừa được chọn từ Dropdown
-                }
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-            end)
-        end
-    end
-end)
-
-spawn(function()
-    while wait(0.1) do
-        pcall(function()
-            if _G.Auto_StartRaid then
-                if game:GetService("Players")["LocalPlayer"].PlayerGui.Main.Timer.Visible == false then
-                    if not game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 1") and game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Special Microchip") or game:GetService("Players").LocalPlayer.Character:FindFirstChild("Special Microchip") then
-                        if Second_Sea then
-                            fireclickdetector(game:GetService("Workspace").Map.CircleIsland.RaidSummon2.Button.Main.ClickDetector)
-                        elseif Third_Sea then
-                            fireclickdetector(game:GetService("Workspace").Map["Boat Castle"].RaidSummon2.Button.Main.ClickDetector)
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
-spawn(function()
-    while wait() do
-        if KillAura then
-            pcall(function()
-                for i,v in pairs(game.Workspace.Enemies:GetDescendants()) do
-                    if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                        repeat task.wait()
-                            sethiddenproperty(game:GetService('Players').LocalPlayer,"SimulationRadius",math.huge)
-                            v.Humanoid.Health = 0
-                            v.HumanoidRootPart.CanCollide = false
-                        until not KillAura or not v.Parent or v.Humanoid.Health <= 0
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-spawn(function()
-    while task.wait() do
-        if AutoNextIsland then
-            pcall(function()
-                if game:GetService("Players")["LocalPlayer"].PlayerGui.Main.Timer.Visible == true then
-                    if game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 5") then
-                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 5").CFrame * CFrame.new(0,70,100))
-                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 4") then
-                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 4").CFrame * CFrame.new(0,70,100))
-                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 3") then
-                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 3").CFrame * CFrame.new(0,70,100))
-                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 2") then
-                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 2").CFrame * CFrame.new(0,70,100))
-                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 1") then
-                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 1").CFrame * CFrame.new(0,70,100))
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-spawn(function()
-    while task.wait() do
-        if AutoAwakenAbilities then
-            pcall(function()
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Awakener","Awaken")
-            end)
-        end
-    end
-end)
-
-spawn(function()
-    while wait(0.1) do
-        pcall(function()
-            if _G.Autofruit then
-                local args = {
-                    [1] = "LoadFruit",
-                    [2] = "Rocket-Rocket"
-                }
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-
-                -- Tiếp tục với các trái cây khác như trong code gốc của bạn
-            end
-        end)
-    end
-end)
 
 
    Section = AddSection(Tab7o, {"Đến các sea"})          
@@ -3065,8 +2976,3 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)     
-
-
-
-
- 
