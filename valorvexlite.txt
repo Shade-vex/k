@@ -3001,7 +3001,7 @@ task.spawn(updateCoords)
 local autoClickEnabled = false
 local attackRange = 50 -- Tăng tầm đánh lên 50m
 
--- Hàm Auto Click (Giữ nguyên code của bạn, không sửa)
+-- Hàm Auto Click
 local function startAutoClick()
     autoClickEnabled = not autoClickEnabled
 
@@ -3024,42 +3024,26 @@ local function startAutoClick()
     end
 end
 
--- Hàm Tăng Tầm Đánh (Sửa lại để hoạt động 100%)
+-- Hàm Tăng Tầm Đánh
 local function extendHitbox()
-    spawn(function()
-        while autoClickEnabled do
-            pcall(function()
-                local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-                local combatData = getupvalues(combatFramework)[2]
+    local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+    local combatData = getupvalues(combatFramework)[2]
 
-                if combatData and combatData.activeController then
-                    local controller = combatData.activeController
-                    if controller and controller.equipped then
-                        local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
-
-                        -- Chỉnh sửa phạm vi đánh
-                        rigLib.getBladeHits = function(_, targets, range)
-                            return rigLib.getBladeHits(_, targets, attackRange)
-                        end
-                    end
-                end
-            end)
-            wait(1) -- Cập nhật mỗi giây
+    if combatData and combatData.activeController then
+        local controller = combatData.activeController
+        if controller then
+            local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
+            rigLib.getBladeHits = function(_, targets, range)
+                return rigLib.getBladeHits(_, targets, attackRange) -- Tăng tầm đánh lên 50m
+            end
         end
-    end)
+    end
 end
 
 -- Kết hợp Auto Click + Tăng Tầm Đánh
 local function toggleAutoAttack()
-    autoClickEnabled = not autoClickEnabled
-
-    if autoClickEnabled then
-        print("🔹 Auto Attack: BẬT")
-        startAutoClick() -- Giữ nguyên code Auto Click của bạn
-        extendHitbox() -- Fix tăng tầm đánh
-    else
-        print("🔹 Auto Attack: TẮT")
-    end
+    startAutoClick() -- Bật Auto Click
+    extendHitbox() -- Tăng tầm đánh
 end
 
 -- Thêm nút bật/tắt vào menu
@@ -3069,5 +3053,3 @@ AddButton(Tab11o, {
         toggleAutoAttack()
     end
 })
-
-
