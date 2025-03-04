@@ -85,21 +85,23 @@ local attackLoopRunning = false
 local SelectedSpeed = "Fast Attack (Nhanh)"
 local SelectedWeapon = "Melee (Cận chiến)"
 
--- Danh sách tốc độ đánh
-local listFastAttack = { "Normal Attack (Chậm)", "Fast Attack (Nhanh)", "Super Fast Attack (Siêu nhanh)" }
+-- Danh sách tốc độ đánh (Thêm độ trễ random)
+local listFastAttack = {
+    {name = "Normal Attack (Chậm)", delayMin = 0.25, delayMax = 0.35},
+    {name = "Fast Attack (Nhanh)", delayMin = 0.15, delayMax = 0.25},
+    {name = "Super Fast Attack (Siêu nhanh)", delayMin = 0.05, delayMax = 0.15}
+}
 
 -- Dropdown chọn tốc độ đánh
 AddDropdown(Tab2o, {
     Name = "🔹 Chọn tốc độ đánh",
-    Options = listFastAttack,
+    Options = {listFastAttack[1].name, listFastAttack[2].name, listFastAttack[3].name},
     Callback = function(Value)
-        SelectedSpeed = Value
-        if Value == "Fast Attack (Nhanh)" then
-            _G.Fast_Delay = 0.15
-        elseif Value == "Normal Attack (Chậm)" then
-            _G.Fast_Delay = 0.25
-        elseif Value == "Super Fast Attack (Siêu nhanh)" then
-            _G.Fast_Delay = 0.05
+        for _, speed in pairs(listFastAttack) do
+            if speed.name == Value then
+                _G.Fast_DelayMin = speed.delayMin
+                _G.Fast_DelayMax = speed.delayMax
+            end
         end
     end
 })
@@ -127,8 +129,8 @@ AddButton(Tab2o, {
     end
 })
 
--- 📌 **Hàm Gây Dame Thật**
-function FakeDamage()
+-- **Hàm Gây Sát Thương Ảo (Server Sẽ Tính Là Thật)**
+local function FakeDamage()
     if not attackLoopRunning then return end
 
     local player = game.Players.LocalPlayer
@@ -151,34 +153,39 @@ function FakeDamage()
 
     if not validWeapon then return end
 
-    -- 📌 **Gây dame thật sự bằng cách gọi AttackNoCD**
-    pcall(function()
-        local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-        local activeController = combatFramework.activeController
-        if activeController and activeController.equipped then
-            for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-                if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                    local distance = (character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-                    if distance <= 70 then
-                        -- 📌 **Gửi tín hiệu đánh thật đến server**
-                        game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", {enemy.HumanoidRootPart}, 1, "")
-                        game:GetService("VirtualUser"):CaptureController()
-                        game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
-                    end
-                end
+    -- **Tìm quái gần nhất trong bán kính 50m**
+    local closestEnemy = nil
+    local closestDistance = 50
+    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            local distance = (character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestEnemy = enemy
             end
         end
-    end)
+    end
+
+    -- **Tấn công quái gần nhất**
+    if closestEnemy then
+        -- **Mô phỏng nhấn chuột**
+        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 0)
+        wait(0.05) -- Độ trễ nhỏ để tránh spam
+        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 0)
+
+        -- **Gửi tín hiệu đánh đến server**
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Combat", weapon.Name, closestEnemy)
+    end
 end
 
--- 📌 **Bắt Đầu Vòng Lặp Tự Động Gây Sát Thương**
-function StartLoop()
+-- **Bắt Đầu Vòng Lặp Tự Động Gây Sát Thương**
+local function StartLoop()
     if attackLoopRunning and SelectedSpeed and SelectedWeapon then
         task.spawn(function()
             wait(5) -- Đợi 5 giây để tránh lỗi khi script khác chưa tải xong
             while attackLoopRunning do
                 FakeDamage()
-                wait(_G.Fast_Delay)
+                wait(math.random(_G.Fast_DelayMin * 100, _G.Fast_DelayMax * 100) / 100)
             end
         end)
     end
