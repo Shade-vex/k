@@ -127,8 +127,8 @@ AddButton(Tab2o, {
     end
 })
 
--- 🔹 **Hàm Tấn Công Kẻ Địch**
-function AutoAttackSpeed()
+-- 📌 **Hàm Gây Dame Ảo**
+function FakeDamage()
     if not attackLoopRunning then return end
 
     local player = game.Players.LocalPlayer
@@ -151,14 +151,14 @@ function AutoAttackSpeed()
 
     if not validWeapon then return end
 
-    -- 🔹 **Tăng tầm đánh lên 70**
+    -- 📌 **Gây dame lên tất cả quái xung quanh trong bán kính 70m**
     local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
     if humanoidRootPart then
         for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
             if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
                 local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
                 if distance <= 70 then
-                    -- 🔹 **Gửi sự kiện Remote để tấn công**
+                    -- 📌 **Gửi tín hiệu đánh đến Server (Hack Dame Ảo)**
                     pcall(function()
                         game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", {enemy.HumanoidRootPart}, 1, "")
                         game:GetService("VirtualUser"):CaptureController()
@@ -170,13 +170,13 @@ function AutoAttackSpeed()
     end
 end
 
--- 🔹 **Bắt Đầu Vòng Lặp Tự Động Đánh**
+-- 📌 **Bắt Đầu Vòng Lặp Tự Động Gây Sát Thương**
 function StartLoop()
     if attackLoopRunning and SelectedSpeed and SelectedWeapon then
         task.spawn(function()
             wait(5) -- Đợi 5 giây để tránh lỗi khi script khác chưa tải xong
             while attackLoopRunning do
-                AutoAttackSpeed()
+                FakeDamage()
                 wait(_G.Fast_Delay)
             end
         end)
