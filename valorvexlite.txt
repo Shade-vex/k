@@ -3024,7 +3024,7 @@ local function startAutoClick()
     end
 end
 
--- Hàm Tăng Tầm Đánh (Hoạt động 100%)
+-- Hàm Tăng Tầm Đánh (Chỉnh sửa hoạt động 100%)
 local function extendHitbox()
     spawn(function()
         while autoClickEnabled do
@@ -3062,8 +3062,10 @@ end
 
 -- Thêm nút bật/tắt vào menu
 AddButton(Tab11o, {
-    Name = "⚔️ Auto Attack",
+    Name = "⚔️ Auto Click + Tăng Tầm Đánh 50m",
     Callback = function()
         toggleAutoAttack()
     end
 })
+
+
