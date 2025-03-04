@@ -86,41 +86,44 @@ local SelectedSpeed = nil
 local SelectedWeapon = nil
 
 -- Danh sách tốc độ đánh
-local listfastattack = {'Normal Attack', 'Fast Attack', 'Super Fast Attack'}
-
--- Tạo nút bật/tắt vòng lặp đánh
-AddButton(Tab2o, {
-    Name = "Bật/Tắt Auto Attack",
-    Callback = function()
-        attackLoopRunning = not attackLoopRunning
-        if attackLoopRunning then
-            StartLoop()
-        end
-    end
-})
+local listfastattack = { "Normal Attack (Chậm)", "Fast Attack (Nhanh)", "Super Fast Attack (Siêu nhanh)" }
 
 -- Dropdown chọn tốc độ đánh
 AddDropdown(Tab2o, {
-    Name = "Chọn tốc độ đánh",
+    Name = "🔹 Chọn tốc độ đánh",
     Values = listfastattack,
     Callback = function(Value)
         SelectedSpeed = Value
-        if Value == "Fast Attack" then
+        if Value == "Fast Attack (Nhanh)" then
             _G.Fast_Delay = 0.15
-        elseif Value == "Normal Attack" then
+        elseif Value == "Normal Attack (Chậm)" then
             _G.Fast_Delay = 0.25
-        elseif Value == "Super Fast Attack" then
+        elseif Value == "Super Fast Attack (Siêu nhanh)" then
             _G.Fast_Delay = 0.05
         end
     end
 })
 
+-- Danh sách vũ khí
+local listWeapons = { "Melee (Cận chiến)", "Sword (Kiếm)", "Blox Fruit (Trái ác quỷ)" }
+
 -- Dropdown chọn vũ khí
 AddDropdown(Tab2o, {
-    Name = "Chọn vũ khí",
-    Values = {'Melee', 'Sword', 'Blox Fruit'},
+    Name = "Chọn loại vũ khí",
+    Values = listWeapons,
     Callback = function(Value)
         SelectedWeapon = Value
+    end
+})
+
+-- Tạo nút bật/tắt vòng lặp đánh
+AddButton(Tab2o, {
+    Name = "Auto Attack",
+    Callback = function()
+        attackLoopRunning = not attackLoopRunning
+        if attackLoopRunning then
+            StartLoop()
+        end
     end
 })
 
@@ -133,7 +136,7 @@ function StartLoop()
                 pcall(function()
                     local Backpack = game.Players.LocalPlayer.Backpack
                     for i, v in pairs(Backpack:GetChildren()) do
-                        if (v.ToolTip == SelectedWeapon) and Backpack:FindFirstChild(v.Name) then
+                        if (v.ToolTip == string.match(SelectedWeapon, "%((.-)%)")) and Backpack:FindFirstChild(v.Name) then
                             SelectWeapon = v.Name
                             break
                         end
