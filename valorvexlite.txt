@@ -82,16 +82,16 @@ end
 
 -- Biến kiểm soát
 local attackLoopRunning = false
-local SelectedSpeed = nil
-local SelectedWeapon = nil
+local SelectedSpeed = "Fast Attack (Nhanh)"
+local SelectedWeapon = "Melee (Cận chiến)"
 
 -- Danh sách tốc độ đánh
-local listfastattack = { "Normal Attack (Chậm)", "Fast Attack (Nhanh)", "Super Fast Attack (Siêu nhanh)" }
+local listFastAttack = { "Normal Attack (Chậm)", "Fast Attack (Nhanh)", "Super Fast Attack (Siêu nhanh)" }
 
 -- Dropdown chọn tốc độ đánh
 AddDropdown(Tab2o, {
     Name = "🔹 Chọn tốc độ đánh",
-    Values = listfastattack,
+    Options = listFastAttack, -- Dùng "Options" thay vì "Values"
     Callback = function(Value)
         SelectedSpeed = Value
         if Value == "Fast Attack (Nhanh)" then
@@ -109,8 +109,8 @@ local listWeapons = { "Melee (Cận chiến)", "Sword (Kiếm)", "Blox Fruit (Tr
 
 -- Dropdown chọn vũ khí
 AddDropdown(Tab2o, {
-    Name = "Chọn loại vũ khí",
-    Values = listWeapons,
+    Name = "🔹Chọn loại vũ khí",
+    Options = listWeapons, -- Dùng "Options" thay vì "Values"
     Callback = function(Value)
         SelectedWeapon = Value
     end
@@ -118,7 +118,7 @@ AddDropdown(Tab2o, {
 
 -- Tạo nút bật/tắt vòng lặp đánh
 AddButton(Tab2o, {
-    Name = "Auto Attack",
+    Name = "⚔️ Auto Attack",
     Callback = function()
         attackLoopRunning = not attackLoopRunning
         if attackLoopRunning then
@@ -136,7 +136,7 @@ function StartLoop()
                 pcall(function()
                     local Backpack = game.Players.LocalPlayer.Backpack
                     for i, v in pairs(Backpack:GetChildren()) do
-                        if (v.ToolTip == string.match(SelectedWeapon, "%((.-)%)")) and Backpack:FindFirstChild(v.Name) then
+                        if v.ToolTip and string.find(v.ToolTip, string.match(SelectedWeapon, "%((.-)%)")) then
                             SelectWeapon = v.Name
                             break
                         end
