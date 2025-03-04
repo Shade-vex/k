@@ -166,7 +166,7 @@ local function toggleAutoAttack()
 end
 
 -- Thêm nút bật/tắt vào menu
-AddButton(Tab11o, {
+AddButton(Tab2o, {
     Name = "⚔️Auto Attack V1",
     Callback = function()
         toggleAutoAttack()
@@ -2975,3 +2975,8 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)     
+
+
+
+
+ 
