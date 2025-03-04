@@ -2992,4 +2992,65 @@ AddButton(Tab11o, {
 })
 
 -- Chạy cập nhật tọa độ
-task.spawn(updateCoords)                                            
+task.spawn(updateCoords)     
+
+---auto click
+
+
+-- Biến kiểm soát trạng thái
+local autoClickEnabled = false
+local originalHitboxRange = 1 -- Tầm đánh gốc
+local extendedHitboxRange = 50 -- Tăng tầm đánh lên 50m
+
+-- Hàm tăng tầm đánh
+local function setAttackRange(expand)
+    local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+    local combatData = getupvalues(combatFramework)[2]
+
+    if combatData and combatData.activeController then
+        local controller = combatData.activeController
+        if controller then
+            local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
+            if expand then
+                rigLib.getBladeHits = function(_, targets, range)
+                    return rigLib.getBladeHits(_, targets, extendedHitboxRange)
+                end
+            else
+                rigLib.getBladeHits = function(_, targets, range)
+                    return rigLib.getBladeHits(_, targets, originalHitboxRange)
+                end
+            end
+        end
+    end
+end
+
+-- Hàm Auto Click
+local function startAutoClick()
+    autoClickEnabled = not autoClickEnabled
+
+    if autoClickEnabled then
+        setAttackRange(true) -- Tăng tầm đánh lên 50m
+
+        spawn(function()
+            while autoClickEnabled do
+                pcall(function()
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                    wait(0.1) -- Tốc độ 0.1s
+                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                end)
+                wait(0.1)
+            end
+        end)
+    else
+        setAttackRange(false) -- Khôi phục tầm đánh gốc
+    end
+end
+
+-- Thêm nút bật/tắt vào menu
+AddButton(Tab11o, {
+    Name = "⚔️ Auto Click + Tăng Tầm Đánh 50m",
+    Callback = function()
+        startAutoClick()
+    end
+})                                       
