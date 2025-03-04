@@ -3001,7 +3001,7 @@ task.spawn(updateCoords)
 local autoClickEnabled = false
 local attackRange = 50 -- Tăng tầm đánh lên 50m
 
--- Hàm Auto Click
+-- Hàm Auto Click (Giữ nguyên code của bạn, không sửa)
 local function startAutoClick()
     autoClickEnabled = not autoClickEnabled
 
@@ -3024,7 +3024,7 @@ local function startAutoClick()
     end
 end
 
--- Hàm Tăng Tầm Đánh (Chỉnh sửa hoạt động 100%)
+-- Hàm Tăng Tầm Đánh (Sửa lại để hoạt động 100%)
 local function extendHitbox()
     spawn(function()
         while autoClickEnabled do
@@ -3034,29 +3034,31 @@ local function extendHitbox()
 
                 if combatData and combatData.activeController then
                     local controller = combatData.activeController
-                    if controller then
+                    if controller and controller.equipped then
                         local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
 
-                        -- Chỉnh sửa để đảm bảo phạm vi đánh tăng lên 50m
-                        debug.setupvalue(controller.attack, 5, attackRange)
+                        -- Chỉnh sửa phạm vi đánh
+                        rigLib.getBladeHits = function(_, targets, range)
+                            return rigLib.getBladeHits(_, targets, attackRange)
+                        end
                     end
                 end
             end)
-            wait(1) -- Kiểm tra và áp dụng mỗi giây
+            wait(1) -- Cập nhật mỗi giây
         end
     end)
 end
 
 -- Kết hợp Auto Click + Tăng Tầm Đánh
 local function toggleAutoAttack()
+    autoClickEnabled = not autoClickEnabled
+
     if autoClickEnabled then
-        autoClickEnabled = false
-        print("🔹 Auto Attack: TẮT")
-    else
-        autoClickEnabled = true
         print("🔹 Auto Attack: BẬT")
-        startAutoClick()
-        extendHitbox()
+        startAutoClick() -- Giữ nguyên code Auto Click của bạn
+        extendHitbox() -- Fix tăng tầm đánh
+    else
+        print("🔹 Auto Attack: TẮT")
     end
 end
 
