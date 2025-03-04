@@ -222,12 +222,25 @@ local function findNearestEnemy()
     return nearestEnemy
 end
 
--- **Tăng hitbox quái ×10 lần**
-local function increaseHitbox(enemy)
-    if enemy and enemy:FindFirstChild("HumanoidRootPart") then
-        enemy.HumanoidRootPart.Size = enemy.HumanoidRootPart.Size * 10
+-- **Tăng hitbox quái ×10 lần và vô hiệu hóa quái**
+local function modifyEnemy(enemy)
+    if enemy and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") then
+        enemy.HumanoidRootPart.Size = Vector3.new(50, 50, 50) -- Tăng hitbox 10 lần
         enemy.HumanoidRootPart.Transparency = 0.5
         enemy.HumanoidRootPart.CanCollide = false
+
+        -- **Vô hiệu hóa quái**
+        enemy.Humanoid.WalkSpeed = 0 -- Không thể di chuyển
+        enemy.Humanoid.JumpPower = 0 -- Không thể nhảy
+        enemy.Humanoid.AutoRotate = false -- Không thể quay đầu
+        enemy.HumanoidRootPart.Anchored = true -- Giữ cố định tại chỗ
+
+        -- **Vô hiệu hóa kỹ năng của quái**
+        for _, obj in pairs(enemy:GetChildren()) do
+            if obj:IsA("ObjectValue") or obj:IsA("RemoteEvent") or obj:IsA("BindableEvent") then
+                obj:Destroy() -- Xóa tất cả event và skill của quái
+            end
+        end
     end
 end
 
@@ -236,7 +249,7 @@ local function moveToEnemy()
     while autoHunt do
         local enemy = findNearestEnemy()
         if enemy then
-            increaseHitbox(enemy)
+            modifyEnemy(enemy)
             while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and autoHunt do
                 local targetPos = enemy.HumanoidRootPart.Position
                 local distance = (humanoidRootPart.Position - targetPos).Magnitude
