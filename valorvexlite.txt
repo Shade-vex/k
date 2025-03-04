@@ -176,7 +176,7 @@ AddButton(Tab2o, {
 
 
 
-   Section = AddSection(Tab2o, {"Farm (error)"})        
+   Section = AddSection(Tab2o, {"Farm [beta]"})        
 
 
 
@@ -192,6 +192,83 @@ AddButton(Tab2o, {
         end
     end
 })
+
+
+
+
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local tweenService = game:GetService("TweenService")
+local runService = game:GetService("RunService")
+
+local autoHunt = false -- Trạng thái bật/tắt
+
+-- **Tìm quái gần nhất trong phạm vi 6000m**
+local function findNearestEnemy()
+    local nearestEnemy = nil
+    local minDistance = 6000
+
+    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            local distance = (enemy.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
+            if distance < minDistance then
+                minDistance = distance
+                nearestEnemy = enemy
+            end
+        end
+    end
+    return nearestEnemy
+end
+
+-- **Tăng hitbox quái ×10 lần**
+local function increaseHitbox(enemy)
+    if enemy and enemy:FindFirstChild("HumanoidRootPart") then
+        enemy.HumanoidRootPart.Size = enemy.HumanoidRootPart.Size * 10
+        enemy.HumanoidRootPart.Transparency = 0.5
+        enemy.HumanoidRootPart.CanCollide = false
+    end
+end
+
+-- **Bay đến quái với tốc độ 300**
+local function moveToEnemy()
+    while autoHunt do
+        local enemy = findNearestEnemy()
+        if enemy then
+            increaseHitbox(enemy)
+            while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and autoHunt do
+                local targetPos = enemy.HumanoidRootPart.Position
+                local distance = (humanoidRootPart.Position - targetPos).Magnitude
+                local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+                local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+                tween:Play()
+                wait(0.5)
+            end
+        else
+            autoHunt = false -- Dừng lại khi không còn quái nào
+        end
+        wait(0.5)
+    end
+end
+
+-- **Nút bật/tắt săn quái tự động**
+AddButton(Tab2o, {
+    Name = "Farm quái xung quanh",
+    Callback = function()
+        autoHunt = not autoHunt
+        if autoHunt then
+            moveToEnemy()
+        end
+    end
+})
+
+
+
+
+
+
+
 
 ------farm boss
 
