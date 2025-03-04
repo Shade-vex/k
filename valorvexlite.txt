@@ -1999,7 +1999,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
 local speedEnabled = false
-local defaultSpeed = 30
+local defaultSpeed = 16
 local superSpeed = 300
 
 -- Đảm bảo TabVo tồn tại trước khi thêm UI
