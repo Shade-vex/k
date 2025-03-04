@@ -3024,31 +3024,45 @@ local function startAutoClick()
     end
 end
 
--- Hàm Tăng Tầm Đánh
+-- Hàm Tăng Tầm Đánh (Hoạt động 100%)
 local function extendHitbox()
-    local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-    local combatData = getupvalues(combatFramework)[2]
+    spawn(function()
+        while autoClickEnabled do
+            pcall(function()
+                local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+                local combatData = getupvalues(combatFramework)[2]
 
-    if combatData and combatData.activeController then
-        local controller = combatData.activeController
-        if controller then
-            local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
-            rigLib.getBladeHits = function(_, targets, range)
-                return rigLib.getBladeHits(_, targets, attackRange) -- Tăng tầm đánh lên 50m
-            end
+                if combatData and combatData.activeController then
+                    local controller = combatData.activeController
+                    if controller then
+                        local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
+
+                        -- Chỉnh sửa để đảm bảo phạm vi đánh tăng lên 50m
+                        debug.setupvalue(controller.attack, 5, attackRange)
+                    end
+                end
+            end)
+            wait(1) -- Kiểm tra và áp dụng mỗi giây
         end
-    end
+    end)
 end
 
 -- Kết hợp Auto Click + Tăng Tầm Đánh
 local function toggleAutoAttack()
-    startAutoClick() -- Bật Auto Click
-    extendHitbox() -- Tăng tầm đánh
+    if autoClickEnabled then
+        autoClickEnabled = false
+        print("🔹 Auto Attack: TẮT")
+    else
+        autoClickEnabled = true
+        print("🔹 Auto Attack: BẬT")
+        startAutoClick()
+        extendHitbox()
+    end
 end
 
 -- Thêm nút bật/tắt vào menu
 AddButton(Tab11o, {
-    Name = "⚔️ Auto Click + Tăng Tầm Đánh 50m",
+    Name = "⚔️ Auto Attack",
     Callback = function()
         toggleAutoAttack()
     end
