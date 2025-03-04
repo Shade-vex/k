@@ -127,7 +127,7 @@ AddButton(Tab2o, {
     end
 })
 
--- **Hàm Tự Động Đánh Với Tốc Độ Đã Chọn & Tầm Đánh 70**
+-- 🔹 **Hàm Tấn Công Kẻ Địch**
 function AutoAttackSpeed()
     if not attackLoopRunning then return end
 
@@ -151,23 +151,26 @@ function AutoAttackSpeed()
 
     if not validWeapon then return end
 
-    -- **Tăng tầm đánh lên 70**
+    -- 🔹 **Tăng tầm đánh lên 70**
     local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
     if humanoidRootPart then
         for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-            if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") then
+            if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
                 local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
                 if distance <= 70 then
-                    -- Đánh quái nếu trong phạm vi 70m
-                    game:GetService("VirtualUser"):CaptureController()
-                    game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+                    -- 🔹 **Gửi sự kiện Remote để tấn công**
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", {enemy.HumanoidRootPart}, 1, "")
+                        game:GetService("VirtualUser"):CaptureController()
+                        game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+                    end)
                 end
             end
         end
     end
 end
 
--- **Bắt Đầu Vòng Lặp Tự Động Đánh**
+-- 🔹 **Bắt Đầu Vòng Lặp Tự Động Đánh**
 function StartLoop()
     if attackLoopRunning and SelectedSpeed and SelectedWeapon then
         task.spawn(function()
