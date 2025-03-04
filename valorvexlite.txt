@@ -75,15 +75,29 @@ AddButton(Tab1o, {
 
    Section = AddSection(Tab2o, {"Chọn tốc độ ,vũ khí"})        
 
--- Đảm bảo Farming Tab tồn tại
-local Farming = Tabs.Main:AddSection("Farming")
+-- Đảm bảo Tab2o tồn tại
+if not Tab2o then
+    Tab2o = AddTab("Combat")
+end
 
--- Biến lưu trạng thái
+-- Biến kiểm soát
+local attackLoopRunning = false
 local SelectedSpeed = nil
 local SelectedWeapon = nil
 
 -- Danh sách tốc độ đánh
 local listfastattack = {'Normal Attack', 'Fast Attack', 'Super Fast Attack'}
+
+-- Tạo nút bật/tắt vòng lặp đánh
+AddButton(Tab2o, {
+    Name = "Bật/Tắt Auto Attack",
+    Callback = function()
+        attackLoopRunning = not attackLoopRunning
+        if attackLoopRunning then
+            StartLoop()
+        end
+    end
+})
 
 -- Dropdown chọn tốc độ đánh
 AddDropdown(Tab2o, {
@@ -98,7 +112,6 @@ AddDropdown(Tab2o, {
         elseif Value == "Super Fast Attack" then
             _G.Fast_Delay = 0.05
         end
-        StartLoop()
     end
 })
 
@@ -108,24 +121,26 @@ AddDropdown(Tab2o, {
     Values = {'Melee', 'Sword', 'Blox Fruit'},
     Callback = function(Value)
         SelectedWeapon = Value
-        wait(5) -- Đợi 5 giây để tránh lỗi khi script khác chưa tải xong
-        StartLoop()
     end
 })
 
 -- Hàm tìm vũ khí và bắt đầu vòng lặp
 function StartLoop()
-    if SelectedSpeed and SelectedWeapon then
+    if attackLoopRunning and SelectedSpeed and SelectedWeapon then
         task.spawn(function()
-            pcall(function()
-                local Backpack = game.Players.LocalPlayer.Backpack
-                for i, v in pairs(Backpack:GetChildren()) do
-                    if (v.ToolTip == SelectedWeapon) and Backpack:FindFirstChild(v.Name) then
-                        SelectWeapon = v.Name
-                        break
+            wait(5) -- Đợi 5 giây để tránh xung đột
+            while attackLoopRunning do
+                pcall(function()
+                    local Backpack = game.Players.LocalPlayer.Backpack
+                    for i, v in pairs(Backpack:GetChildren()) do
+                        if (v.ToolTip == SelectedWeapon) and Backpack:FindFirstChild(v.Name) then
+                            SelectWeapon = v.Name
+                            break
+                        end
                     end
-                end
-            end)
+                end)
+                wait(_G.Fast_Delay)
+            end
         end)
     end
 end
