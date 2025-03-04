@@ -127,7 +127,7 @@ AddButton(Tab2o, {
     end
 })
 
--- 📌 **Hàm Gây Dame Ảo**
+-- 📌 **Hàm Gây Dame Thật**
 function FakeDamage()
     if not attackLoopRunning then return end
 
@@ -151,23 +151,24 @@ function FakeDamage()
 
     if not validWeapon then return end
 
-    -- 📌 **Gây dame lên tất cả quái xung quanh trong bán kính 70m**
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-            if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-                if distance <= 70 then
-                    -- 📌 **Gửi tín hiệu đánh đến Server (Hack Dame Ảo)**
-                    pcall(function()
+    -- 📌 **Gây dame thật sự bằng cách gọi AttackNoCD**
+    pcall(function()
+        local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+        local activeController = combatFramework.activeController
+        if activeController and activeController.equipped then
+            for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+                if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                    local distance = (character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                    if distance <= 70 then
+                        -- 📌 **Gửi tín hiệu đánh thật đến server**
                         game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", {enemy.HumanoidRootPart}, 1, "")
                         game:GetService("VirtualUser"):CaptureController()
                         game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
-                    end)
+                    end
                 end
             end
         end
-    end
+    end)
 end
 
 -- 📌 **Bắt Đầu Vòng Lặp Tự Động Gây Sát Thương**
