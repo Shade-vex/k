@@ -3,7 +3,7 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "Valor Vex V0.1",
+         Title = "Valor Vex V0.1.2",
          Animation = "Youtuber : Shade Vex"
          },
         Key = {
@@ -72,6 +72,67 @@ AddButton(Tab1o, {
 })
 
 ------farm quái
+
+   Section = AddSection(Tab2o, {"Chọn tốc độ ,vũ khí"})        
+
+-- Tạo danh mục Farming trong menu
+local Farming = Tabs.Main:AddSection("Farming")
+
+-- Danh sách tốc độ đánh
+local listfastattack = {'Normal Attack', 'Fast Attack', 'Super Fast Attack'}
+
+-- Dropdown chọn tốc độ đánh
+AddDropdown(Tab2o, {
+    Name = "Select Fast Attack",
+    Values = listfastattack,
+    Callback = function(Value)
+        _G.FastAttackFaiFao_Mode = Value
+        if _G.FastAttackFaiFao_Mode == "Fast Attack" then
+            _G.Fast_Delay = 0.15
+        elseif _G.FastAttackFaiFao_Mode == "Normal Attack" then
+            _G.Fast_Delay = 0.25
+        elseif _G.FastAttackFaiFao_Mode == "Super Fast Attack" then
+            _G.Fast_Delay = 0.05
+        end
+    end
+})
+
+-- Dropdown chọn vũ khí
+AddDropdown(Tab2o, {
+    Name = "Select Weapon",
+    Values = {'Melee', 'Sword', 'Blox Fruit'},
+    Callback = function(Value)
+        ChooseWeapon = Value
+        wait(5) -- Đợi 5 giây để tránh lỗi khi script khác chưa tải xong
+
+        task.spawn(function()
+            pcall(function()
+                if ChooseWeapon == "Melee" then
+                    for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                        if v.ToolTip == "Melee" and game.Players.LocalPlayer.Backpack:FindFirstChild(v.Name) then
+                            SelectWeapon = v.Name
+                        end
+                    end
+                elseif ChooseWeapon == "Sword" then
+                    for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                        if v.ToolTip == "Sword" and game.Players.LocalPlayer.Backpack:FindFirstChild(v.Name) then
+                            SelectWeapon = v.Name
+                        end
+                    end
+                elseif ChooseWeapon == "Blox Fruit" then
+                    for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                        if v.ToolTip == "Blox Fruit" and game.Players.LocalPlayer.Backpack:FindFirstChild(v.Name) then
+                            SelectWeapon = v.Name
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+
+
 
    Section = AddSection(Tab2o, {"Farm (error)"})        
 
