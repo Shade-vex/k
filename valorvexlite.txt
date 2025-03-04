@@ -3,12 +3,12 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "Valor Vex V0.1.2",
+         Title = "Valor Vex V0.1.3",
          Animation = "Youtuber : Shade Vex"
          },
         Key = {
         KeySystem = fasle,
-        Title = "Valor Vex V0.1",
+        Title = "Valor Vex V0.1.3",
         Description = "đăng kí cho Shade-Vex đi",
         KeyLink = "https://discord.gg/DmN8sE7Y",
         Keys = {"Premium_Key_29833z920j8"},
@@ -80,12 +80,7 @@ if not Tab2o then
     Tab2o = AddTab("Combat")
 end
 
--- Biến kiểm soát
-local attackLoopRunning = false
-local SelectedSpeed = "Fast Attack (Nhanh)"
-local SelectedWeapon = "Melee (Cận chiến)"
-
--- Danh sách tốc độ đánh (Thêm độ trễ random)
+-- Danh sách tốc độ đánh
 local listFastAttack = {
     {name = "Normal Attack (Chậm)", delayMin = 0.25, delayMax = 0.35},
     {name = "Fast Attack (Nhanh)", delayMin = 0.15, delayMax = 0.25},
@@ -118,78 +113,65 @@ AddDropdown(Tab2o, {
     end
 })
 
--- Nút bật/tắt Auto Attack
-AddButton(Tab2o, {
-    Name = "⚔️ Bật/Tắt Auto Attack",
-    Callback = function()
-        attackLoopRunning = not attackLoopRunning
-        if attackLoopRunning then
-            StartLoop()
-        end
-    end
-})
 
--- **Hàm Gây Sát Thương Ảo (Server Sẽ Tính Là Thật)**
-local function FakeDamage()
-    if not attackLoopRunning then return end
+---auto click
 
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    if not character then return end
+-- Biến kiểm soát
+local autoClickEnabled = false
+local attackRange = 50 -- Tăng tầm đánh lên 50m
 
-    -- Lấy vũ khí hiện tại
-    local weapon = character:FindFirstChildOfClass("Tool")
-    if not weapon then return end
+-- Hàm Auto Click
+local function startAutoClick()
+    autoClickEnabled = not autoClickEnabled
 
-    -- Kiểm tra nếu vũ khí đúng loại đã chọn
-    local validWeapon = false
-    if SelectedWeapon == "Melee (Cận chiến)" and weapon.ToolTip == "Melee" then
-        validWeapon = true
-    elseif SelectedWeapon == "Sword (Kiếm)" and weapon.ToolTip == "Sword" then
-        validWeapon = true
-    elseif SelectedWeapon == "Blox Fruit (Trái ác quỷ)" and weapon.ToolTip == "Blox Fruit" then
-        validWeapon = true
-    end
+    if autoClickEnabled then
+        print("🔹 Auto Click: BẬT")
 
-    if not validWeapon then return end
-
-    -- **Tìm quái gần nhất trong bán kính 50m**
-    local closestEnemy = nil
-    local closestDistance = 50
-    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-            local distance = (character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-            if distance < closestDistance then
-                closestDistance = distance
-                closestEnemy = enemy
-            end
-        end
-    end
-
-    -- **Tấn công quái gần nhất**
-    if closestEnemy then
-        -- **Mô phỏng nhấn chuột**
-        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 0)
-        wait(0.05) -- Độ trễ nhỏ để tránh spam
-        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 0)
-
-        -- **Gửi tín hiệu đánh đến server**
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Combat", weapon.Name, closestEnemy)
-    end
-end
-
--- **Bắt Đầu Vòng Lặp Tự Động Gây Sát Thương**
-local function StartLoop()
-    if attackLoopRunning and SelectedSpeed and SelectedWeapon then
-        task.spawn(function()
-            wait(5) -- Đợi 5 giây để tránh lỗi khi script khác chưa tải xong
-            while attackLoopRunning do
-                FakeDamage()
-                wait(math.random(_G.Fast_DelayMin * 100, _G.Fast_DelayMax * 100) / 100)
+        spawn(function()
+            while autoClickEnabled do
+                pcall(function()
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0) -- Nhấp chuột
+                    wait(0.1)
+                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                end)
+                wait(0.1)
             end
         end)
+    else
+        print("🔹 Auto Click: TẮT")
     end
 end
+
+-- Hàm Tăng Tầm Đánh
+local function extendHitbox()
+    local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+    local combatData = getupvalues(combatFramework)[2]
+
+    if combatData and combatData.activeController then
+        local controller = combatData.activeController
+        if controller then
+            local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
+            rigLib.getBladeHits = function(_, targets, range)
+                return rigLib.getBladeHits(_, targets, attackRange) -- Tăng tầm đánh lên 50m
+            end
+        end
+    end
+end
+
+-- Kết hợp Auto Click + Tăng Tầm Đánh
+local function toggleAutoAttack()
+    startAutoClick() -- Bật Auto Click
+    extendHitbox() -- Tăng tầm đánh
+end
+
+-- Thêm nút bật/tắt vào menu
+AddButton(Tab11o, {
+    Name = "⚔️Auto Attack V1",
+    Callback = function()
+        toggleAutoAttack()
+    end
+})
 
 
 
@@ -2993,82 +2975,3 @@ AddButton(Tab11o, {
 
 -- Chạy cập nhật tọa độ
 task.spawn(updateCoords)     
-
----auto click
-
-
--- Biến kiểm soát
-local autoClickEnabled = false
-local attackRange = 50 -- Tăng tầm đánh lên 50m
-local oldGetBladeHits -- Lưu hàm gốc để tránh lỗi
-
--- Hàm Auto Click
-local function startAutoClick()
-    autoClickEnabled = not autoClickEnabled
-
-    if autoClickEnabled then
-        print("🔹 Auto Click: BẬT")
-
-        spawn(function()
-            while autoClickEnabled do
-                pcall(function()
-                    local vim = game:GetService("VirtualInputManager")
-                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0) -- Nhấp chuột
-                    wait(0.1)
-                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-                end)
-                wait(0.1)
-            end
-        end)
-    else
-        print("🔹 Auto Click: TẮT")
-    end
-end
-
--- Hàm Tăng Tầm Đánh Không Bị Anti Cheat
-local function extendHitbox()
-    spawn(function()
-        pcall(function()
-            local combatFramework = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-            local combatData = getupvalues(combatFramework)[2]
-
-            if combatData and combatData.activeController then
-                local controller = combatData.activeController
-                if controller and controller.equipped then
-                    local rigLib = require(game.ReplicatedStorage.CombatFramework.RigLib)
-
-                    -- Lưu hàm gốc, chỉ chỉnh sửa nếu chưa thay đổi
-                    if not oldGetBladeHits then
-                        oldGetBladeHits = rigLib.getBladeHits
-                    end
-
-                    -- Tạo hàm mới để tăng tầm đánh
-                    rigLib.getBladeHits = function(char, targets, range)
-                        return oldGetBladeHits(char, targets, attackRange) -- Tăng tầm đánh lên 50m
-                    end
-                end
-            end
-        end)
-    end)
-end
-
--- Kết hợp Auto Click + Tăng Tầm Đánh
-local function toggleAutoAttack()
-    autoClickEnabled = not autoClickEnabled
-
-    if autoClickEnabled then
-        print("🔹 Auto Attack: BẬT")
-        startAutoClick() -- Giữ nguyên Auto Click
-        extendHitbox() -- Fix tăng tầm đánh
-    else
-        print("🔹 Auto Attack: TẮT")
-    end
-end
-
--- Thêm nút bật/tắt vào menu
-AddButton(Tab11o, {
-    Name = "⚔️ Auto Click + Tăng Tầm Đánh 50m",
-    Callback = function()
-        toggleAutoAttack()
-    end
-})
