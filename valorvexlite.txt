@@ -3,12 +3,12 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "Valor Vex V0.1.3",
+         Title = "Valor Vex V0.1.4",
          Animation = "Youtuber : Shade Vex"
          },
         Key = {
         KeySystem = fasle,
-        Title = "Valor Vex V0.1.3",
+        Title = "Valor Vex V0.1.4",
         Description = "đăng kí cho Shade-Vex đi",
         KeyLink = "https://discord.gg/DmN8sE7Y",
         Keys = {"Premium_Key_29833z920j8"},
@@ -1999,7 +1999,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
 local speedEnabled = false
-local defaultSpeed = 16
+local defaultSpeed = 36
 local superSpeed = 300
 
 -- Đảm bảo TabVo tồn tại trước khi thêm UI
