@@ -3,12 +3,12 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "Valor Vex V0.1.4",
+         Title = "Valor Vex V0.1.3",
          Animation = "Youtuber : Shade Vex"
          },
         Key = {
         KeySystem = fasle,
-        Title = "Valor Vex V0.1.4",
+        Title = "Valor Vex V0.1.3",
         Description = "đăng kí cho Shade-Vex đi",
         KeyLink = "https://discord.gg/DmN8sE7Y",
         Keys = {"Premium_Key_29833z920j8"},
