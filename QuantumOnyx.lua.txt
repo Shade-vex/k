@@ -1,9 +1,9 @@
 getgenv().GamesTables = (function()
     local GameList = {
-        [2753915549] = "https://raw.githubusercontent.com/Trustmenotcondom/QTONYX/refs/heads/main/BloxFruit.lua",
-        [4442272183] = "https://raw.githubusercontent.com/Trustmenotcondom/QTONYX/refs/heads/main/BloxFruit.lua",
-        [7449423635] = "https://raw.githubusercontent.com/Trustmenotcondom/QTONYX/refs/heads/main/BloxFruit.lua",
-        [16732694052] = "https://raw.githubusercontent.com/Trustmenotcondom/QTONYX/refs/heads/main/Fisch.lua",
+        [2753915549] = "https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/BloxFruit1.lua.txt",
+        [4442272183] = "https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/BloxFruit2.lua.txt",
+        [7449423635] = "https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/BloxFruit3.lua.txt",
+        [16732694052] = "https://raw.githubusercontent.com/Shade-vex/k/refs/heads/main/Fisch4.lua.txt",
     }
     local function ReverseTable(tbl)
         local proxy = {}
