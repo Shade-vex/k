@@ -184,7 +184,7 @@ end
 
 -- **🔹 Thêm nút vào menu**
 AddButton(Tab1o, {
-    Name = "⚔️ Kill Aura",
+    Name = "⚔️KILL AURA",
     Callback = function()
         toggleKillAura()
     end
@@ -197,60 +197,72 @@ AddButton(Tab1o, {
 
 
 
+-- 🛠 Biến kiểm soát
 local speedEnabled = false
-local speedValue = 75  -- Tốc độ di chuyển mong muốn
-local defaultSpeed = 16 -- Tốc độ mặc định của game
+local speedValue = 75
+local player = game.Players.LocalPlayer
+local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
 
--- **🔹 Hàm thiết lập tốc độ**
-local function setSpeed(value)
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = value
+-- 🎭 Fake Admin để bỏ qua kiểm tra server
+local function fakeAdmin()
+    if sethiddenproperty then
+        sethiddenproperty(player, "SimulationRadius", math.huge)
     end
+    if setfflag then
+        setfflag("HumanoidParallelRemoveNoPhysics", "False")
+        setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
+    end
+    print("✅ Fake Admin: Thành công!")
 end
 
--- **🔹 Giữ tốc độ không bị reset**
-local function maintainSpeed()
-    while speedEnabled do
-        pcall(function()
-            local player = game.Players.LocalPlayer
-            if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-                local humanoid = player.Character.Humanoid
-                if humanoid.WalkSpeed ~= speedValue then
-                    humanoid.WalkSpeed = speedValue
-                end
+-- 🚀 Hàm tăng tốc độ (bypass anti-cheat)
+local function setSpeed()
+    if speedEnabled then
+        print("⚡ Đã bật tăng tốc độ: " .. speedValue)
+        while speedEnabled do
+            if humanoid then
+                humanoid.WalkSpeed = speedValue
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false) -- Vô hiệu hóa check địa hình
             end
-        end)
-        wait(0.1)  -- Kiểm tra mỗi 0.1 giây để giữ tốc độ
-    end
-end
-
--- **🔹 Reset tốc độ nếu chết**
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    if speedEnabled then
-        wait(1) -- Đợi nhân vật load xong
-        setSpeed(speedValue)
-        maintainSpeed()
-    end
-end)
-
--- **🔹 Bật/Tắt tăng tốc**
-local function toggleSpeed()
-    speedEnabled = not speedEnabled
-    if speedEnabled then
-        print("🚀 Tốc độ: 75 (Bypass Anti-Cheat)")
-        setSpeed(speedValue)
-        maintainSpeed()
+            wait(0.1)
+        end
     else
-        print("❌ Tốc độ về mặc định")
-        setSpeed(defaultSpeed)
+        print("❌ Đã tắt tăng tốc độ")
+        if humanoid then
+            humanoid.WalkSpeed = 16 -- Trả lại tốc độ mặc định
+        end
     end
 end
 
--- **🔹 Thêm nút vào menu**
+-- 🔄 Chặn Anti-Cheat kéo lại vị trí
+local function bypassAntiCheat()
+    for _, obj in pairs(getgc(true)) do
+        if type(obj) == "function" and islclosure(obj) then
+            local scriptName = getinfo(obj).source
+            if string.find(scriptName, "AntiCheat") then
+                setreadonly(obj, false)
+                disablefunction(obj)
+                print("🚫 Anti-Cheat đã bị vô hiệu hóa!")
+            end
+        end
+    end
+end
+
+-- 🟢 Nút bật/tắt Fake Admin + Tăng tốc
 AddButton(Tab1o, {
-    Name = "⚡ Tăng Tốc Độ",
+    Name = "🚀 SPEED",
     Callback = function()
-        toggleSpeed()
+        speedEnabled = not speedEnabled
+        if speedEnabled then
+            fakeAdmin()
+            bypassAntiCheat()
+            setSpeed()
+        else
+            humanoid.WalkSpeed = 16 -- Trả lại tốc độ bình thường khi tắt
+        end
     end
 })
+
+
+
+
