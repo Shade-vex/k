@@ -262,34 +262,34 @@ AddButton(Tab1o, {
 
 local espEnabled = false
 local espColor = Color3.fromRGB(0, 255, 0) -- Xanh lá
-local textSize = 15 -- Luôn giữ nguyên 15
-local updateRate = 0.5 -- Cập nhật mỗi 0.5 giây
-local maxDistance = 1000 -- Giới hạn khoảng cách hiển thị
+local textSize = 15 -- Giữ cố định 15
+local updateRate = 5 -- Tải lại mỗi 5 giây
+local maxDistance = 2500 -- Bán kính 2500m
 
--- **🔹 Hàm tạo ESP**
+-- **🔹 Hàm tạo ESP cho item**
 local function createESP(item)
     if not item:FindFirstChild("EspLabel") then
         local billboard = Instance.new("BillboardGui")
         billboard.Name = "EspLabel"
         billboard.Adornee = item
-        billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước cố định
-        billboard.StudsOffset = Vector3.new(0, 2, 0) -- Hiển thị trên đầu item
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0) -- Hiển thị trên item
         billboard.AlwaysOnTop = true
 
         local textLabel = Instance.new("TextLabel", billboard)
         textLabel.Size = UDim2.new(1, 0, 1, 0)
         textLabel.BackgroundTransparency = 1
         textLabel.TextColor3 = espColor
-        textLabel.TextSize = textSize -- Giữ cố định 15
+        textLabel.TextSize = textSize
         textLabel.Font = Enum.Font.SourceSansBold
         textLabel.TextStrokeTransparency = 0.5
-        textLabel.TextScaled = false -- Không cho chữ co dãn
+        textLabel.TextScaled = false
 
         billboard.Parent = item
     end
 end
 
--- **🔹 Hàm cập nhật ESP**
+-- **🔹 Cập nhật ESP cho toàn bộ item mỗi 5 giây**
 local function updateESP()
     while espEnabled do
         pcall(function()
@@ -297,22 +297,22 @@ local function updateESP()
             if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local playerPos = player.Character.HumanoidRootPart.Position
 
-                for _, item in pairs(game.Workspace:GetChildren()) do
-                    if item:IsA("Model") and item:FindFirstChild("Handle") then
-                        local distance = (playerPos - item.Handle.Position).Magnitude
+                for _, item in pairs(game.Workspace:GetDescendants()) do
+                    if item:IsA("BasePart") and item.Parent:IsA("Model") and not game.Players:GetPlayerFromCharacter(item.Parent) then
+                        local distance = (playerPos - item.Position).Magnitude
 
                         if distance <= maxDistance then
-                            createESP(item)
-                            local label = item:FindFirstChild("EspLabel")
+                            createESP(item.Parent)
+                            local label = item.Parent:FindFirstChild("EspLabel")
                             if label then
                                 local textLabel = label:FindFirstChildOfClass("TextLabel")
                                 if textLabel then
-                                    textLabel.Text = string.format("%s\n[%dm]", item.Name, distance)
+                                    textLabel.Text = string.format("%s\n[%dm]", item.Parent.Name, distance)
                                 end
                             end
                         else
-                            if item:FindFirstChild("EspLabel") then
-                                item.EspLabel:Destroy()
+                            if item.Parent:FindFirstChild("EspLabel") then
+                                item.Parent.EspLabel:Destroy()
                             end
                         end
                     end
@@ -327,12 +327,12 @@ end
 local function toggleESP()
     espEnabled = not espEnabled
     if espEnabled then
-        print("🟢 ESP Item: BẬT")
+        print("🟢 ESP Toàn Bộ Item: BẬT (Cập nhật mỗi 5 giây)")
         updateESP()
     else
-        print("🔴 ESP Item: TẮT")
-        for _, item in pairs(game.Workspace:GetChildren()) do
-            if item:FindFirstChild("EspLabel") then
+        print("🔴 ESP Toàn Bộ Item: TẮT")
+        for _, item in pairs(game.Workspace:GetDescendants()) do
+            if item:IsA("Model") and item:FindFirstChild("EspLabel") then
                 item.EspLabel:Destroy()
             end
         end
@@ -341,7 +341,7 @@ end
 
 -- **🔹 Thêm nút vào menu**
 AddButton(Tab3o, {
-    Name = "👁 ESP ITEM",
+    Name = "👁ESP ITEM",
     Callback = function()
         toggleESP()
     end
