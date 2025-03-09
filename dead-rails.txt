@@ -36,13 +36,13 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
 
 
+------ PVP
 
 
 
-
--- Đảm bảo TabVo đã tồn tại
-if not TabVo then
-    TabVo = AddTab("Aimbot") -- Hoặc đổi tên nếu muốn
+-- Đảm bảo Tab1o đã tồn tại
+if not Tab1o then
+    Tab1o = AddTab("Aimbot") -- Hoặc đổi tên nếu muốn
 end
 
 -- Cài đặt mặc định cho AimBot
@@ -240,7 +240,7 @@ AddButton(Tab1o, {
 
 
 
-
+------ hitbox
 
 
 
