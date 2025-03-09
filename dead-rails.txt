@@ -3,12 +3,12 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "DZ hub [beta]",
+         Title = "👑DZ hub [beta]",
          Animation = "Youtuber : Shade Vex"
          },
         Key = {
         KeySystem = fasle,
-        Title = "DZ hub [beta]",
+        Title = "👑DZ hub [beta]",
         Description = "đăng kí cho Shade-Vex đi",
         KeyLink = "https://discord.gg/DmN8sE7Y",
         Keys = {"Premium_Key_29833z920j8"},
@@ -44,7 +44,7 @@ local humanoid = character:FindFirstChild("Humanoid")
 local godModeEnabled = false
 
 AddButton(Tab1o, {
-    Name = "NEVER DIE",
+    Name = "🛡NEVER DIE",
     Callback = function()
         godModeEnabled = not godModeEnabled
         if godModeEnabled then
@@ -113,5 +113,79 @@ AddButton(Tab1o, {
         else
             print("❌ God Mode: TẮT")
         end
+    end
+})
+
+
+
+
+
+
+
+
+local attackEnabled = false
+local attackRate = 1  -- Mỗi giây tấn công 1 lần
+local damageAmount = 50 -- Sát thương mỗi đòn đánh
+local attackRange = 1000 -- Bán kính tấn công
+
+-- **🔹 Tìm quái hợp lệ**
+local function isValidEnemy(entity)
+    if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity:FindFirstChild("HumanoidRootPart") then
+        -- Không tấn công người chơi
+        if game.Players:GetPlayerFromCharacter(entity) then
+            return false
+        end
+        return true
+    end
+    return false
+end
+
+-- **🔹 Kiểm tra khoảng cách**
+local function isInRange(entity)
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local distance = (player.Character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).Magnitude
+        return distance <= attackRange
+    end
+    return false
+end
+
+-- **🔹 Tấn công quái bằng RemoteEvent (Server Ghi Nhận)**
+local function attackEnemies()
+    while attackEnabled do
+        pcall(function()
+            for _, entity in pairs(game.Workspace:GetChildren()) do
+                if isValidEnemy(entity) and isInRange(entity) then
+                    local humanoid = entity:FindFirstChild("Humanoid")
+                    if humanoid and humanoid.Health > 0 then
+                        -- **Gửi lệnh tấn công đến server**
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:FireServer("Combat", "Melee", entity)
+
+                        -- **Làm quái mất 50 HP**
+                        humanoid.Health = humanoid.Health - damageAmount
+                    end
+                end
+            end
+        end)
+        wait(attackRate)
+    end
+end
+
+-- **🔹 Bật/Tắt Kill Aura**
+local function toggleKillAura()
+    attackEnabled = not attackEnabled
+    if attackEnabled then
+        print("🔥 Kill Aura: BẬT (50 HP/s, 1000m)")
+        attackEnemies()
+    else
+        print("❌ Kill Aura: TẮT")
+    end
+end
+
+-- **🔹 Thêm nút vào menu**
+AddButton(Tab1o, {
+    Name = "⚔️ Kill Aura",
+    Callback = function()
+        toggleKillAura()
     end
 })
