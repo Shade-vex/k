@@ -44,7 +44,7 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
 local aimLockEnabled = false
 local aimRadius = 1000  -- Bán kính quét mục tiêu
-local aimSpeed = 0.15  -- Tốc độ điều chỉnh góc nhìn
+local aimSpeed = 1  -- Tốc độ lia cam (cao hơn = nhanh hơn)
 local selectedTarget = nil
 local crosshairGui = nil  -- GUI tâm ngắm
 
@@ -74,7 +74,7 @@ local function removeCrosshair()
     end
 end
 
--- **🔹 Xác định quái/NPC hợp lệ (Không nhắm vào player)**
+-- **🔹 Xác định mục tiêu hợp lệ (Không aim vào Player)**
 local function isValidTarget(entity)
     if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity:FindFirstChild("HumanoidRootPart") then
         if game.Players:GetPlayerFromCharacter(entity) then  -- Bỏ qua Player
@@ -85,7 +85,7 @@ local function isValidTarget(entity)
     return false
 end
 
--- **🔹 Tìm quái gần nhất**
+-- **🔹 Tìm thực thể gần nhất**
 local function findClosestTarget()
     local player = game.Players.LocalPlayer
     local character = player.Character
@@ -114,7 +114,7 @@ local function aimAtTarget(target)
         local camera = game.Workspace.CurrentCamera
         local headPosition = target.HumanoidRootPart.Position + Vector3.new(0, 2.5, 0)  -- Vị trí đầu mục tiêu
         local newCFrame = CFrame.new(camera.CFrame.Position, headPosition)
-        camera.CFrame = camera.CFrame:Lerp(newCFrame, aimSpeed)
+        camera.CFrame = camera.CFrame:Lerp(newCFrame, aimSpeed)  -- Tăng tốc độ lia cam
     end
 end
 
@@ -123,7 +123,7 @@ local function startAimLock()
     aimLockEnabled = not aimLockEnabled
 
     if aimLockEnabled then
-        print("🎯 Camlock BẬT (Ghim Đầu + Hiện Tâm)")
+        print("🎯 Camlock BẬT (Aim tất cả thực thể, trừ Player)")
         createCrosshair()  -- Hiện tâm ngắm
 
         spawn(function()
@@ -132,7 +132,7 @@ local function startAimLock()
                 if selectedTarget then
                     aimAtTarget(selectedTarget)
                 end
-                wait(0.05)  -- Kiểm soát tần suất quét mục tiêu
+                wait(0.02)  -- Tăng tốc độ quét mục tiêu
             end
         end)
     else
