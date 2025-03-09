@@ -50,41 +50,47 @@ AddButton(Tab1o, {
         if godModeEnabled then
             print("🔥 God Mode + Anti-Cheat: ON")
 
-            -- **CHẶN MẤT MÁU**
+            -- **1️⃣ CHẶN MẤT MÁU**
             game:GetService("RunService").Stepped:Connect(function()
                 if humanoid and godModeEnabled then
                     humanoid.Health = humanoid.MaxHealth
-                    humanoid:SetAttribute("HealthLocked", true) -- Một số game dùng thuộc tính này
                 end
             end)
 
-            -- **XÓA HIỆU ỨNG CHẾT (Lửa, độc, đóng băng, v.v...)**
-            for _, v in pairs(humanoid:GetChildren()) do
-                if v:IsA("NumberValue") or v:IsA("BoolValue") then
-                    v:Destroy()
+            -- **2️⃣ CHẶN QUÁI TẤN CÔNG (Khiến quái bỏ qua bạn)**
+            spawn(function()
+                while godModeEnabled do
+                    pcall(function()
+                        for _, enemy in pairs(game.Workspace:GetChildren()) do
+                            if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") then
+                                enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Seated) -- Vô hiệu hóa quái
+                            end
+                        end
+                    end)
+                    wait(1)
                 end
-            end
+            end)
 
-            -- **CHẶN BỊ GAME XÓA NHÂN VẬT**
+            -- **3️⃣ CHẶN GAME XÓA NHÂN VẬT**
             character.AncestryChanged:Connect(function()
                 if character.Parent == nil and godModeEnabled then
                     player.Character = character
                 end
             end)
 
-            -- **CHẶN GAME XỬ LÝ SỰ KIỆN CHẾT**
+            -- **4️⃣ NGĂN GAME XỬ LÝ CÁI CHẾT**
             humanoid.BreakJointsOnDeath = false
             humanoid.RequiresNeck = false
-            humanoid.Parent = nil -- Ngăn game xử lý chết
+            humanoid.Parent = nil
             wait(0.1)
-            humanoid.Parent = character -- Gắn lại để tiếp tục hoạt động
+            humanoid.Parent = character
 
-            -- **TẠO NHÂN VẬT DỰ PHÒNG (Chống lệnh Kill của admin)**
+            -- **5️⃣ TẠO NHÂN VẬT DỰ PHÒNG (Chống admin kill)**
             local clone = character:Clone()
             clone.Parent = workspace
             player.Character = clone
 
-            -- **CHỐNG ANTI-CHEAT (Vượt qua kiểm tra bất tử)**
+            -- **6️⃣ CHỐNG ANTI-CHEAT (Vượt qua kiểm tra bất tử)**
             spawn(function()
                 while godModeEnabled do
                     pcall(function()
@@ -97,7 +103,7 @@ AddButton(Tab1o, {
                 end
             end)
 
-            -- **XÓA SCRIPT KIỂM TRA ANTI-CHEAT**
+            -- **7️⃣ VÔ HIỆU HÓA SCRIPT ANTI-CHEAT**
             spawn(function()
                 for _, obj in pairs(getgc(true)) do
                     if type(obj) == "function" and islclosure(obj) then
