@@ -3,12 +3,12 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
        local Window = MakeWindow({
          Hub = {
-         Title = "👑DZ hub [beta]",
+         Title = "DZ HUB [betaV1]",
          Animation = "Youtuber : Shade Vex"
          },
         Key = {
         KeySystem = fasle,
-        Title = "👑DZ hub [beta]",
+        Title = "DZ HUB [betaV1]",
         Description = "đăng kí cho Shade-Vex đi",
         KeyLink = "https://discord.gg/DmN8sE7Y",
         Keys = {"Premium_Key_29833z920j8"},
@@ -31,9 +31,7 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
       })
       
 ------ Tab
-     local Tab1o = MakeTab({Name = "🏠MAIN"})
-     local Tab2o = MakeTab({Name = "⚒️FARM"})
-     local Tab3o = MakeTab({Name = "🧭ESP VIP"})
+     local Tab1o = MakeTab({Name = "⚔️PVP"})
 
 
 
@@ -42,110 +40,329 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
 
 
 
-local aimLockEnabled = false
-local aimRadius = 1000  -- Bán kính quét mục tiêu
-local aimSpeed = 1  -- Tốc độ lia cam (cao hơn = nhanh hơn)
-local selectedTarget = nil
-local crosshairGui = nil  -- GUI tâm ngắm
+-- Đảm bảo TabVo đã tồn tại
+if not TabVo then
+    TabVo = AddTab("Aimbot") -- Hoặc đổi tên nếu muốn
+end
 
--- **🔹 Tạo GUI tâm ngắm**
-local function createCrosshair()
-    if crosshairGui then return end  -- Nếu đã tạo, không tạo lại
+-- Cài đặt mặc định cho AimBot
+getgenv().setting = {
+    Fov = 50,
+    Color = Color3.fromRGB(191, 255, 209),
+    LockPlayers = false,
+    LockPlayersBind = Enum.KeyCode.L,
+    resetPlayersBind = Enum.KeyCode.P,
+}
 
+local Playersaimbot = nil
+local mouse = game.Players.LocalPlayer:GetMouse()
+local guiservice = game:GetService("GuiService")
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
+local currentCamera = game:GetService("Workspace").CurrentCamera
+local circle = Drawing.new("Circle")
+local AimBotEnabled = false
+
+-- Hiển thị thông báo khi bật AimBot
+local function showAimBotNotification()
     local gui = Instance.new("ScreenGui")
     gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui
-    gui.Name = "Crosshair"
 
-    local crosshair = Instance.new("Frame")
-    crosshair.Size = UDim2.new(0, 20, 0, 20)  -- Kích thước tâm
-    crosshair.Position = UDim2.new(0.5, -10, 0.5, -10)  -- Giữ giữa màn hình
-    crosshair.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Màu xanh lá
-    crosshair.BackgroundTransparency = 0.2
-    crosshair.Parent = gui
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 300, 0, 50)
+    label.Position = UDim2.new(0.5, -150, 0.4, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 0, 0) -- Chữ màu đỏ
+    label.TextStrokeTransparency = 0
+    label.TextStrokeColor3 = Color3.new(0, 0, 0)
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = "DZ HUB AIMBOT"
+    label.Parent = gui
 
-    crosshairGui = gui
+    spawn(function()
+        wait(3)
+        label:Destroy()
+        gui:Destroy()
+    end)
 end
 
--- **🔹 Xóa GUI tâm ngắm**
-local function removeCrosshair()
-    if crosshairGui then
-        crosshairGui:Destroy()
-        crosshairGui = nil
+-- Vòng tròn AimBot
+function updateCircle(Fov, colorCircle)
+    if circle.__OBJECT_EXISTS then
+        circle.Transparency = 1
+        circle.Visible = true
+        circle.Thickness = 2
+        circle.Color = colorCircle
+        circle.NumSides = 100
+        circle.Radius = (Fov * 6) / 2
+        circle.Filled = false
+        circle.Position = Vector2.new(mouse.X, mouse.Y + (guiservice:GetGuiInset().Y))
     end
 end
 
--- **🔹 Xác định mục tiêu hợp lệ (Không aim vào Player)**
-local function isValidTarget(entity)
-    if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity:FindFirstChild("HumanoidRootPart") then
-        if game.Players:GetPlayerFromCharacter(entity) then  -- Bỏ qua Player
-            return false
+-- Theo dõi vị trí kẻ địch trong phạm vi FOV
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if AimBotEnabled then
+            pcall(function()
+                updateCircle(getgenv().setting['Fov'], getgenv().setting['Color'])
+            end)
+        else
+            circle.Visible = false
         end
-        return true
-    end
-    return false
-end
+    end)
+end)
 
--- **🔹 Tìm thực thể gần nhất**
-local function findClosestTarget()
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
-
-    local closestTarget = nil
-    local shortestDistance = aimRadius
-
-    for _, entity in pairs(game.Workspace:GetChildren()) do
-        if isValidTarget(entity) then
-            local distance = (character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).Magnitude
-            if distance < shortestDistance then
-                closestTarget = entity
-                shortestDistance = distance
+-- Xác định mục tiêu
+spawn(function()
+    while wait() do
+        if AimBotEnabled then
+            for i, v in pairs(players:GetPlayers()) do
+                if v ~= localPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local pos = currentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
+                    local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+                    if magnitude < (getgenv().setting['Fov'] * 6 - 8) / 2 then
+                        if (v.Character.HumanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude <= 1000 then
+                            if getgenv().setting['LockPlayers'] == false then
+                                Playersaimbot = v.Name
+                            end
+                        end
+                    end
+                end
             end
         end
     end
+end)
 
-    return closestTarget
-end
-
--- **🔹 Camlock tự động nhắm vào đầu mục tiêu**
-local function aimAtTarget(target)
-    if target and target:FindFirstChild("HumanoidRootPart") then
-        local player = game.Players.LocalPlayer
-        local camera = game.Workspace.CurrentCamera
-        local headPosition = target.HumanoidRootPart.Position + Vector3.new(0, 2.5, 0)  -- Vị trí đầu mục tiêu
-        local newCFrame = CFrame.new(camera.CFrame.Position, headPosition)
-        camera.CFrame = camera.CFrame:Lerp(newCFrame, aimSpeed)  -- Tăng tốc độ lia cam
-    end
-end
-
--- **🔹 Kích hoạt Camlock + Tâm Ngắm**
-local function startAimLock()
-    aimLockEnabled = not aimLockEnabled
-
-    if aimLockEnabled then
-        print("🎯 Camlock BẬT (Aim tất cả thực thể, trừ Player)")
-        createCrosshair()  -- Hiện tâm ngắm
-
-        spawn(function()
-            while aimLockEnabled do
-                selectedTarget = findClosestTarget()
-                if selectedTarget then
-                    aimAtTarget(selectedTarget)
+-- Cập nhật vị trí đối thủ
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if AimBotEnabled and Playersaimbot then
+            for _, v in pairs(players:GetChildren()) do
+                if v.Name == Playersaimbot and v.Character then
+                    PlayersPosition = v.Character.HumanoidRootPart.Position
                 end
-                wait(0.02)  -- Tăng tốc độ quét mục tiêu
+            end
+        end
+    end)
+end)
+
+-- Hook vào RemoteEvent để tự động nhắm
+spawn(function()
+    local gg = getrawmetatable(game)
+    local old = gg.__namecall
+    setreadonly(gg, false)
+    gg.__namecall = newcclosure(function(...)
+        local method = getnamecallmethod()
+        local args = { ... }
+        if tostring(method) == "FireServer" and tostring(args[1]) == "RemoteEvent" then
+            if AimBotEnabled and Playersaimbot then
+                args[2] = PlayersPosition
+                return old(unpack(args))
+            end
+        end
+        return old(...)
+    end)
+end)
+
+-- Tự động Aim khi bắn súng
+mouse.Button1Down:Connect(function()
+    if AimBotEnabled then
+        pcall(function()
+            if Playersaimbot and localPlayer.Character then
+                local weapon = localPlayer.Character:FindFirstChildOfClass("Tool")
+                if weapon and weapon:FindFirstChild("RemoteFunctionShoot") then
+                    local args = {
+                        [1] = PlayersPosition,
+                        [2] = players:FindFirstChild(Playersaimbot).Character.HumanoidRootPart
+                    }
+                    weapon.RemoteFunctionShoot:InvokeServer(unpack(args))
+                end
             end
         end)
-    else
-        print("❌ Camlock TẮT")
-        removeCrosshair()  -- Ẩn tâm ngắm
-        selectedTarget = nil
+    end
+end)
+
+-- Tự động Aim cho tất cả vũ khí
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if AimBotEnabled and Playersaimbot and localPlayer.Character then
+            local weapon = localPlayer.Character:FindFirstChildOfClass("Tool")
+            if weapon then
+                if weapon:IsA("Tool") and (weapon.ToolTip:find("Melee") or weapon.ToolTip:find("Sword") or weapon.ToolTip:find("Gun") or weapon.ToolTip:find("Fruit")) then
+                    local args = {
+                        [1] = PlayersPosition,
+                        [2] = players:FindFirstChild(Playersaimbot).Character.HumanoidRootPart
+                    }
+                    if weapon:FindFirstChild("RemoteFunctionShoot") then
+                        weapon.RemoteFunctionShoot:InvokeServer(unpack(args))
+                    elseif weapon:FindFirstChild("RemoteEvent") then
+                        weapon.RemoteEvent:FireServer(unpack(args))
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+-- Điều khiển bật/tắt AimBot
+game:GetService("UserInputService").InputBegan:Connect(function(io, p)
+    if io.KeyCode == getgenv().setting['LockPlayersBind'] then
+        AimBotEnabled = not AimBotEnabled
+        if AimBotEnabled then
+            showAimBotNotification()
+            print("AimBot ON")
+        else
+            print("AimBot OFF")
+        end
+    end
+    if io.KeyCode == getgenv().setting['resetPlayersBind'] then
+        Playersaimbot = nil
+        PlayersPosition = nil
+        print("Reset AimBot Target")
+    end
+end)
+
+-- Thêm nút vào menu
+AddButton(Tab1o, {
+    Name = "Aimbot All Skill",
+    Callback = function()
+        AimBotEnabled = not AimBotEnabled
+        if AimBotEnabled then
+            showAimBotNotification()
+            print("AimBot ON")
+        else
+            print("AimBot OFF")
+        end
+    end
+})    
+
+
+
+
+
+
+
+
+local hitboxEnabled = false  -- Biến để bật/tắt hitbox
+local hitboxSize = Vector3.new(70, 70, 70)  -- Kích thước hitbox x70
+local transparency = 0.5  -- Độ trong suốt của hitbox (0 là không trong suốt, 1 là vô hình)
+local hitboxLoopRunning = false  -- Biến kiểm soát vòng lặp kiểm tra hitbox
+
+-- Hàm chỉnh hitbox của người chơi khác
+local function setHitbox(player)
+    -- Kiểm tra không áp dụng hitbox cho chính mình
+    if player == game.Players.LocalPlayer then return end  
+
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = character.HumanoidRootPart
+        rootPart.Size = hitboxSize
+        rootPart.Transparency = transparency
+        rootPart.CanCollide = false
     end
 end
 
--- **🔹 Thêm nút vào menu**
+-- Hàm kiểm tra và cập nhật hitbox cho tất cả người chơi trong game
+local function checkAndSetHitboxes()
+    if hitboxEnabled then
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character then
+                -- Kiểm tra và set hitbox cho player
+                setHitbox(player)
+            end
+        end
+    end
+end
+
+-- Hiển thị chữ "DZ hub hitbox" bảy màu trong 3 giây
+local function showRainbowText()
+    local gui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+    local label = Instance.new("TextLabel", gui)
+
+    label.Size = UDim2.new(0.4, 0, 0.1, 0)  -- Kích thước chữ
+    label.Position = UDim2.new(0.3, 0, 0.4, 0)  -- Giữa màn hình
+    label.Text = "DZ HUB HITBOX"
+    label.Font = Enum.Font.SourceSansBold
+    label.TextScaled = true
+    label.BackgroundTransparency = 1
+    label.TextStrokeTransparency = 0
+    label.TextColor3 = Color3.new(1, 0, 0)  -- Bắt đầu với màu đỏ
+
+    -- Hiệu ứng đổi màu bảy sắc cầu vồng
+    local colors = {
+        Color3.new(1, 0, 0),  -- Đỏ
+        Color3.new(1, 0.5, 0),  -- Cam
+        Color3.new(1, 1, 0),  -- Vàng
+        Color3.new(0, 1, 0),  -- Xanh lá
+        Color3.new(0, 1, 1),  -- Xanh dương
+        Color3.new(0, 0, 1),  -- Xanh đậm
+        Color3.new(0.5, 0, 1)  -- Tím
+    }
+
+    task.spawn(function()
+        for i = 1, 30 do  -- Chạy trong 3 giây (mỗi lần đổi màu 0.1 giây)
+            label.TextColor3 = colors[(i % #colors) + 1]
+            wait(0.1)
+        end
+        gui:Destroy()  -- Xóa chữ sau 3 giây
+    end)
+end
+
+-- Hàm bật/tắt hitbox
+local function toggleHitbox()
+    hitboxEnabled = not hitboxEnabled
+    if hitboxEnabled then
+        -- Áp dụng hitbox cho tất cả player hiện tại (trừ LocalPlayer)
+        checkAndSetHitboxes()
+
+        -- Kết nối sự kiện khi có player mới vào game và sau 3s sẽ thay đổi hitbox
+        game.Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                wait(3)  -- Chờ 3 giây để nhân vật load xong
+                setHitbox(player)
+            end)
+        end)
+
+        -- Kết nối sự kiện khi player hồi sinh
+        game.Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                wait(3)  -- Chờ 3 giây để nhân vật load xong
+                setHitbox(player)
+            end)
+        end)
+
+        showRainbowText()  -- Hiển thị chữ khi bật hitbox
+
+        -- Bắt đầu vòng lặp kiểm tra hitbox mỗi giây
+        hitboxLoopRunning = true
+        while hitboxLoopRunning do
+            wait(1)  -- Kiểm tra mỗi giây
+            checkAndSetHitboxes()  -- Kiểm tra và set hitbox cho tất cả player
+        end
+    else
+        -- Dừng vòng lặp và reset hitbox cho tất cả player
+        hitboxLoopRunning = false
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local character = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    local rootPart = character.HumanoidRootPart
+                    rootPart.Size = Vector3.new(2, 2, 1)  -- Kích thước mặc định
+                    rootPart.Transparency = 0  -- Không trong suốt
+                end
+            end
+        end
+    end
+end
+
+-- Nút bật/tắt hitbox
 AddButton(Tab1o, {
-    Name = "🎯AIMBOT ENTITY",
+    Name = "Super hitbox",
     Callback = function()
-        startAimLock()
+        toggleHitbox()
     end
 })
+
+  
