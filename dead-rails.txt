@@ -31,9 +31,9 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
       })
       
 ------ Tab
-     local Tab1o = MakeTab({Name = "MAIN"})
-     local Tab2o = MakeTab({Name = "FARM"})
-
+     local Tab1o = MakeTab({Name = "🏠MAIN"})
+     local Tab2o = MakeTab({Name = "⚒️FARM"})
+     local Tab3o = MakeTab({Name = "🧭ESP VIP"})
 
 ------ Main
 
@@ -197,50 +197,23 @@ AddButton(Tab1o, {
 
 
 
--- 🔹 Biến kiểm soát
 local speedEnabled = false
-local speedValue = 75  -- Tốc độ mong muốn
-local defaultSpeed = 16 -- Tốc độ mặc định
-local player = game.Players.LocalPlayer
+local speedValue = 75  -- Tốc độ di chuyển mong muốn
+local defaultSpeed = 16 -- Tốc độ mặc định của game
 
--- 🛡 **CHẶN ANTI-CHEAT**
-local function disableAntiCheat()
-    for _, obj in pairs(getgc(true)) do
-        if type(obj) == "function" and islclosure(obj) then
-            local info = debug.getinfo(obj)
-            if info.source and string.find(info.source, "AntiCheat") then
-                setreadonly(obj, false)
-                disablefunction(obj)
-                print("🚫 Đã vô hiệu hóa Anti-Cheat!")
-            end
-        end
-    end
-end
-
--- 🎭 **FAKE ADMIN QUYỀN ĐẶC BIỆT**
-local function fakeAdmin()
-    if sethiddenproperty then
-        sethiddenproperty(player, "SimulationRadius", math.huge)
-    end
-    if setfflag then
-        setfflag("HumanoidParallelRemoveNoPhysics", "False")
-        setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
-    end
-    print("✅ Đã Fake Admin thành công!")
-end
-
--- 🚀 **HÀM TĂNG TỐC**
+-- **🔹 Hàm thiết lập tốc độ**
 local function setSpeed(value)
+    local player = game.Players.LocalPlayer
     if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-        local humanoid = player.Character.Humanoid
-        humanoid.WalkSpeed = value
+        player.Character.Humanoid.WalkSpeed = value
     end
 end
 
--- 🔄 **GIỮ TỐC ĐỘ KHÔNG BỊ RESET**
+-- **🔹 Giữ tốc độ không bị reset**
 local function maintainSpeed()
     while speedEnabled do
         pcall(function()
+            local player = game.Players.LocalPlayer
             if player and player.Character and player.Character:FindFirstChild("Humanoid") then
                 local humanoid = player.Character.Humanoid
                 if humanoid.WalkSpeed ~= speedValue then
@@ -248,12 +221,12 @@ local function maintainSpeed()
                 end
             end
         end)
-        wait(0.1) -- Kiểm tra mỗi 0.1s
+        wait(0.1)  -- Kiểm tra mỗi 0.1 giây để giữ tốc độ
     end
 end
 
--- ♻️ **RESET TỐC ĐỘ KHI CHẾT**
-player.CharacterAdded:Connect(function()
+-- **🔹 Reset tốc độ nếu chết**
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
     if speedEnabled then
         wait(1) -- Đợi nhân vật load xong
         setSpeed(speedValue)
@@ -261,22 +234,20 @@ player.CharacterAdded:Connect(function()
     end
 end)
 
--- 🔘 **BẬT/TẮT TĂNG TỐC**
+-- **🔹 Bật/Tắt tăng tốc**
 local function toggleSpeed()
     speedEnabled = not speedEnabled
     if speedEnabled then
-        print("🚀 Đã Bật Tăng Tốc (75, Bypass)")
-        disableAntiCheat()
-        fakeAdmin()
+        print("🚀 Tốc độ: 75 (Bypass Anti-Cheat)")
         setSpeed(speedValue)
         maintainSpeed()
     else
-        print("❌ Tốc Độ Trở Lại Mặc Định")
+        print("❌ Tốc độ về mặc định")
         setSpeed(defaultSpeed)
     end
 end
 
--- 🎮 **THÊM NÚT VÀO MENU**
+-- **🔹 Thêm nút vào menu**
 AddButton(Tab1o, {
     Name = "🚀SPEED OP",
     Callback = function()
@@ -286,9 +257,92 @@ AddButton(Tab1o, {
 
 
 
+------ ESP
 
 
+local espEnabled = false
+local espColor = Color3.fromRGB(0, 255, 0) -- Xanh lá
+local textSize = 15 -- Luôn giữ nguyên 15
+local updateRate = 0.5 -- Cập nhật mỗi 0.5 giây
+local maxDistance = 1000 -- Giới hạn khoảng cách hiển thị
 
+-- **🔹 Hàm tạo ESP**
+local function createESP(item)
+    if not item:FindFirstChild("EspLabel") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "EspLabel"
+        billboard.Adornee = item
+        billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước cố định
+        billboard.StudsOffset = Vector3.new(0, 2, 0) -- Hiển thị trên đầu item
+        billboard.AlwaysOnTop = true
 
+        local textLabel = Instance.new("TextLabel", billboard)
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = espColor
+        textLabel.TextSize = textSize -- Giữ cố định 15
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextStrokeTransparency = 0.5
+        textLabel.TextScaled = false -- Không cho chữ co dãn
 
+        billboard.Parent = item
+    end
+end
 
+-- **🔹 Hàm cập nhật ESP**
+local function updateESP()
+    while espEnabled do
+        pcall(function()
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local playerPos = player.Character.HumanoidRootPart.Position
+
+                for _, item in pairs(game.Workspace:GetChildren()) do
+                    if item:IsA("Model") and item:FindFirstChild("Handle") then
+                        local distance = (playerPos - item.Handle.Position).Magnitude
+
+                        if distance <= maxDistance then
+                            createESP(item)
+                            local label = item:FindFirstChild("EspLabel")
+                            if label then
+                                local textLabel = label:FindFirstChildOfClass("TextLabel")
+                                if textLabel then
+                                    textLabel.Text = string.format("%s\n[%dm]", item.Name, distance)
+                                end
+                            end
+                        else
+                            if item:FindFirstChild("EspLabel") then
+                                item.EspLabel:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+        wait(updateRate)
+    end
+end
+
+-- **🔹 Bật/Tắt ESP**
+local function toggleESP()
+    espEnabled = not espEnabled
+    if espEnabled then
+        print("🟢 ESP Item: BẬT")
+        updateESP()
+    else
+        print("🔴 ESP Item: TẮT")
+        for _, item in pairs(game.Workspace:GetChildren()) do
+            if item:FindFirstChild("EspLabel") then
+                item.EspLabel:Destroy()
+            end
+        end
+    end
+end
+
+-- **🔹 Thêm nút vào menu**
+AddButton(Tab3o, {
+    Name = "👁 ESP ITEM",
+    Callback = function()
+        toggleESP()
+    end
+})
