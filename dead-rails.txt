@@ -373,6 +373,7 @@ AddButton(Tab1o, {
 
 
 local autoFarmEnabled = false -- Trạng thái bật/tắt Auto Farm
+local farmTask = nil -- Kiểm soát vòng lặp
 
 -- 🌟 Hàm tìm và di chuyển đến coin gần nhất
 local function collectCoin()
@@ -394,17 +395,23 @@ local function collectCoin()
     end
 
     -- Nếu tìm thấy coin, di chuyển đến đó
-    if closestCoin then
-        player.Character.HumanoidRootPart.CFrame = closestCoin.CFrame + Vector3.new(0, 3, 0) -- Dịch lên 3 để tránh lỗi
+    if closestCoin and autoFarmEnabled then
+        local targetPos = closestCoin.Position + Vector3.new(0, 3, 0) -- Dịch lên 3 để tránh lỗi
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
     end
 end
 
--- 🌟 Hàm chạy Auto Farm
+-- 🌟 Hàm chạy Auto Farm (chỉ chạy khi bật)
 local function startAutoFarm()
-    while autoFarmEnabled do
-        collectCoin()
-        wait(0.5) -- Giữ khoảng cách thời gian để tránh bị phát hiện
-    end
+    if farmTask then return end -- Đảm bảo không chạy trùng vòng lặp
+
+    farmTask = task.spawn(function()
+        while autoFarmEnabled do
+            collectCoin()
+            wait(0.5) -- Giữ khoảng cách thời gian để tránh bị phát hiện
+        end
+        farmTask = nil -- Reset biến khi vòng lặp kết thúc
+    end)
 end
 
 -- 🌟 Nút bật/tắt Auto Farm
@@ -412,11 +419,13 @@ AddButton(Tab1o, {
     Name = "💰 Auto Farm Coin",
     Callback = function()
         autoFarmEnabled = not autoFarmEnabled
+
         if autoFarmEnabled then
-            print("Auto Farm Coin: BẬT ✅")
+            print("✅ Auto Farm Coin: ĐANG BẬT")
             startAutoFarm()
         else
-            print("Auto Farm Coin: TẮT ❌")
+            print("❌ Auto Farm Coin: ĐÃ TẮT")
+            farmTask = nil -- Dừng hoàn toàn vòng lặp khi tắt
         end
     end
 })
