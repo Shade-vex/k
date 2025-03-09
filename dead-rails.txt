@@ -1,0 +1,67 @@
+
+loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/refs/heads/main/menu-for-you-hub.txt")))()
+
+       local Window = MakeWindow({
+         Hub = {
+         Title = "DZ hub [beta]",
+         Animation = "Youtuber : Shade Vex"
+         },
+        Key = {
+        KeySystem = fasle,
+        Title = "DZ hub [beta]",
+        Description = "đăng kí cho Shade-Vex đi",
+        KeyLink = "https://discord.gg/DmN8sE7Y",
+        Keys = {"Premium_Key_29833z920j8"},
+        Notifi = {
+        Notifications = true,
+        CorrectKey = "Đang chạy script...",
+       Incorrectkey = "Key không tồn tại",
+       CopyKeyLink = "Đã sao chép link",
+      }
+    }
+  })
+
+       MinimizeButton({
+       Image = "http://www.roblox.com/asset/?id=123776424679172",
+       Size = {50, 50},
+       Color = Color3.fromRGB(10, 10, 10),
+       Corner = true,
+       Stroke = false,
+       StrokeColor = Color3.fromRGB(255, 0, 0)
+      })
+      
+------ Tab
+     local Tab1o = MakeTab({Name = "MAIN"})
+     local Tab2o = MakeTab({Name = "FARM"})
+
+
+------ Main
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:FindFirstChild("Humanoid")
+
+local godModeEnabled = false -- Trạng thái bật/tắt bất tử
+
+AddButton(Tab1o, {
+    Name = "NEVER DIE",
+    Callback = function()
+        godModeEnabled = not godModeEnabled -- Đảo trạng thái bật/tắt
+        if godModeEnabled then
+            print("God Mode ON")
+            game:GetService("RunService").Stepped:Connect(function()
+                if humanoid and godModeEnabled then
+                    humanoid.Health = humanoid.MaxHealth -- Giữ máu ở mức tối đa
+                end
+            end)
+        else
+            print("God Mode OFF")
+        end
+    end
+})
+
+
+
+
+
+
