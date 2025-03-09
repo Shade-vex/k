@@ -50,20 +50,43 @@ AddButton(Tab1o, {
         if godModeEnabled then
             print("🔥 God Mode + Anti-Cheat: ON")
 
-            -- **1️⃣ CHẶN MẤT MÁU**
-            game:GetService("RunService").Stepped:Connect(function()
-                if humanoid and godModeEnabled then
-                    humanoid.Health = humanoid.MaxHealth
+            -- **1️⃣ VÔ HIỆU HÓA XỬ LÝ CÁI CHẾT**
+            humanoid.BreakJointsOnDeath = false
+            humanoid.RequiresNeck = false
+
+            -- **2️⃣ CHẶN SERVER GỬI LỆNH KILL**
+            local mt = getrawmetatable(game)
+            setreadonly(mt, false)
+            local oldNamecall = mt.__namecall
+            mt.__namecall = newcclosure(function(self, ...)
+                local method = getnamecallmethod()
+                if method == "FireServer" or method == "InvokeServer" then
+                    local args = {...}
+                    if type(args[1]) == "string" and (args[1]:lower():find("kill") or args[1]:lower():find("damage")) then
+                        print("🚫 Chặn lệnh Kill từ Server:", args[1])
+                        return nil -- Chặn server gửi lệnh kill
+                    end
+                end
+                return oldNamecall(self, ...)
+            end)
+
+            -- **3️⃣ KHÓA MÁU LUÔN Ở MỨC CAO NHẤT**
+            spawn(function()
+                while godModeEnabled do
+                    pcall(function()
+                        humanoid.Health = humanoid.MaxHealth
+                    end)
+                    wait(0.1)
                 end
             end)
 
-            -- **2️⃣ CHẶN QUÁI TẤN CÔNG (Khiến quái bỏ qua bạn)**
+            -- **4️⃣ CHẶN QUÁI TẤN CÔNG**
             spawn(function()
                 while godModeEnabled do
                     pcall(function()
                         for _, enemy in pairs(game.Workspace:GetChildren()) do
                             if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") then
-                                enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Seated) -- Vô hiệu hóa quái
+                                enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Seated) -- Ngăn quái tấn công
                             end
                         end
                     end)
@@ -71,39 +94,7 @@ AddButton(Tab1o, {
                 end
             end)
 
-            -- **3️⃣ CHẶN GAME XÓA NHÂN VẬT**
-            character.AncestryChanged:Connect(function()
-                if character.Parent == nil and godModeEnabled then
-                    player.Character = character
-                end
-            end)
-
-            -- **4️⃣ NGĂN GAME XỬ LÝ CÁI CHẾT**
-            humanoid.BreakJointsOnDeath = false
-            humanoid.RequiresNeck = false
-            humanoid.Parent = nil
-            wait(0.1)
-            humanoid.Parent = character
-
-            -- **5️⃣ TẠO NHÂN VẬT DỰ PHÒNG (Chống admin kill)**
-            local clone = character:Clone()
-            clone.Parent = workspace
-            player.Character = clone
-
-            -- **6️⃣ CHỐNG ANTI-CHEAT (Vượt qua kiểm tra bất tử)**
-            spawn(function()
-                while godModeEnabled do
-                    pcall(function()
-                        if humanoid then
-                            humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-                            humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-                        end
-                    end)
-                    wait(1)
-                end
-            end)
-
-            -- **7️⃣ VÔ HIỆU HÓA SCRIPT ANTI-CHEAT**
+            -- **5️⃣ CHỐNG ANTI-CHEAT**
             spawn(function()
                 for _, obj in pairs(getgc(true)) do
                     if type(obj) == "function" and islclosure(obj) then
@@ -117,15 +108,10 @@ AddButton(Tab1o, {
                 end
             end)
 
+            print("🔥 God Mode ĐÃ BẬT!")
+
         else
-            print("❌ God Mode: OFF")
+            print("❌ God Mode: TẮT")
         end
     end
 })
-
-
-
-
-
-
-
