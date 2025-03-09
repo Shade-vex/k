@@ -260,19 +260,21 @@ AddButton(Tab1o, {
 ------ ESP
 
 
-local espEnabled = false
-local espColor = Color3.fromRGB(0, 255, 0) -- Màu xanh lá
-local textSize = 15 -- Kích thước cố định
-local updateRate = 1 -- Cập nhật mỗi 1 giây
+local espEnabled = false 
+local espColor = Color3.fromRGB(0, 255, 0) -- Màu xanh lá 
+local textSize = 15 -- Kích thước cố định 
+local updateRate = 0.5 -- Cập nhật mỗi 0.5 giây 
 local maxDistance = 1500 -- Bán kính 1500m
 
--- 🔹 Xác định item có thể nhặt, bỏ qua "wood" và "house"
+-- 🔹 Xác định item có thể nhặt, loại bỏ "wood" và "house"
 local function isValidItem(item)
-    local name = item.Name:lower() -- Chuyển tên về chữ thường để so sánh
-    if name:find("wood") or name:find("house") then
-        return false
+    if item:IsA("Tool") or item:IsA("Accessory") or item:IsA("Model") or item:IsA("Part") or item:IsA("MeshPart") then
+        local itemName = item.Name:lower()  -- Chuyển tên về chữ thường để kiểm tra dễ hơn
+        if not (itemName:find("wood") or itemName:find("house")) then
+            return true
+        end
     end
-    return item:IsA("Tool") or item:IsA("Accessory") or item:IsA("Part") or item:IsA("MeshPart")
+    return false
 end
 
 -- 🔹 Hàm tạo ESP cho item
