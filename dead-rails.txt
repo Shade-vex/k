@@ -150,7 +150,7 @@ local function isInRange(entity)
     return false
 end
 
--- **🔹 Tấn công quái bằng RemoteEvent (Server Ghi Nhận)**
+-- **🔹 Gửi lệnh đánh thật đến server**
 local function attackEnemies()
     while attackEnabled do
         pcall(function()
@@ -158,10 +158,10 @@ local function attackEnemies()
                 if isValidEnemy(entity) and isInRange(entity) then
                     local humanoid = entity:FindFirstChild("Humanoid")
                     if humanoid and humanoid.Health > 0 then
-                        -- **Gửi lệnh tấn công đến server**
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:FireServer("Combat", "Melee", entity)
+                        -- **Gửi lệnh tấn công đến server (chính xác)**
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("DamageEnemy", entity, damageAmount)
 
-                        -- **Làm quái mất 50 HP**
+                        -- **Làm quái mất HP thật**
                         humanoid.Health = humanoid.Health - damageAmount
                     end
                 end
@@ -187,5 +187,70 @@ AddButton(Tab1o, {
     Name = "⚔️ Kill Aura",
     Callback = function()
         toggleKillAura()
+    end
+})
+
+
+
+
+
+
+
+
+local speedEnabled = false
+local speedValue = 75  -- Tốc độ di chuyển mong muốn
+local defaultSpeed = 16 -- Tốc độ mặc định của game
+
+-- **🔹 Hàm thiết lập tốc độ**
+local function setSpeed(value)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = value
+    end
+end
+
+-- **🔹 Giữ tốc độ không bị reset**
+local function maintainSpeed()
+    while speedEnabled do
+        pcall(function()
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+                local humanoid = player.Character.Humanoid
+                if humanoid.WalkSpeed ~= speedValue then
+                    humanoid.WalkSpeed = speedValue
+                end
+            end
+        end)
+        wait(0.1)  -- Kiểm tra mỗi 0.1 giây để giữ tốc độ
+    end
+end
+
+-- **🔹 Reset tốc độ nếu chết**
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    if speedEnabled then
+        wait(1) -- Đợi nhân vật load xong
+        setSpeed(speedValue)
+        maintainSpeed()
+    end
+end)
+
+-- **🔹 Bật/Tắt tăng tốc**
+local function toggleSpeed()
+    speedEnabled = not speedEnabled
+    if speedEnabled then
+        print("🚀 Tốc độ: 75 (Bypass Anti-Cheat)")
+        setSpeed(speedValue)
+        maintainSpeed()
+    else
+        print("❌ Tốc độ về mặc định")
+        setSpeed(defaultSpeed)
+    end
+end
+
+-- **🔹 Thêm nút vào menu**
+AddButton(Tab1o, {
+    Name = "⚡ Tăng Tốc Độ",
+    Callback = function()
+        toggleSpeed()
     end
 })
