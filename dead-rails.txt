@@ -35,104 +35,49 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
      local Tab2o = MakeTab({Name = "⚒️FARM"})
      local Tab3o = MakeTab({Name = "🧭ESP VIP"})
 
------- Main
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:FindFirstChild("Humanoid")
 
-local godModeEnabled = false
 
-AddButton(Tab1o, {
-    Name = "🛡NEVER DIE",
-    Callback = function()
-        godModeEnabled = not godModeEnabled
-        if godModeEnabled then
-            print("🔥 God Mode + Anti-Cheat: ON")
 
-            -- **1️⃣ VÔ HIỆU HÓA XỬ LÝ CÁI CHẾT**
-            humanoid.BreakJointsOnDeath = false
-            humanoid.RequiresNeck = false
 
-            -- **2️⃣ CHẶN SERVER GỬI LỆNH KILL**
-            local mt = getrawmetatable(game)
-            setreadonly(mt, false)
-            local oldNamecall = mt.__namecall
-            mt.__namecall = newcclosure(function(self, ...)
-                local method = getnamecallmethod()
-                if method == "FireServer" or method == "InvokeServer" then
-                    local args = {...}
-                    if type(args[1]) == "string" and (args[1]:lower():find("kill") or args[1]:lower():find("damage")) then
-                        print("🚫 Chặn lệnh Kill từ Server:", args[1])
-                        return nil -- Chặn server gửi lệnh kill
-                    end
-                end
-                return oldNamecall(self, ...)
-            end)
 
-            -- **3️⃣ KHÓA MÁU LUÔN Ở MỨC CAO NHẤT**
-            spawn(function()
-                while godModeEnabled do
-                    pcall(function()
-                        humanoid.Health = humanoid.MaxHealth
-                    end)
-                    wait(0.1)
-                end
-            end)
 
-            -- **4️⃣ CHẶN QUÁI TẤN CÔNG**
-            spawn(function()
-                while godModeEnabled do
-                    pcall(function()
-                        for _, enemy in pairs(game.Workspace:GetChildren()) do
-                            if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") then
-                                enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Seated) -- Ngăn quái tấn công
-                            end
-                        end
-                    end)
-                    wait(1)
-                end
-            end)
+local aimLockEnabled = false
+local aimRadius = 1000  -- Bán kính quét mục tiêu
+local aimSpeed = 0.15  -- Tốc độ điều chỉnh góc nhìn
+local selectedTarget = nil
+local crosshairGui = nil  -- GUI tâm ngắm
 
-            -- **5️⃣ CHỐNG ANTI-CHEAT**
-            spawn(function()
-                for _, obj in pairs(getgc(true)) do
-                    if type(obj) == "function" and islclosure(obj) then
-                        local scriptName = getinfo(obj).source
-                        if string.find(scriptName, "AntiCheat") then
-                            setreadonly(obj, false)
-                            disablefunction(obj)
-                            print("🚫 Anti-Cheat đã bị vô hiệu hóa!")
-                        end
-                    end
-                end
-            end)
+-- **🔹 Tạo GUI tâm ngắm**
+local function createCrosshair()
+    if crosshairGui then return end  -- Nếu đã tạo, không tạo lại
 
-            print("🔥 God Mode ĐÃ BẬT!")
+    local gui = Instance.new("ScreenGui")
+    gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui
+    gui.Name = "Crosshair"
 
-        else
-            print("❌ God Mode: TẮT")
-        end
+    local crosshair = Instance.new("Frame")
+    crosshair.Size = UDim2.new(0, 20, 0, 20)  -- Kích thước tâm
+    crosshair.Position = UDim2.new(0.5, -10, 0.5, -10)  -- Giữ giữa màn hình
+    crosshair.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Màu xanh lá
+    crosshair.BackgroundTransparency = 0.2
+    crosshair.Parent = gui
+
+    crosshairGui = gui
+end
+
+-- **🔹 Xóa GUI tâm ngắm**
+local function removeCrosshair()
+    if crosshairGui then
+        crosshairGui:Destroy()
+        crosshairGui = nil
     end
-})
+end
 
-
-
-
-
-
-
-
-local attackEnabled = false
-local attackRate = 1  -- Mỗi giây tấn công 1 lần
-local damageAmount = 50 -- Sát thương mỗi đòn đánh
-local attackRange = 1000 -- Bán kính tấn công
-
--- **🔹 Tìm quái hợp lệ**
-local function isValidEnemy(entity)
+-- **🔹 Xác định quái/NPC hợp lệ (Không nhắm vào player)**
+local function isValidTarget(entity)
     if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity:FindFirstChild("HumanoidRootPart") then
-        -- Không tấn công người chơi
-        if game.Players:GetPlayerFromCharacter(entity) then
+        if game.Players:GetPlayerFromCharacter(entity) then  -- Bỏ qua Player
             return false
         end
         return true
@@ -140,315 +85,67 @@ local function isValidEnemy(entity)
     return false
 end
 
--- **🔹 Kiểm tra khoảng cách**
-local function isInRange(entity)
+-- **🔹 Tìm quái gần nhất**
+local function findClosestTarget()
     local player = game.Players.LocalPlayer
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local distance = (player.Character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).Magnitude
-        return distance <= attackRange
-    end
-    return false
-end
-
--- **🔹 Gửi lệnh đánh thật đến server**
-local function attackEnemies()
-    while attackEnabled do
-        pcall(function()
-            for _, entity in pairs(game.Workspace:GetChildren()) do
-                if isValidEnemy(entity) and isInRange(entity) then
-                    local humanoid = entity:FindFirstChild("Humanoid")
-                    if humanoid and humanoid.Health > 0 then
-                        -- **Gửi lệnh tấn công đến server (chính xác)**
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("DamageEnemy", entity, damageAmount)
-
-                        -- **Làm quái mất HP thật**
-                        humanoid.Health = humanoid.Health - damageAmount
-                    end
-                end
-            end
-        end)
-        wait(attackRate)
-    end
-end
-
--- **🔹 Bật/Tắt Kill Aura**
-local function toggleKillAura()
-    attackEnabled = not attackEnabled
-    if attackEnabled then
-        print("🔥 Kill Aura: BẬT (50 HP/s, 1000m)")
-        attackEnemies()
-    else
-        print("❌ Kill Aura: TẮT")
-    end
-end
-
--- **🔹 Thêm nút vào menu**
-AddButton(Tab1o, {
-    Name = "⚔️KILL AURA",
-    Callback = function()
-        toggleKillAura()
-    end
-})
-
-
-
-
-
-
-
-
-local speedEnabled = false
-local speedValue = 75  -- Tốc độ di chuyển mong muốn
-local defaultSpeed = 16 -- Tốc độ mặc định của game
-
--- **🔹 Hàm thiết lập tốc độ**
-local function setSpeed(value)
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = value
-    end
-end
-
--- **🔹 Giữ tốc độ không bị reset**
-local function maintainSpeed()
-    while speedEnabled do
-        pcall(function()
-            local player = game.Players.LocalPlayer
-            if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-                local humanoid = player.Character.Humanoid
-                if humanoid.WalkSpeed ~= speedValue then
-                    humanoid.WalkSpeed = speedValue
-                end
-            end
-        end)
-        wait(0.1)  -- Kiểm tra mỗi 0.1 giây để giữ tốc độ
-    end
-end
-
--- **🔹 Reset tốc độ nếu chết**
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    if speedEnabled then
-        wait(1) -- Đợi nhân vật load xong
-        setSpeed(speedValue)
-        maintainSpeed()
-    end
-end)
-
--- **🔹 Bật/Tắt tăng tốc**
-local function toggleSpeed()
-    speedEnabled = not speedEnabled
-    if speedEnabled then
-        print("🚀 Tốc độ: 75 (Bypass Anti-Cheat)")
-        setSpeed(speedValue)
-        maintainSpeed()
-    else
-        print("❌ Tốc độ về mặc định")
-        setSpeed(defaultSpeed)
-    end
-end
-
--- **🔹 Thêm nút vào menu**
-AddButton(Tab1o, {
-    Name = "🚀SPEED OP",
-    Callback = function()
-        toggleSpeed()
-    end
-})
-
-
-
------- ESP
-
-
-local espEnabled = false 
-local espColor = Color3.fromRGB(0, 255, 0) -- Màu xanh lá 
-local textSize = 15 -- Kích thước cố định 
-local updateRate = 0.5 -- Cập nhật mỗi 0.5 giây 
-local maxDistance = 1500 -- Bán kính 1500m
-
--- 🔹 Xác định item có thể nhặt, loại bỏ "wood" và "house"
-local function isValidItem(item)
-    if item:IsA("Tool") or item:IsA("Accessory") or item:IsA("Model") or item:IsA("Part") or item:IsA("MeshPart") then
-        local itemName = item.Name:lower()  -- Chuyển tên về chữ thường để kiểm tra dễ hơn
-        if not (itemName:find("wood") or itemName:find("house")) then
-            return true
-        end
-    end
-    return false
-end
-
--- 🔹 Hàm tạo ESP cho item
-local function createESP(item)
-    local basePart = item:FindFirstChildWhichIsA("BasePart") or item
-    if basePart and not basePart:FindFirstChild("EspLabel") then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "EspLabel"
-        billboard.Adornee = basePart
-        billboard.Size = UDim2.new(0, 200, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 2, 0)
-        billboard.AlwaysOnTop = true
-
-        local textLabel = Instance.new("TextLabel", billboard)
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.BackgroundTransparency = 1
-        textLabel.TextColor3 = espColor
-        textLabel.TextSize = textSize
-        textLabel.Font = Enum.Font.SourceSansBold
-        textLabel.TextStrokeTransparency = 0.5
-        textLabel.TextScaled = false
-
-        billboard.Parent = basePart
-    end
-end
-
--- 🔹 Cập nhật ESP cho toàn bộ item mỗi 5 giây
-local function updateESP()
-    while espEnabled do
-        pcall(function()
-            local player = game.Players.LocalPlayer
-            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local playerPos = player.Character.HumanoidRootPart.Position
-
-                for _, item in pairs(game.Workspace:GetDescendants()) do
-                    if isValidItem(item) then
-                        local basePart = item:FindFirstChildWhichIsA("BasePart") or item
-                        if basePart then
-                            local distance = (playerPos - basePart.Position).Magnitude
-                            if distance <= maxDistance then
-                                createESP(basePart)
-                                local label = basePart:FindFirstChild("EspLabel")
-                                if label then
-                                    local textLabel = label:FindFirstChildOfClass("TextLabel")
-                                    if textLabel then
-                                        textLabel.Text = string.format("%s\n[%dm]", item.Name, distance)
-                                    end
-                                end
-                            else
-                                if basePart:FindFirstChild("EspLabel") then
-                                    basePart.EspLabel:Destroy()
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-        wait(updateRate)
-    end
-end
-
--- 🔹 Bật/Tắt ESP
-local function toggleESP()
-    espEnabled = not espEnabled
-    if espEnabled then
-        print("🟢 ESP Item: BẬT (Cập nhật mỗi 5 giây)")
-        updateESP()
-    else
-        print("🔴 ESP Item: TẮT")
-        for _, item in pairs(game.Workspace:GetDescendants()) do
-            if isValidItem(item) then
-                local basePart = item:FindFirstChildWhichIsA("BasePart") or item
-                if basePart and basePart:FindFirstChild("EspLabel") then
-                    basePart.EspLabel:Destroy()
-                end
-            end
-        end
-    end
-end
-
--- 🔹 Thêm nút vào menu
-AddButton(Tab3o, {
-    Name = "🔰ESP ITEM",
-    Callback = function()
-        toggleESP()
-    end
-})
-
-
-
-
-
-
-
-
-local espEnabled = false -- Trạng thái bật/tắt ESP
-
-local function createESP(player)
-    if player == game.Players.LocalPlayer then return end -- Không hiển thị bản thân
-
     local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
 
-    local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước mặc định lớn
-    billboard.StudsOffset = Vector3.new(0, 3, 0) -- Đặt ở giữa nhân vật
-    billboard.AlwaysOnTop = true
+    local closestTarget = nil
+    local shortestDistance = aimRadius
 
-    local textLabel = Instance.new("TextLabel", billboard)
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.TextColor3 = Color3.new(1, 0, 0) -- Màu đỏ
-    textLabel.TextScaled = false
-    textLabel.TextSize = 20 -- Giữ nguyên kích thước chữ
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.TextStrokeTransparency = 0.2 -- Viền chữ giúp dễ nhìn hơn
-
-    billboard.Parent = character.HumanoidRootPart
-
-    -- Cập nhật vị trí & giữ nguyên kích thước theo khoảng cách
-    spawn(function()
-        while espEnabled and character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") do
-            local humanoid = character:FindFirstChild("Humanoid")
-            local localPlayer = game.Players.LocalPlayer
-            if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local distance = (localPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
-                
-                -- Giữ nguyên kích thước 15 dù ở xa hay gần
-                local size = 15
-                billboard.Size = UDim2.new(0, size * 10, 0, size * 2)
-
-                -- Hiển thị thông tin máu & khoảng cách
-                textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
+    for _, entity in pairs(game.Workspace:GetChildren()) do
+        if isValidTarget(entity) then
+            local distance = (character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                closestTarget = entity
+                shortestDistance = distance
             end
-            wait(0.1)
         end
-        billboard:Destroy()
-    end)
+    end
+
+    return closestTarget
 end
 
--- Hàm bật/tắt ESP
-local function toggleESP()
-    espEnabled = not espEnabled
+-- **🔹 Camlock tự động nhắm vào đầu mục tiêu**
+local function aimAtTarget(target)
+    if target and target:FindFirstChild("HumanoidRootPart") then
+        local player = game.Players.LocalPlayer
+        local camera = game.Workspace.CurrentCamera
+        local headPosition = target.HumanoidRootPart.Position + Vector3.new(0, 2.5, 0)  -- Vị trí đầu mục tiêu
+        local newCFrame = CFrame.new(camera.CFrame.Position, headPosition)
+        camera.CFrame = camera.CFrame:Lerp(newCFrame, aimSpeed)
+    end
+end
 
-    if espEnabled then
-        -- Thêm ESP cho tất cả người chơi
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                createESP(player)
+-- **🔹 Kích hoạt Camlock + Tâm Ngắm**
+local function startAimLock()
+    aimLockEnabled = not aimLockEnabled
+
+    if aimLockEnabled then
+        print("🎯 Camlock BẬT (Ghim Đầu + Hiện Tâm)")
+        createCrosshair()  -- Hiện tâm ngắm
+
+        spawn(function()
+            while aimLockEnabled do
+                selectedTarget = findClosestTarget()
+                if selectedTarget then
+                    aimAtTarget(selectedTarget)
+                end
+                wait(0.05)  -- Kiểm soát tần suất quét mục tiêu
             end
-        end
-
-        -- Lắng nghe người chơi mới tham gia
-        game.Players.PlayerAdded:Connect(function(player)
-            if espEnabled then createESP(player) end
         end)
     else
-        -- Xóa toàn bộ ESP khi tắt
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                for _, gui in pairs(player.Character.HumanoidRootPart:GetChildren()) do
-                    if gui:IsA("BillboardGui") then gui:Destroy() end
-                end
-            end
-        end
+        print("❌ Camlock TẮT")
+        removeCrosshair()  -- Ẩn tâm ngắm
+        selectedTarget = nil
     end
 end
 
--- Nút bật/tắt ESP
-AddButton(Tab3o, {
-    Name = "😖ESP PLAYER",
+-- **🔹 Thêm nút vào menu**
+AddButton(Tab1o, {
+    Name = "🎯AIMBOT ENTITY",
     Callback = function()
-        toggleESP()
+        startAimLock()
     end
-})   
+})
