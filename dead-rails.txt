@@ -262,26 +262,20 @@ AddButton(Tab1o, {
 
 local espEnabled = false
 local espColor = Color3.fromRGB(0, 255, 0) -- Màu xanh lá
-local textSize = 15 -- Kích thước chữ cố định
+local textSize = 15 -- Kích thước cố định
 local updateRate = 1 -- Cập nhật mỗi 1 giây
 local maxDistance = 1500 -- Bán kính 1500m
 
--- **🔹 Xác định item có thể nhặt**
+-- 🔹 Xác định item có thể nhặt, bỏ qua "wood" và "house"
 local function isValidItem(item)
-    if item:IsA("Tool") or item:IsA("Accessory") or item:IsA("BackpackItem") then
-        return true
+    local name = item.Name:lower() -- Chuyển tên về chữ thường để so sánh
+    if name:find("wood") or name:find("house") then
+        return false
     end
-    -- **Chặn các vật thể lớn không phải item**
-    local blacklist = {"Tree", "Building", "Wall", "Track", "Bridge", "Platform"}
-    for _, name in pairs(blacklist) do
-        if item.Name:lower():find(name:lower()) then
-            return false
-        end
-    end
-    return false
+    return item:IsA("Tool") or item:IsA("Accessory") or item:IsA("Part") or item:IsA("MeshPart")
 end
 
--- **🔹 Hàm tạo ESP cho item**
+-- 🔹 Hàm tạo ESP cho item
 local function createESP(item)
     local basePart = item:FindFirstChildWhichIsA("BasePart") or item
     if basePart and not basePart:FindFirstChild("EspLabel") then
@@ -305,7 +299,7 @@ local function createESP(item)
     end
 end
 
--- **🔹 Cập nhật ESP cho toàn bộ item mỗi 5 giây**
+-- 🔹 Cập nhật ESP cho toàn bộ item mỗi 5 giây
 local function updateESP()
     while espEnabled do
         pcall(function()
@@ -313,7 +307,7 @@ local function updateESP()
             if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local playerPos = player.Character.HumanoidRootPart.Position
 
-                for _, item in pairs(game.Workspace:GetChildren()) do
+                for _, item in pairs(game.Workspace:GetDescendants()) do
                     if isValidItem(item) then
                         local basePart = item:FindFirstChildWhichIsA("BasePart") or item
                         if basePart then
@@ -341,7 +335,7 @@ local function updateESP()
     end
 end
 
--- **🔹 Bật/Tắt ESP**
+-- 🔹 Bật/Tắt ESP
 local function toggleESP()
     espEnabled = not espEnabled
     if espEnabled then
@@ -349,7 +343,7 @@ local function toggleESP()
         updateESP()
     else
         print("🔴 ESP Item: TẮT")
-        for _, item in pairs(game.Workspace:GetChildren()) do
+        for _, item in pairs(game.Workspace:GetDescendants()) do
             if isValidItem(item) then
                 local basePart = item:FindFirstChildWhichIsA("BasePart") or item
                 if basePart and basePart:FindFirstChild("EspLabel") then
@@ -360,7 +354,7 @@ local function toggleESP()
     end
 end
 
--- **🔹 Thêm nút vào menu**
+-- 🔹 Thêm nút vào menu
 AddButton(Tab3o, {
     Name = "🔰ESP ITEM",
     Callback = function()
