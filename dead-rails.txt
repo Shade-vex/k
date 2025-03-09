@@ -22,7 +22,7 @@ loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/r
   })
 
        MinimizeButton({
-       Image = "http://www.roblox.com/asset/?id=123776424679172",
+       Image = "http://www.roblox.com/asset/?id=94011781668645",
        Size = {50, 50},
        Color = Color3.fromRGB(10, 10, 10),
        Corner = true,
@@ -41,7 +41,7 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:FindFirstChild("Humanoid")
 
-local godModeEnabled = false -- Trạng thái bật/tắt bất tử
+local godModeEnabled = false -- Biến kiểm soát chế độ bất tử
 
 AddButton(Tab1o, {
     Name = "NEVER DIE",
@@ -49,9 +49,20 @@ AddButton(Tab1o, {
         godModeEnabled = not godModeEnabled -- Đảo trạng thái bật/tắt
         if godModeEnabled then
             print("God Mode ON")
+
+            -- Chặn tất cả sát thương
             game:GetService("RunService").Stepped:Connect(function()
                 if humanoid and godModeEnabled then
-                    humanoid.Health = humanoid.MaxHealth -- Giữ máu ở mức tối đa
+                    humanoid.Health = humanoid.MaxHealth -- Giữ máu đầy
+                    humanoid:ChangeState(11) -- Chặn chết vật lý (fall damage, void damage)
+                end
+            end)
+
+            -- Chặn chết do scripts khác
+            humanoid.BreakJointsOnDeath = false
+            character.AncestryChanged:Connect(function()
+                if character.Parent == nil and godModeEnabled then
+                    player.Character = character -- Ngăn chặn bị xóa nhân vật
                 end
             end)
         else
@@ -59,6 +70,7 @@ AddButton(Tab1o, {
         end
     end
 })
+
 
 
 
