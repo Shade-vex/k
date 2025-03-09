@@ -72,7 +72,7 @@ local function showAimBotNotification()
     label.Size = UDim2.new(0, 300, 0, 50)
     label.Position = UDim2.new(0.5, -150, 0.4, 0)
     label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.new(1, 0, 0) -- Chữ màu đỏ
+    label.TextColor3 = Color3.new(0, 255, 0) -- Chữ màu xanh lá
     label.TextStrokeTransparency = 0
     label.TextStrokeColor3 = Color3.new(0, 0, 0)
     label.TextScaled = true
@@ -456,72 +456,138 @@ AddButton(Tab1o, {
 
 
 
------coin
+-----fake gampass
 
-local autoFarmEnabled = false -- Trạng thái bật/tắt Auto Farm
-local farmTask = nil -- Kiểm soát vòng lặp
+local espFruitEnabled = false
+local fruitLabelVI = nil
+local fruitLabelEN = nil
 
--- 🌟 Hàm tìm coin gần nhất
-local function findClosestCoin()
-    local player = game.Players.LocalPlayer
-    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return nil end
+-- Hàm phát hiện ngôn ngữ của game
+local function getGameLanguage()
+    local locale = game.LocalizationService.RobloxLocaleId
+    if locale:find("en") then
+        return "en" -- Tiếng Anh
+    else
+        return "vi" -- Tiếng Việt (mặc định)
+    end
+end
 
-    local closestCoin = nil
+-- Hàm tìm trái cây trong nhiều thư mục khác nhau
+local function findClosestFruit()
+    local localPlayer = game.Players.LocalPlayer
+    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return nil, math.huge end
+
+    local closestFruit = nil
     local closestDistance = math.huge
-    local playerPos = player.Character.HumanoidRootPart.Position
+    local humanoidRootPart = localPlayer.Character.HumanoidRootPart
 
-    -- Duyệt qua toàn bộ Workspace để tìm coin
-    for _, obj in pairs(game.Workspace:GetChildren()) do
-        if obj:IsA("Part") and obj.Name:lower():find("coin") then
-            local distance = (playerPos - obj.Position).Magnitude
-            if distance < closestDistance then
-                closestDistance = distance
-                closestCoin = obj
+    local function checkFolder(folder)
+        for _, fruit in pairs(folder:GetChildren()) do
+            if (fruit:IsA("Tool") or fruit:IsA("Model") or fruit:IsA("Part")) and fruit:FindFirstChild("Handle") then
+                local distance = (humanoidRootPart.Position - fruit.Handle.Position).Magnitude
+                if distance < closestDistance then
+                    closestFruit = fruit
+                    closestDistance = distance
+                end
             end
         end
     end
 
-    return closestCoin
+    -- Kiểm tra trong các thư mục có thể chứa trái cây
+    checkFolder(game.Workspace)
+    if game.Workspace:FindFirstChild("Fruits") then
+        checkFolder(game.Workspace.Fruits)
+    end
+    if game.ReplicatedStorage:FindFirstChild("Fruits") then
+        checkFolder(game.ReplicatedStorage.Fruits)
+    end
+
+    return closestFruit, closestDistance
 end
 
--- 🌟 Hàm di chuyển đến coin
-local function moveToCoin()
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+-- Cập nhật UI hiển thị khoảng cách đến trái cây gần nhất
+local function updateFruitESP()
+    if not espFruitEnabled then return end
 
-    local coin = findClosestCoin()
-    if coin and autoFarmEnabled then
-        character.HumanoidRootPart.CFrame = CFrame.new(coin.Position + Vector3.new(0, 3, 0)) -- Dịch lên 3 để tránh lỗi
+    local closestFruit, closestDistance = findClosestFruit()
+
+    -- Xác định ngôn ngữ hiển thị
+    local lang = getGameLanguage()
+
+    if closestFruit then
+        if lang == "vi" and fruitLabelVI then
+            fruitLabelVI.Text = string.format("Đã phát hiện trái cây: Cách đây %dm", math.floor(closestDistance))
+            fruitLabelEN.Text = ""
+        elseif lang == "en" and fruitLabelEN then
+            fruitLabelEN.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(closestDistance))
+            fruitLabelVI.Text = ""
+        end
+    else
+        if fruitLabelVI then fruitLabelVI.Text = "" end
+        if fruitLabelEN then fruitLabelEN.Text = "" end
     end
 end
 
--- 🌟 Hàm chạy Auto Farm
-local function startAutoFarm()
-    if farmTask then return end -- Đảm bảo không chạy trùng vòng lặp
+-- Hàm bật/tắt ESP trái cây
+local function toggleFruitESP()
+    espFruitEnabled = not espFruitEnabled
 
-    farmTask = task.spawn(function()
-        while autoFarmEnabled do
-            moveToCoin()
-            wait(0.5) -- Giữ khoảng cách thời gian để tránh bị phát hiện
+    if espFruitEnabled then
+        if not fruitLabelVI or not fruitLabelEN then
+            local gui = Instance.new("ScreenGui")
+            gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui
+
+            -- Tiếng Việt
+            fruitLabelVI = Instance.new("TextLabel")
+            fruitLabelVI.Size = UDim2.new(0, 500, 0, 50)
+            fruitLabelVI.Position = UDim2.new(0.5, -250, 0.56, 0)
+            fruitLabelVI.BackgroundTransparency = 1
+            fruitLabelVI.TextColor3 = Color3.new(1, 1, 1)
+            fruitLabelVI.TextStrokeTransparency = 0
+            fruitLabelVI.TextStrokeColor3 = Color3.new(0, 0, 0)
+            fruitLabelVI.TextSize = 30
+            fruitLabelVI.Font = Enum.Font.SourceSansBold
+            fruitLabelVI.Text = ""
+            fruitLabelVI.Parent = gui
+
+            -- Tiếng Anh
+            fruitLabelEN = Instance.new("TextLabel")
+            fruitLabelEN.Size = UDim2.new(0, 500, 0, 50)
+            fruitLabelEN.Position = UDim2.new(0.5, -250, 0.56, 0)
+            fruitLabelEN.BackgroundTransparency = 1
+            fruitLabelEN.TextColor3 = Color3.new(1, 1, 1)
+            fruitLabelEN.TextStrokeTransparency = 0
+            fruitLabelEN.TextStrokeColor3 = Color3.new(0, 0, 0)
+            fruitLabelEN.TextSize = 30
+            fruitLabelEN.Font = Enum.Font.SourceSansBold
+            fruitLabelEN.Text = ""
+            fruitLabelEN.Parent = gui
         end
-        farmTask = nil -- Reset biến khi vòng lặp kết thúc
-    end)
+
+        spawn(function()
+            while espFruitEnabled do
+                updateFruitESP()
+                wait(0.5)
+            end
+            if fruitLabelVI then fruitLabelVI.Text = "" end
+            if fruitLabelEN then fruitLabelEN.Text = "" end
+        end)
+    else
+        if fruitLabelVI then fruitLabelVI.Text = "" end
+        if fruitLabelEN then fruitLabelEN.Text = "" end
+    end
 end
 
--- 🌟 Nút bật/tắt Auto Farm
-AddButton(Tab1o, {
-    Name = "Auto Farm Coin",
-    Callback = function()
-        autoFarmEnabled = not autoFarmEnabled
+-- Đảm bảo Tab1o tồn tại
+if not Tab1o then
+    Tab1o = AddTab("ESP")
+end
 
-        if autoFarmEnabled then
-            print("✅ Auto Farm Coin: ĐANG BẬT")
-            startAutoFarm()
-        else
-            print("❌ Auto Farm Coin: ĐÃ TẮT")
-            farmTask = nil -- Dừng hoàn toàn vòng lặp khi tắt
-        end
+-- Tạo nút bật/tắt ESP trái cây
+AddButton(Tab1o, {
+    Name = "FRUIT NOTIFIER",
+    Callback = function()
+        toggleFruitESP()
     end
 })
 
