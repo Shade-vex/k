@@ -365,4 +365,59 @@ AddButton(Tab1o, {
     end
 })
 
+
+
+
+
+
+
+
+local autoFarmEnabled = false -- Trạng thái bật/tắt Auto Farm
+
+-- 🌟 Hàm tìm và di chuyển đến coin gần nhất
+local function collectCoin()
+    local player = game.Players.LocalPlayer
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local closestCoin = nil
+    local closestDistance = math.huge
+
+    -- Tìm coin trong Workspace
+    for _, obj in pairs(game.Workspace:GetChildren()) do
+        if obj:IsA("Part") and obj.Name:lower():find("coin") then -- Chỉ tìm object có tên chứa "coin"
+            local distance = (player.Character.HumanoidRootPart.Position - obj.Position).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestCoin = obj
+            end
+        end
+    end
+
+    -- Nếu tìm thấy coin, di chuyển đến đó
+    if closestCoin then
+        player.Character.HumanoidRootPart.CFrame = closestCoin.CFrame + Vector3.new(0, 3, 0) -- Dịch lên 3 để tránh lỗi
+    end
+end
+
+-- 🌟 Hàm chạy Auto Farm
+local function startAutoFarm()
+    while autoFarmEnabled do
+        collectCoin()
+        wait(0.5) -- Giữ khoảng cách thời gian để tránh bị phát hiện
+    end
+end
+
+-- 🌟 Nút bật/tắt Auto Farm
+AddButton(Tab1o, {
+    Name = "💰 Auto Farm Coin",
+    Callback = function()
+        autoFarmEnabled = not autoFarmEnabled
+        if autoFarmEnabled then
+            print("Auto Farm Coin: BẬT ✅")
+            startAutoFarm()
+        else
+            print("Auto Farm Coin: TẮT ❌")
+        end
+    end
+})
   
