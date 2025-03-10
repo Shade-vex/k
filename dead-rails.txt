@@ -641,35 +641,55 @@ AddButton(Tab1o, {
 
 
 
-local noclipEnabled = false  
+local noclipEnabled = false
+local noclipConnection = nil -- Biến để lưu kết nối của sự kiện
 
--- Hàm bật/tắt đi xuyên tường  
-local function toggleNoclip()  
-    noclipEnabled = not noclipEnabled  
-    local player = game.Players.LocalPlayer  
-    local character = player.Character or player.CharacterAdded:Wait()  
+-- Hàm bật/tắt đi xuyên tường
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
 
-    game:GetService("RunService").Stepped:Connect(function()  
-        if noclipEnabled and character then  
-            for _, part in pairs(character:GetDescendants()) do  
-                if part:IsA("BasePart") and part.CanCollide then  
-                    part.CanCollide = false  
-                end  
-            end  
-        end  
-    end)  
+    if noclipEnabled then
+        -- Nếu đã có kết nối cũ, ngắt trước khi tạo cái mới
+        if noclipConnection then
+            noclipConnection:Disconnect()
+        end
 
-    if noclipEnabled then  
-        print("🚀 Đi xuyên tường: BẬT")  
-    else  
-        print("❌ Đi xuyên tường: TẮT")  
-    end  
-end  
+        -- Tạo kết nối mới và lưu lại
+        noclipConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if character then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+        
+        print("🚀 Đi xuyên tường: BẬT")
+    else
+        -- Ngắt kết nối và đặt lại CanCollide
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
 
--- Thêm nút bật/tắt vào menu  
-AddButton(Tab1o, {  
-    Name = "Walk hack",  
-    Callback = function()  
-        toggleNoclip()  
-    end  
+        -- Bật lại CanCollide cho toàn bộ nhân vật
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+
+        print("❌ Đi xuyên tường: TẮT")
+    end
+end
+
+-- Thêm nút bật/tắt vào menu
+AddButton(Tab1o, {
+    Name = "Walk Hack",
+    Callback = function()
+        toggleNoclip()
+    end
 })
