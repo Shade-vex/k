@@ -619,16 +619,22 @@ AddButton(Tab1o, {
 
 -- Biến lưu trạng thái tốc độ hiện tại
 local currentSpeed = 16
+local player = game.Players.LocalPlayer
 
 -- 🔹 Hàm thay đổi tốc độ
 local function setSpeed(speed)
-    local player = game.Players.LocalPlayer
     if player and player.Character and player.Character:FindFirstChild("Humanoid") then
         player.Character.Humanoid.WalkSpeed = speed
         currentSpeed = speed
         print("🚀 Đã đặt tốc độ:", speed)
     end
 end
+
+-- 🔹 Tự động khôi phục tốc độ khi nhân vật respawn
+player.CharacterAdded:Connect(function()
+    wait(1) -- Đợi nhân vật load hoàn tất
+    setSpeed(currentSpeed) -- Khôi phục tốc độ trước đó
+end)
 
 -- 🔹 Nút đặt tốc độ 16
 AddButton(Tab1o, {
