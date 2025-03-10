@@ -632,3 +632,44 @@ AddButton(Tab1o, {
         setSpeed(300)
     end
 })
+
+
+
+
+
+
+
+
+
+local noclipEnabled = false  
+
+-- Hàm bật/tắt đi xuyên tường  
+local function toggleNoclip()  
+    noclipEnabled = not noclipEnabled  
+    local player = game.Players.LocalPlayer  
+    local character = player.Character or player.CharacterAdded:Wait()  
+
+    game:GetService("RunService").Stepped:Connect(function()  
+        if noclipEnabled and character then  
+            for _, part in pairs(character:GetDescendants()) do  
+                if part:IsA("BasePart") and part.CanCollide then  
+                    part.CanCollide = false  
+                end  
+            end  
+        end  
+    end)  
+
+    if noclipEnabled then  
+        print("🚀 Đi xuyên tường: BẬT")  
+    else  
+        print("❌ Đi xuyên tường: TẮT")  
+    end  
+end  
+
+-- Thêm nút bật/tắt vào menu  
+AddButton(Tab1o, {  
+    Name = "Walk hack",  
+    Callback = function()  
+        toggleNoclip()  
+    end  
+})
