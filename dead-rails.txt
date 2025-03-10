@@ -642,21 +642,21 @@ AddButton(Tab1o, {
 
 
 local noclipEnabled = false
-local noclipConnection = nil -- Biến để lưu kết nối của sự kiện
+local noclipConnection = nil -- Lưu kết nối noclip
+local player = game.Players.LocalPlayer
 
 -- Hàm bật/tắt đi xuyên tường
-local function toggleNoclip()
-    noclipEnabled = not noclipEnabled
-    local player = game.Players.LocalPlayer
+local function setNoclip(state)
+    noclipEnabled = state
     local character = player.Character or player.CharacterAdded:Wait()
 
     if noclipEnabled then
-        -- Nếu đã có kết nối cũ, ngắt trước khi tạo cái mới
+        -- Đảm bảo không bị trùng kết nối
         if noclipConnection then
             noclipConnection:Disconnect()
         end
 
-        -- Tạo kết nối mới và lưu lại
+        -- Tạo kết nối mới
         noclipConnection = game:GetService("RunService").Heartbeat:Connect(function()
             if character then
                 for _, part in pairs(character:GetDescendants()) do
@@ -666,16 +666,16 @@ local function toggleNoclip()
                 end
             end
         end)
-        
+
         print("🚀 Đi xuyên tường: BẬT")
     else
-        -- Ngắt kết nối và đặt lại CanCollide
+        -- Ngắt kết nối
         if noclipConnection then
             noclipConnection:Disconnect()
             noclipConnection = nil
         end
 
-        -- Bật lại CanCollide cho toàn bộ nhân vật
+        -- Khôi phục CanCollide
         for _, part in pairs(character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = true
@@ -686,10 +686,19 @@ local function toggleNoclip()
     end
 end
 
+-- Sự kiện khi nhân vật hồi sinh
+player.CharacterAdded:Connect(function()
+    -- Nếu noclip đang bật, tự động kích hoạt lại
+    if noclipEnabled then
+        task.wait(1) -- Đợi nhân vật load hoàn tất
+        setNoclip(true)
+    end
+end)
+
 -- Thêm nút bật/tắt vào menu
 AddButton(Tab1o, {
     Name = "Walk Hack",
     Callback = function()
-        toggleNoclip()
+        setNoclip(not noclipEnabled)
     end
 })
