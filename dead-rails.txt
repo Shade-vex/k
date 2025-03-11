@@ -822,3 +822,92 @@ AddButton(Tab1o, {
         toggleProtection()
     end
 })
+
+
+
+
+local protectionEnabled = false
+local timeLeft = 10 -- 10 giây = 10 giây
+local gui = nil
+local countdownLabel = nil
+
+-- 🛡️ Hàm tạo GUI hiển thị trạng thái và đồng hồ đếm ngược
+local function createGUI()
+    if gui then gui:Destroy() end
+    gui = Instance.new("ScreenGui", game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui)
+
+    -- Tạo TextLabel trạng thái
+    local statusLabel = Instance.new("TextLabel", gui)
+    statusLabel.Size = UDim2.new(0, 300, 0, 50)
+    statusLabel.Position = UDim2.new(0.5, -150, 0.1, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.TextSize = 25
+    statusLabel.Font = Enum.Font.SourceSansBold
+    statusLabel.TextStrokeTransparency = 0.1
+
+    -- Tạo TextLabel đếm ngược
+    countdownLabel = Instance.new("TextLabel", gui)
+    countdownLabel.Size = UDim2.new(0, 300, 0, 50)
+    countdownLabel.Position = UDim2.new(0.5, -150, 0.15, 0)
+    countdownLabel.BackgroundTransparency = 1
+    countdownLabel.TextSize = 20
+    countdownLabel.Font = Enum.Font.SourceSansBold
+    countdownLabel.TextStrokeTransparency = 0.1
+end
+
+-- ⏳ Hàm cập nhật trạng thái và đếm ngược
+local function updateGUI()
+    if not gui then return end
+    local statusLabel = gui:FindFirstChildOfClass("TextLabel")
+    if not statusLabel or not countdownLabel then return end
+
+    if protectionEnabled then
+        statusLabel.Text = "🟢 Đã Bật (Kick sau 10 giây)"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        countdownLabel.Visible = true
+    else
+        statusLabel.Text = "🔴 Đã Tắt"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        countdownLabel.Visible = false
+    end
+end
+
+-- ⏱️ Hàm bắt đầu đếm ngược
+local function startCountdown()
+    while protectionEnabled and timeLeft > 0 do
+        local hours = math.floor(timeLeft / 3600)
+        local minutes = math.floor((timeLeft % 3600) / 60)
+        local seconds = timeLeft % 60
+        countdownLabel.Text = string.format("⏳ %02d:%02d:%02d", hours, minutes, seconds)
+        timeLeft = timeLeft - 1
+        wait(1)
+    end
+
+    if protectionEnabled then
+        game.Players.LocalPlayer:Kick("⏳ Hết thời gian! Hãy nghỉ ngơi nhé!")
+    end
+end
+
+-- 🔄 Hàm bật/tắt bảo vệ người chơi
+local function toggleProtection()
+    protectionEnabled = not protectionEnabled
+    createGUI()
+    updateGUI()
+
+    if protectionEnabled then
+        print("🛡️ Bảo vệ: BẬT (Sẽ kick sau 10 giây)")
+        timeLeft = 10 -- Reset thời gian đếm ngược
+        startCountdown()
+    else
+        print("❌ Bảo vệ: TẮT")
+        if gui then gui:Destroy() end
+    end
+end
+
+-- 🟢🔴 Thêm nút vào menu
+AddButton(Tab1o, {
+    Name = "🛡️ Bảo Vệ Người Chơi Dưới 18+",
+    Callback = function()
+        toggleProtection()
+    end
+})
